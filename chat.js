@@ -290,3 +290,13 @@ auth.onAuthStateChanged(async user => {
     }
   }
 });
+
+async function addFriend(currentUserUid, friendUid) {
+  const timestamp = firebase.firestore.FieldValue.serverTimestamp();
+
+  // Add friend to your list
+  await db.collection("friends").doc(currentUserUid).collection("list").doc(friendUid).set({ addedAt: timestamp });
+
+  // Add yourself to their friend list
+  await db.collection("friends").doc(friendUid).collection("list").doc(currentUserUid).set({ addedAt: timestamp });
+}
