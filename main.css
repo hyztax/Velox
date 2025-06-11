@@ -1,0 +1,884 @@
+/* Reset & basics */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #0d0d0d, #1a1a1a);
+  min-height: 100vh;
+  padding-top: env(safe-area-inset-top);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: #ddd;
+  position: relative;
+
+  /* Hide scrollbar but keep scroll */
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;     /* Firefox */
+}
+body::-webkit-scrollbar {
+  display: none;             /* Chrome, Safari, Opera */
+}
+
+header {
+  width: 100%;
+  max-width: 480px;
+  padding: 15px 20px;
+  display: flex;
+  justify-content: center; /* Center content horizontally */
+  align-items: center;
+  position: fixed;
+  top: env(safe-area-inset-top, 0);
+  right: 0;
+  left: 0;
+  background: rgba(10 10 10 / 0.7);
+  backdrop-filter: saturate(180%) blur(14px);
+  box-shadow: 0 0 20px rgba(0,0,0,0.7);
+  z-index: 1000;
+  gap: 15px;
+  border-radius: 0 0 15px 15px;
+  color: #eee;
+  font-weight: 600;
+  font-size: 14px;
+  user-select: none;
+  position: relative; /* Needed for positioning hamburger */
+}
+
+/* Style for the "Logged in as" text and username span */
+header > span,
+#usernameDisplay {
+  margin-left: 5px;
+  color: #eee;
+  font-weight: 700;
+}
+
+/* Ensure hamburger button and lines are visible on mobile */
+#settingsBtn {
+  width: 35px;
+  height: 25px;
+  padding: 6px 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  cursor: pointer;
+  position: absolute;
+  right: 20px;
+  background: transparent;
+  border: none;
+  z-index: 1200;
+}
+
+#settingsBtn span {
+  display: block;
+  height: 3px;
+  width: 100%;       /* Full width of button */
+  background: #eee;  /* Light color for visibility */
+  border-radius: 2px;
+  transition: background 0.3s ease;
+}
+
+/* Hover effect */
+#settingsBtn:hover span {
+  background: #ccc;
+}
+
+/* Mobile-specific fix */
+@media (max-width: 480px) {
+  #settingsBtn {
+    width: 35px;
+    height: 25px;
+  }
+  #settingsBtn span {
+    height: 3px;
+    width: 100%;
+    background: #eee;
+  }
+}
+
+
+#settingsBtn:hover span {
+  background: #ccc;
+}
+
+/* Settings Menu */
+#settingsMenu {
+  position: absolute;
+  top: 60px;
+  right: 20px;
+  background: rgba(20, 20, 20, 0.9);  /* dark background, not transparent */
+  backdrop-filter: saturate(180%) blur(10px);
+  border-radius: 10px;
+  box-shadow: 0 0 15px rgba(0,0,0,0.7);
+  display: flex;
+  flex-direction: column;
+  width: 160px;
+  overflow: hidden;
+  z-index: 1150;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+#settingsMenu.hidden {
+  opacity: 0;
+  transform: translateY(-10px);
+  pointer-events: none;
+  /* We keep it in flow but invisible, so no layout shifts */
+}
+
+/* Settings Menu items (example, you might have buttons/links inside) */
+#settingsMenu button,
+#settingsMenu a {
+  padding: 12px 15px;
+  background: transparent;
+  border: none;
+  color: #eee;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.2s ease;
+}
+
+#settingsMenu button:hover,
+#settingsMenu a:hover {
+  background: rgba(255 255 255 / 0.1);
+  color: #fff;
+}
+
+
+#settingsMenu.hidden {
+  display: none;
+}
+
+/* ... rest of your existing CSS */
+
+/* Main content */
+main {
+  margin-top: 100px;
+  max-width: 480px;
+  width: 90%;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: #ccc;
+  user-select: none;
+}
+
+/* Users list */
+#usersList {
+  width: 100%;
+  background: rgba(30 30 30 / 0.6);
+  border-radius: 15px;
+  padding: 15px 20px;
+  box-shadow: 0 0 30px rgba(0,0,0,0.7);
+  text-align: center;
+  backdrop-filter: saturate(200%) blur(10px);
+
+  /* Hide scrollbar but keep scroll */
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+#usersList::-webkit-scrollbar,
+#usersList ul::-webkit-scrollbar {
+  display: none;
+}
+
+#usersList h2 {
+  margin-bottom: 12px;
+  font-weight: 700;
+  font-size: 20px;
+  color: #eee;
+}
+
+#usersList ul {
+  list-style: none;
+  max-height: 220px; /* Allow a bit more height for scroll */
+  overflow-y: auto;
+  padding-left: 0;
+
+  /* Hide scrollbar but keep scroll */
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+#usersList ul li {
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(255 255 255 / 0.1);
+  font-size: 16px;
+  color: #ddd;
+}
+
+#usersList ul li:last-child {
+  border-bottom: none;
+}
+
+/* Mobile-specific tweaks */
+@media (max-width: 400px) {
+  #usersList {
+    padding: 12px 15px;
+    border-radius: 12px;
+
+    /* Move up on mobile */
+    margin-top: -30px; /* adjust this to move higher or lower */
+  }
+
+  #usersList h2 {
+    font-size: 18px;
+    margin-bottom: 10px;
+  }
+
+  #usersList ul {
+    max-height: 180px; /* smaller height on very small phones */
+  }
+
+  #usersList ul li {
+    font-size: 14px;
+    padding: 5px 0;
+  }
+}
+
+
+#inviteBtn {
+  position: fixed;
+  bottom: env(safe-area-inset-bottom, 20px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(255 255 255 / 0.15);
+  border: none;
+  color: #eee;
+  padding: 8px 28px;
+  font-size: 16px;
+  border-radius: 10px;
+  cursor: pointer;
+  box-shadow: 0 8px 32px rgba(255 255 255 / 0.3);
+  backdrop-filter: saturate(180%) blur(12px);
+  transition: background 0.3s ease, box-shadow 0.3s ease;
+  user-select: none;
+  max-width: 300px;
+  width: 100%;
+  height: 40px; /* Adjusted for normal button height */
+  z-index: 1000;
+}
+
+/* For larger screens (PC) move it higher up */
+@media (min-width: 768px) {
+  #inviteBtn {
+    bottom: 10px; /* moves button 80px from bottom instead of 20px */
+    max-width: 300px;
+    width: auto;
+    padding: 10px 30px;
+    font-size: 18px;
+    height: 45px;
+  }
+}
+
+
+/* General small screen tweak */
+@media (max-width: 400px) {
+  #inviteBtn {
+    padding: 7px 24px;
+    font-size: 15px;
+  }
+}
+
+
+
+#inviteBtn:hover {
+  background: rgba(255 255 255 / 0.3);
+  box-shadow: 0 10px 48px rgba(255 255 255 / 0.5);
+}
+
+/* Responsive font sizes */
+@media (max-width: 400px) {
+  .user-info {
+    font-size: 12px;
+  }
+
+  #usersList h2 {
+    font-size: 18px;
+  }
+
+  #usersList ul li {
+    font-size: 16px;
+  }
+
+  #inviteBtn {
+    font-size: 18px;
+    padding: 14px 24px;
+  }
+}
+
+/* Style for the welcome title above the users list */
+/* Style for the welcome title above the users list */
+.welcome-title {
+  width: 100%;
+  max-width: 480px;
+  text-align: center;
+  color: #d4dad3; /* a soft greenish color */
+  font-weight: 800;
+  user-select: none;
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.6); /* green glow */
+  font-size: 28px;
+  letter-spacing: 2px;
+  
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+@media (max-width: 400px) {
+  .welcome-title {
+    font-size: 20px;
+    margin-top: 90px; /* slightly less margin for smaller screens */
+    letter-spacing: 1.5px;
+  }
+}
+
+.velox-green {
+  color: #6abf69; /* a nice green shade */
+  text-shadow: 0 0 8px rgba(106, 191, 105, 0.7); /* subtle green glow */
+}
+
+.toggleProfile {
+  margin-left: 10px;
+  background: none;
+  border: none;
+  color: rgb(97, 168, 121);
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.profileActions {
+  margin-top: 8px;
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.profileActions button {
+  font-size: 12px;
+  padding: 4px 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: 6px;
+  color: #eee;
+  cursor: pointer;
+}
+
+.hidden {
+  display: none;
+}
+
+#usersList {
+  max-width: 400px;
+  margin: 20px auto;
+  background: #1e1e1e;
+  border-radius: 8px;
+  padding: 15px 20px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  color: #eee;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+#usersList h2 {
+  margin-bottom: 12px;
+  font-size: 1.5rem;
+  color: #e7ebe7; /* velox-green vibe */
+  text-align: center;
+  letter-spacing: 1px;
+}
+
+#usersUl li {
+  display: flex;
+  justify-content: center; /* centers horizontally */
+  align-items: center;     /* centers vertically */
+  padding: 10px 5px;
+  border-bottom: 1px solid #333;
+  cursor: default;
+  transition: background-color 0.3s;
+  gap: 10px; /* space between username and toggle */
+}
+
+#usersUl .username {
+  font-weight: 600;
+  color: #a5d6a7;
+  text-align: center; /* center text */
+  min-width: 100px;   /* optional: ensure a min width */
+}
+
+
+#usersUl li:hover {
+  background-color: #333;
+}
+
+#usersUl .username {
+  font-weight: 600;
+  color: #a5d6a7; /* lighter green */
+}
+
+.toggleProfile {
+  background: transparent;
+  border: none;
+  color: #a5d6a7;
+  font-size: 1.2rem;
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.2s;
+}
+
+.toggleProfile:hover {
+  color: #81c784;
+}
+
+.profileActions {
+  margin-left: 10px;
+  display: flex;
+  gap: 8px;
+}
+
+.profileActions.hidden {
+  display: none;
+}
+
+.profileActions button {
+  background-color: #4caf50;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 4px;
+  color: white;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.profileActions button:hover {
+  background-color: #388e3c;
+}
+
+#usernameDisplay {
+  margin-left: 0px; /* small space, adjust as you want */
+  font-weight: bold;
+  display: inline;
+}
+
+/* Style for profile action buttons */
+.profileActions button {
+  background-color: #0c0c0c;       /* Dark background */
+  color: #eee;                  /* Light text */
+  border: none;                 /* No border */
+  padding: 6px 12px;            /* Some padding */
+  margin: 4px 6px 0 0;          /* Small margin to separate buttons */
+  border-radius: 6px;           /* Rounded corners */
+  cursor: pointer;              /* Pointer cursor on hover */
+  font-weight: 600;             /* Semi-bold text */
+  transition: background-color 0.3s ease;
+}
+
+.profileActions button:hover {
+  background-color: #020202;       /* Slightly lighter on hover */
+  color: rgb(223, 221, 221);
+}
+
+/* Optional: smaller font for buttons */
+.profileActions button {
+  font-size: 14px;
+}
+
+/* Profile Editor Modal Background */
+#profileEditor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  display: none; /* hidden by default */
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+/* Show modal */
+#profileEditor:not(.hidden) {
+  display: flex;
+}
+
+/* Modal Content Box */
+#profileEditor .modal-content {
+  background: #1f1e1e;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 400px;
+  padding: 20px 25px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.25);
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+/* Modal Header */
+#profileEditor h2 {
+  margin: 0 0 10px 0;
+  font-size: 1.5rem;
+  text-align: center;
+  color: #333;
+}
+
+/* Label and Inputs */
+#profileEditor label {
+  font-weight: 600;
+  color: #555;
+  margin-bottom: 5px;
+  display: block;
+}
+
+#profileEditor input[type="text"],
+#profileEditor textarea {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #0f0f0f;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-family: inherit;
+  resize: vertical;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease-in-out;
+}
+
+#profileEditor input[type="text"]:focus,
+#profileEditor textarea:focus {
+  outline: none;
+  border-color: #007bff;
+}
+
+/* Avatar input styling */
+#avatarInput {
+  margin-top: 5px;
+}
+
+/* Buttons container */
+#profileEditor .buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+/* Save and Close Buttons */
+#saveProfileBtn,
+#editorCloseBtn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.2s ease;
+}
+
+#saveProfileBtn {
+  background-color: #007bff;
+  color: white;
+}
+
+#saveProfileBtn:hover {
+  background-color: #12ce9f;
+}
+
+#editorCloseBtn {
+  background-color: #ccc;
+  color: #333;
+}
+
+#editorCloseBtn:hover {
+  background-color: #582e2e;
+}
+
+/* Responsive adjustments */
+@media (max-width: 400px) {
+  #profileEditor .modal-content {
+    padding: 15px 20px;
+  }
+}
+
+/* Modal backdrop */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+/* Hide modal when .hidden */
+.hidden {
+  display: none !important;
+}
+
+/* Modal content wrapper */
+.modal-content {
+  background: #2f3136;
+  border-radius: 10px;
+  padding: 30px 40px;
+  width: 320px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.8);
+  color: #dcddde;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  text-align: center;
+  position: relative;
+}
+
+/* Avatar circle */
+.profile-avatar {
+  width: 100px;
+  height: 100px;
+  margin: 0 auto 15px;
+  border-radius: 50%;
+  background: #5865f2; /* Discord blurple */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 40px;
+  color: white;
+  user-select: none;
+  box-shadow: 0 0 10px #5865f2aa;
+}
+
+/* Name + tag wrapper */
+#profileName {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 4px;
+  color: white;
+}
+
+.profile-tag {
+  font-size: 14px;
+  color: #b9bbbe;
+  letter-spacing: 1.5px;
+  margin-bottom: 18px;
+  font-family: monospace;
+}
+
+/* Bio text */
+#profileBio {
+  font-size: 15px;
+  line-height: 1.4;
+  color: #dcddde;
+  min-height: 48px;
+  margin-bottom: 25px;
+}
+
+/* Close button */
+#profileCloseBtn {
+  background: #5865f2;
+  border: none;
+  border-radius: 4px;
+  color: white;
+  padding: 10px 25px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.25s ease;
+}
+
+#profileCloseBtn:hover {
+  background: #4752c4;
+}
+
+#searchInput {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 16px;
+  border: 1px solid #252525;
+  border-radius: 6px;
+  background-color: #302f2f;
+  margin-bottom: 12px;
+  box-sizing: border-box;
+  transition: border-color 0.3s ease;
+  color: white;
+  text-align: center;
+}
+
+#searchInput:focus {
+  outline: none;
+  border-color: #ebebeb;
+  box-shadow: 0 0 6px #d2d3d4aa;
+}
+
+.container {
+  display: flex;
+  gap: 20px;
+  max-width: 1100px;
+  margin: 40px auto 40px auto; /* top and bottom spacing with auto sides */
+  padding: 0 20px;
+  flex-wrap: wrap; /* allows wrapping on smaller screens */
+  justify-content: center; /* center sections if wrapped */
+}
+
+section {
+  background: #222;
+  padding: 15px;
+  border-radius: 8px;
+  flex: 1 1 320px; /* grow, shrink, basis min width */
+  display: flex;
+  flex-direction: column;
+  min-width: 280px; /* avoid shrinking too small */
+  max-width: 360px; /* limit max width */
+  box-shadow: 0 0 10px rgba(234, 238, 234, 0.1); /* subtle green glow */
+}
+
+section h2 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  color: #eff1ef;
+  font-weight: 600;
+  font-size: 1.25rem;
+  text-align: center;
+}
+
+section input[type="text"] {
+  padding: 8px 12px;
+  margin-bottom: 12px;
+  border-radius: 6px;
+  border: none;
+  outline: none;
+  font-size: 15px;
+  background-color: #111;
+  color: white;
+  transition: background-color 0.3s ease;
+}
+
+section input[type="text"]:focus {
+  background-color: #1a1a1a;
+  box-shadow: 0 0 5px #2f302f;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  overflow-y: auto;
+  max-height: 320px;
+  scrollbar-width: thin;
+  scrollbar-color: #393a39 #222;
+}
+
+ul::-webkit-scrollbar {
+  width: 8px;
+}
+
+ul::-webkit-scrollbar-track {
+  background: #222;
+}
+
+ul::-webkit-scrollbar-thumb {
+  background-color: #707070;
+  border-radius: 4px;
+}
+
+li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  padding: 8px 10px;
+  background: #333;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: background-color 0.3s ease;
+}
+
+li:hover {
+  background-color: #2a2a2a;
+}
+
+li button {
+  background-color: #2c2e2d;
+  border: none;
+  padding: 6px 12px;
+  color: black;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background-color 0.3s;
+}
+
+li button:disabled {
+  background-color: #555;
+  cursor: not-allowed;
+  color: #ccc;
+}
+
+li button:hover:not(:disabled) {
+  background-color: #f3fcf5;
+}
+
+@media (max-width: 600px) {
+  .container {
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 10px;
+  }
+  
+  section {
+    max-width: 100%;
+    width: 100%;
+    min-width: unset;
+  }
+}
+
+/* Make modal-content a column flex container to order buttons vertically */
+.modal-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* center horizontally */
+}
+
+/* Style and position the message button */
+#sendMessageBtn {
+  margin-bottom: 15px;  /* space below to separate from close button */
+  padding: 10px 25px;
+  background-color: #070707;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  width: fit-content;
+  transition: background-color 0.3s ease;
+}
+
+#sendMessageBtn:hover {
+  background-color: #181717;
+}
+
+/* Make sure close button stays below message button */
+#profileCloseBtn {
+  padding: 8px 20px;
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  width: fit-content;
+}
+
+#profileCloseBtn:hover {
+  background-color: #c82333;
+}

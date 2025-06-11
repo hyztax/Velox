@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="velox.images/Velox_logo.png">
+  <title>Velox | Sign In</title>
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- Firebase Compat SDKs (classic, no ES module) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-analytics-compat.js"></script>
+</head>
+<body>
+  <main class="auth-screen">
+    <header class="header">
+      <h1 class="logo">Velox</h1>
+      <p class="tagline">Welcome back! Please sign in.</p>
+    </header>
+
+    <form id="signin-form" class="auth-form">
+      <label for="email">Email</label>
+      <input id="email" name="email" type="email" required placeholder="Enter your email" />
+
+      <label for="password">Password</label>
+      <input id="password" name="password" type="password" required placeholder="Enter your password" />
+
+      <button type="submit" class="create-btn">Sign In</button>
+    </form>
+
+    <p class="signin-link">
+      Don't have an account? <a href="signup.html">Sign Up</a>
+    </p>
+  </main>
+
+  <script>
+    // Your Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyBXb9OhOEOo4gXNIv2WcCNmXfnm1x7R2EM",
+      authDomain: "velox-c39ad.firebaseapp.com",
+      projectId: "velox-c39ad",
+      storageBucket: "velox-c39ad.appspot.com",
+      messagingSenderId: "404832661601",
+      appId: "1:404832661601:web:9ad221c8bfb459410bba20",
+      measurementId: "G-X8W755KRF6"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+    // Sign In Form Submit
+    document.getElementById('signin-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const email = e.target.email.value.trim();
+      const password = e.target.password.value.trim();
+
+      if (!email || !password) {
+        alert('Please fill in all fields.');
+        return;
+      }
+
+      try {
+        const userCredential = await auth.signInWithEmailAndPassword(email, password);
+      //  alert(`Welcome back, ${userCredential.user.displayName || 'User'}! You are signed in.`);
+        window.location.href = 'main.html';  // Redirect to main.html after login
+      } catch (error) {
+        alert(`Error: ${error.message}`);
+      }
+    });
+  </script>
+</body>
+</html>

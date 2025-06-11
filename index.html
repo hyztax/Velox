@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="velox.images/Velox_logo.png">
+  <title>Velox | accounts</title>
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-analytics.js"></script>
+
+  <!-- App Script -->
+  <script src="java.js" defer></script>
+</head>
+<body>
+  <main class="welcome-screen">
+  
+
+    <!-- Branding -->
+    <header class="header">
+      <h1 class="logo">Velox</h1>
+      <p class="tagline">The future starts here</p>
+    </header>
+
+    <!-- Create Account Card -->
+    <section class="card">
+      <h2 class="card-title">Join Today</h2>
+      <button class="create-btn">
+        <span>Create Account</span>
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+        </svg>
+      </button>
+    </section>
+
+    <!-- Sign In Link -->
+    <footer class="signin-container">
+      <p class="signin-link">
+        Already have an account? <a href="signin.html">Sign In</a>
+      </p>
+    </footer>
+
+  </main>
+</body>
+</html>

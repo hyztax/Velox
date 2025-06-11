@@ -1,0 +1,409 @@
+/* Reset and base */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';
+  background: linear-gradient(135deg, #0d0d0d, #1a1a1a);
+  color: #6b7280;
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a, button {
+  font-family: inherit;
+}
+
+/* Container */
+#app {
+  max-width: 1200px;
+  margin: 0 auto;
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  grid-template-rows: 64px 1fr 72px;
+  grid-template-areas:
+    "sidebar header"
+    "sidebar chat"
+    "sidebar inputarea";
+   background: linear-gradient(135deg, #0d0d0d, #1a1a1a);
+  box-shadow: 0 10px 30px rgb(0 0 0 / 0.05);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* Responsive layout for mobile */
+@media (max-width: 768px) {
+  #app {
+    display: flex;
+    flex-direction: column;
+    max-width: 100vw;
+    height: 100vh;
+    border-radius: 0;
+    box-shadow: none;
+  }
+}
+
+/* Header */
+header, #appHeader {
+  grid-area: header;
+  background: linear-gradient(135deg, #050505, #000000);
+  color: white;
+  font-weight: 700;
+  font-size: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  letter-spacing: 0.03em;
+  box-shadow: 0 2px 8px rgb(17 24 39 / 0.15);
+  user-select: none;
+}
+
+/* Sidebar - Friends list */
+#friendsSection {
+  grid-area: sidebar;
+   background: linear-gradient(135deg, #242323, #131313);
+  border-right: 1px solid #e5e7eb;
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem;
+  overflow-y: auto;
+}
+
+#friendsSection h2 {
+  margin: 0 0 1rem 0;
+  font-weight: 700;
+  font-size: 22px;
+  color: #111827;
+}
+
+.friend-item {
+  background: #0f0f0f;
+  border-radius: 0.75rem;
+  padding: 10px 16px;
+  margin-bottom: 12px;
+  cursor: pointer;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  transition: background-color 0.3s ease;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.05);
+}
+
+.friend-item:hover,
+.friend-item:focus {
+  background-color: #070708;
+  outline: none;
+}
+
+.friend-avatar {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  background-color: #000000;
+  border-radius: 50%;
+  background-size: cover;
+  background-position: center;
+}
+
+.friend-name {
+  color: #111827;
+  font-size: 17px;
+}
+
+/* Profile Section */
+#profileSection {
+  grid-area: chat;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 2rem;
+  text-align: center;
+  color: #374151;
+  background: #fefefe;
+}
+
+#profileSection.active {
+  display: flex;
+}
+
+.profile-avatar {
+  width: 140px;
+  height: 140px;
+  background-color: #e0e7ff;
+  border-radius: 50%;
+  background-size: cover;
+  background-position: center;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 4px 14px rgba(10, 10, 10, 0.4);
+}
+
+.profile-name {
+  font-size: 32px;
+  font-weight: 800;
+  margin-bottom: 0.5rem;
+  color: #1f2937;
+}
+
+.profile-bio {
+  max-width: 280px;
+  font-size: 18px;
+  color: #6b7280;
+  margin-bottom: 2rem;
+}
+
+.btn {
+  background-color: #6366f1;
+  border: none;
+  border-radius: 9999px;
+  padding: 12px 36px;
+  font-weight: 700;
+  font-size: 16px;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.25s ease;
+  box-shadow: 0 10px 15px -3px rgb(99 102 241 / 0.4);
+  user-select: none;
+}
+.btn:hover {
+  background-color: #4f46e5;
+}
+.btn:disabled,
+.btn[disabled] {
+  background-color: #a5b4fc;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* Chat Section */
+#chatSection {
+  grid-area: chat;
+  display: flex;
+  flex-direction: column;
+  background: #000000;
+  border-radius: 0 0 0 0.75rem;
+  overflow: hidden;
+  height: 100%;
+  display: none;
+}
+#chatSection.active {
+  display: flex;
+}
+
+#chatHeader {
+  background: white;
+  padding: 1rem 1.5rem;
+  font-weight: 700;
+  font-size: 20px;
+  color: #1f2937;
+  border-bottom: 1px solid #e5e7eb;
+  user-select: none;
+}
+
+#chatMessages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  scrollbar-width: thin;
+  scrollbar-color: #a5b4fc transparent;
+}
+/* Custom scrollbar for WebKit */
+#chatMessages::-webkit-scrollbar {
+  width: 8px;
+}
+#chatMessages::-webkit-scrollbar-track {
+  background: transparent;
+}
+#chatMessages::-webkit-scrollbar-thumb {
+  background-color: #616fb3;
+  border-radius: 20px;
+}
+
+.message {
+  max-width: 70%;
+  padding: 14px 20px;
+  border-radius: 1.5rem;
+  word-break: break-word;
+  font-size: 16px;
+  line-height: 1.4;
+  user-select: text;
+  position: relative;
+  box-shadow: 0 3px 5px rgb(0 0 0 / 0.08);
+}
+.message.sent {
+  background: #010108;
+  color: white;
+  align-self: flex-end;
+  border-bottom-right-radius: 0;
+}
+.message.received {
+  background: white;
+  color: #374151;
+  align-self: flex-start;
+  border-bottom-left-radius: 0;
+  box-shadow: 0 2px 12px rgb(99 102 241 / 0.15);
+}
+
+/* Chat input area */
+#chatInputArea {
+  grid-area: inputarea;
+  display: flex;
+  gap: 12px;
+  background: rgb(22, 22, 22);
+  padding: 1rem 2rem;
+  align-items: center;
+  border-top: 1px solid #303235;
+}
+
+#messageInput {
+  flex-grow: 1;
+  padding: 14px 20px;
+  font-size: 16px;
+  border-radius: 9999px;
+  border: 1px solid #202020;
+  box-shadow: inset 0 1px 2px rgb(0 0 0 / 0.05);
+  transition: border-color 0.3s ease;
+}
+#messageInput:focus {
+  outline: none;
+  border-color: #383bc7;
+  box-shadow: 0 0 5px #707dc2;
+}
+
+#sendBtn {
+  background-color: #6366f1;
+  border: none;
+  border-radius: 9999px;
+  padding: 14px 28px;
+  font-weight: 700;
+  font-size: 16px;
+  color: rgb(12, 12, 12);
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.25s ease;
+}
+#sendBtn:hover:not(:disabled) {
+  background-color: #4f46e5;
+}
+#sendBtn:disabled {
+  background-color: #c7d2fe;
+  cursor: default;
+}
+
+/* Scroll chat to bottom */
+#chatMessages.fade {
+  transition: opacity 0.15s ease-in-out;
+}
+
+/* Focus-visible outlines for accessibility */
+.friend-item:focus-visible,
+.btn:focus-visible,
+#sendBtn:focus-visible,
+#messageInput:focus-visible {
+  outline: 3px solid #080808;
+  outline-offset: 2px;
+}
+
+/* Mobile-specific adjustments */
+@media (max-width: 768px) {
+  #app {
+    display: flex;
+    flex-direction: column;
+    max-width: 100vw;
+    height: 100vh;
+    border-radius: 0;
+    box-shadow: none;
+    grid-template-columns: none;
+    grid-template-rows: none;
+    grid-template-areas: none;
+  }
+  #friendsSection {
+    height: 240px;
+    border-right: none;
+    border-bottom: 1px solid #000000;
+    padding: 1rem;
+    overflow-x: auto;
+    overflow-y: hidden;
+    display: flex;
+    gap: 12px;
+    scroll-padding: 1rem;
+  }
+  #friendsSection::-webkit-scrollbar {
+    height: 8px;
+  }
+  #friendsSection::-webkit-scrollbar-thumb {
+    background-color: #0a0a0a;
+    border-radius: 20px;
+  }
+  .friend-item {
+    min-width: 120px;
+    flex-shrink: 0;
+    flex-direction: column;
+    justify-content: center;
+    padding: 16px 12px;
+    border-radius: 1rem;
+    box-shadow: 0 3px 10px rgba(109, 109, 110, 0.15);
+    font-size: 14px;
+    gap: 8px;
+  }
+  .friend-avatar {
+    width: 72px;
+    height: 72px;
+  }
+  .friend-name {
+    text-align: center;
+    font-weight: 700;
+    color: #4b5563;
+  }
+  #profileSection {
+    padding: 2rem 1.5rem;
+  }
+  .profile-avatar {
+    width: 112px;
+    height: 112px;
+    margin-bottom: 1rem;
+  }
+  .profile-name {
+    font-size: 24px;
+  }
+  .profile-bio {
+    font-size: 16px;
+    margin-bottom: 1rem;
+    color: #9ca3af;
+  }
+  #chatSection {
+    flex-grow: 1;
+    border-radius: 0;
+  }
+  #chatHeader {
+    font-size: 18px;
+    padding: 0.75rem 1rem;
+  }
+  #chatMessages {
+    padding: 1rem;
+    gap: 12px;
+  }
+  #chatInputArea {
+    padding: 0.75rem 1rem;
+    gap: 8px;
+  }
+  #messageInput {
+    padding: 12px 16px;
+    font-size: 14px;
+  }
+  #sendBtn {
+    padding: 12px 20px;
+    font-size: 14px;
+  }
+}
+
