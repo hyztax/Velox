@@ -1,4 +1,4 @@
-// Your Firebase config
+// Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyBXb9OhOEOo4gXNIv2WcCNmXfnm1x7R2EM",
   authDomain: "velox-c39ad.firebaseapp.com",
@@ -9,58 +9,67 @@ const firebaseConfig = {
   measurementId: "G-X8W755KRF6"
 };
 
-// Initialize Firebase (using compat)
+// Initialize Firebase
 firebase.initializeApp(firebaseConfig);
+firebase.analytics();
 const auth = firebase.auth();
-const db = firebase.firestore(); // Initialize Firestore here
+const db = firebase.firestore();
 
-const usernameInput = document.querySelector('#signup-form input[name="username"]');
+// Wait for DOM to load
+document.addEventListener('DOMContentLoaded', () => {
+  const signupForm = document.getElementById('signup-form');
+  const usernameInput = signupForm.querySelector('input[name="username"]');
+  const emailInput = signupForm.querySelector('input[name="email"]');
+  const passwordInput = signupForm.querySelector('input[name="password"]');
 
-usernameInput.addEventListener('input', () => {
-  const value = usernameInput.value.trim();
-  const valid = /^[a-zA-Z]{3,10}$/.test(value);
+  // Username validation
+  usernameInput.addEventListener('input', () => {
+    const value = usernameInput.value.trim();
+    const valid = /^[a-zA-Z]{3,10}$/.test(value);
 
-  if (!valid) {
-    usernameInput.setCustomValidity("You need 3–10 letters (A–Z only)");
-    usernameInput.reportValidity(); // Show message
-    usernameInput.style.borderColor = 'red';
-  } else {
-    usernameInput.setCustomValidity('');
-    usernameInput.style.borderColor = ''; // Reset
-  }
-});
+    if (!valid) {
+      usernameInput.setCustomValidity("You need 3–10 letters (A–Z only)");
+      usernameInput.reportValidity();
+      usernameInput.style.borderColor = 'red';
+    } else {
+      usernameInput.setCustomValidity('');
+      usernameInput.style.borderColor = '';
+    }
+  });
 
-document.getElementById('signup-form').addEventListener('submit', async (e) => {
-  e.preventDefault();
+  // Form submission
+  signupForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
 
-  const username = e.target.username.value.trim();
-  const email = e.target.email.value.trim();
-  const password = e.target.password.value.trim();
+    const username = usernameInput.value.trim();
+    const email = emailInput.value.trim();
+    const password = passwordInput.value.trim();
 
-  if (!username || !email || !password) {
-    alert('Please fill in all fields.');
-    return;
-  }
+    if (!username || !email || !password) {
+      alert('Please fill in all fields.');
+      return;
+    }
 
-  try {
-    const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+    try {
+      const userCredential = await auth.createUserWithEmailAndPassword(email, password);
 
-    // Update the user profile on Auth
-    await userCredential.user.updateProfile({
-      displayName: username
-    });
+      // Set display name
+      await userCredential.user.updateProfile({
+        displayName: username
+      });
 
-    // Create Firestore user document
-    await db.collection('users').doc(userCredential.user.uid).set({
-      displayName: username,
-      bio: "",
-      avatarUrl: null,
-      email: email
-    });
+      // Create Firestore document
+      await db.collection('users').doc(userCredential.user.uid).set({
+        displayName: username,
+        bio: "",
+        avatarUrl: null,
+        email: email
+      });
 
-    window.location.href = 'signin.html';
-
-  } catch (error) {
-    alert(`Error: ${error.message}`);
-  }
+      // Redirect to sign-in
+      window.location.href = 'signin.html';
+    } catch (error) {
+      alert(`Error: ${error.message}`);
+    }
+  });
 });
