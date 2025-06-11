@@ -6,10 +6,9 @@
   <link rel="icon" href="velox.image/Velox_logo.png">
   <title>Velox | Chat</title>
   <link rel="stylesheet" href="chat.css" />
-   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
-
 </head>
 <body>
   <div id="app" role="main" aria-label="Velox chat application">
@@ -17,6 +16,7 @@
       <h2 style="color: white;">Friends</h2>
       <div id="friendsList" role="list" aria-live="polite" aria-relevant="additions"></div>
     </section>
+    
     <header id="appHeader" role="banner">Velox Chat</header>
     <section id="profileSection" aria-live="polite" aria-atomic="true" aria-label="User profile">
       <div id="profileAvatar" class="profile-avatar" role="img" aria-label="User avatar"></div>
@@ -27,16 +27,39 @@
         <button id="messageUserBtn" class="btn" type="button">Message User</button>
       </div>
     </section>
+    
+
+    
+<div id="fakeProfile" style="background:#222; color:#eee; padding:20px; border-radius:10px; max-width:450px; margin:20px auto; font-family: Arial, sans-serif;">
+  <img 
+    src="https://media.discordapp.net/attachments/1276293476123676714/1382029108342554714/Xoxo_-_1.png?ex=684a5328&is=684901a8&hm=97d993165f11d3ae474b278fed3bdda44850a56e37d47ef38b53972746b3f751&=&format=webp&quality=lossless" 
+    alt="Fake User Avatar" 
+    style="width:100px; height:100px; border-radius:50%; display:block; margin:0 auto 15px;"
+  />
+  
+  <h2 style="text-align:center; margin-bottom:10px;">Admin</h2>
+  <p style="font-size:14px; line-height:1.4; text-align:center; margin-bottom:15px;">
+   Welcome to Velox! We hope you enjoy your time here. Feel free to message any of your friends and start chatting!
+  </p>
+
+</div>
+
+  <!-- <div class="fake_msg">This is my msg</div> -->
+    
     <section id="chatSection" aria-live="polite" aria-atomic="false" aria-label="Chat messages">
       <header id="chatHeader"></header>
       <div id="chatMessages" tabindex="0" role="log" aria-live="polite" aria-relevant="additions"></div>
     </section>
+  
     <form id="chatInputArea" onsubmit="return false;" aria-label="Message input area">
       <input id="messageInput" name="message" type="text" autocomplete="off" placeholder="Enter message..." aria-label="Message input" />
       <button id="sendBtn" type="submit" disabled>Send</button>
     </form>
   </div>
+
+ 
   
+
   <script src="chat.js"></script>
 </body>
 </html>

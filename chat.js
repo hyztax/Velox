@@ -333,3 +333,6 @@ function isLoggedIn() {
 function getCurrentUser() {
   return currentUser;
 }
+
+// works
+
