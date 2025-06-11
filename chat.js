@@ -300,3 +300,17 @@ async function addFriend(currentUserUid, friendUid) {
   // Add yourself to their friend list
   await db.collection("friends").doc(friendUid).collection("list").doc(currentUserUid).set({ addedAt: timestamp });
 }
+
+async function cleanFriendList(uid) {
+  const friendsRef = db.collection("friends").doc(uid).collection("list");
+  const snapshot = await friendsRef.get();
+
+  for (const doc of snapshot.docs) {
+    const friendUid = doc.id;
+    const userDoc = await db.collection("users").doc(friendUid).get();
+    if (!userDoc.exists) {
+      console.log(`Removing friend UID ${friendUid} from user ${uid} friend list`);
+      await friendsRef.doc(friendUid).delete();
+    }
+  }
+}
