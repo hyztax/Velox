@@ -142,7 +142,8 @@ async function testLoadFriends() {
   } catch (error) {
     console.error("Error loading friends in test:", error);
   }
-}
+} 
+
 
 // Call testLoadFriends after login, like:
 auth.onAuthStateChanged(user => {
