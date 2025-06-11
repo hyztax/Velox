@@ -66,20 +66,21 @@ async function loadFriends() {
   friendsListEl.textContent = "Loading friends...";
 
   try {
-    // Use consistent friend list location
     const friendsRef = db.collection("friends").doc(currentUser.uid).collection("list");
     const snapshot = await friendsRef.get();
 
-    friendsListEl.textContent = ""; // Clear loading text & old friends
-
     if (snapshot.empty) {
+      console.log(`No friends found for user ${currentUser.uid}`);
       friendsListEl.textContent = "No friends yet.";
       return;
     }
 
-    // Map promises to render all friend items
+    friendsListEl.textContent = "";
+
     const friendElementsPromises = snapshot.docs.map(async (doc) => {
       const friendUid = doc.id;
+      console.log(`Loading friend UID: ${friendUid}`);
+
       const userDoc = await db.collection("users").doc(friendUid).get();
       if (!userDoc.exists) {
         console.warn(`Friend UID ${friendUid} missing in users collection`);
@@ -90,6 +91,11 @@ async function loadFriends() {
 
     const friendElements = (await Promise.all(friendElementsPromises)).filter(Boolean);
 
+    if (friendElements.length === 0) {
+      friendsListEl.textContent = "No friends found in users collection.";
+      return;
+    }
+
     friendElements.forEach(friendEl => friendsListEl.appendChild(friendEl));
 
   } catch (error) {
@@ -97,6 +103,7 @@ async function loadFriends() {
     friendsListEl.textContent = `Failed to load friends: ${error.message || error}`;
   }
 }
+
 
 // --- Render Friend Item ---
 async function renderFriendItem(friendUid) {
