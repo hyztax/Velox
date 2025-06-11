@@ -334,5 +334,20 @@ function getCurrentUser() {
   return currentUser;
 }
 
-// works
+// Make sure Firebase is initialized and firebase.auth() is available
 
+firebase.auth().onAuthStateChanged((user) => {
+  if (user) {
+    const username = user.displayName || user.email || "User";
+    const welcomeMsg = document.getElementById("welcomeMsg");
+    if (welcomeMsg) {
+      welcomeMsg.textContent = `Hi there ${username}!`;
+    }
+  } else {
+    // Optional: user is not logged in
+    const welcomeMsg = document.getElementById("welcomeMsg");
+    if (welcomeMsg) {
+      welcomeMsg.textContent = "Welcome guest!";
+    }
+  }
+});

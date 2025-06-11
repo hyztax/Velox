@@ -406,49 +406,81 @@ header, #appHeader {
     font-size: 14px;
   }
 }
+
+
+.chat_column {
+  max-width: 450px;
+  margin: 20px auto;
+  font-family: Arial, sans-serif;
+  transform: translateX(-15px); /* slight shift to the left */
+}
+
+/* Profile Card */
 #fakeProfile {
   background: #222;
   color: #eee;
-  padding: 8px 12px;      /* smaller padding */
-  border-radius: 10px;
-  margin: 15px auto;      /* less vertical margin */
+  padding: 10px 14px;
+  border-radius: 12px;
+  margin: 15px auto;
   font-family: Arial, sans-serif;
-  max-height: 250px;      /* optional max height */
-  overflow: hidden;       /* hide overflow if content is bigger */
+  max-height: 250px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  transition: background 0.3s;
+}
+
+#fakeProfile:hover {
+  background: #2a2a2a;
 }
 
 #fakeProfile img {
-  width: 60px;            /* smaller image */
+  width: 60px;
   height: 60px;
   border-radius: 50%;
   display: block;
-  margin: 0 auto 8px;     /* smaller margin below image */
+  margin: 0 auto 10px;
 }
 
 #fakeProfile h2 {
   text-align: center;
-  margin-bottom: 4px;
-  font-size: 1.1em;       /* smaller heading */
-  line-height: 1.1;
+  margin-bottom: 6px;
+  font-size: 1.1em;
+  line-height: 1.2;
 }
 
 #fakeProfile p {
-  font-size: 11px;        /* smaller text */
-  line-height: 1.1;       /* tighter line height */
+  font-size: 12px;
+  line-height: 1.3;
   text-align: center;
-  margin-bottom: 4px;
+  margin-bottom: 6px;
 }
 
+/* Message Bubble */
 .fake_msg {
   background-color: #444;
   color: #eee;
   padding: 10px 15px;
   border-radius: 15px;
-  max-width: 70%;
-  margin: 8px auto;          /* auto left and right margin centers it */
-  font-size: 14px;
+  width: fit-content;           /* auto width based on content */
+  max-width: 80%;               /* optional limit for very long messages */
+  margin: 10px 0 10px 8px;
+  font-size: 13.5px;
   line-height: 1.4;
   box-shadow: 0 1px 3px rgba(0,0,0,0.3);
   word-wrap: break-word;
-  text-align: center;        /* center text inside bubble */
+  text-align: left;
+  position: relative;
+}
+
+
+.fake_msg::before {
+  content: "";
+  position: absolute;
+  left: -9px;
+  top: 12px;
+  width: 0;
+  height: 0;
+  border-top: 8px solid transparent;
+  border-bottom: 8px solid transparent;
+  border-right: 10px solid #444;
 }
