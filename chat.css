@@ -127,7 +127,7 @@ header, #appHeader {
   padding: 3rem 2rem;
   text-align: center;
   color: #374151;
-  background: #fefefe;
+  /* background: #b80808; */
 }
 
 #profileSection.active {
@@ -137,7 +137,7 @@ header, #appHeader {
 .profile-avatar {
   width: 140px;
   height: 140px;
-  background-color: #e0e7ff;
+  background-color: #0d205f;
   border-radius: 50%;
   background-size: cover;
   background-position: center;
@@ -149,18 +149,18 @@ header, #appHeader {
   font-size: 32px;
   font-weight: 800;
   margin-bottom: 0.5rem;
-  color: #1f2937;
+  color: #c8cace;
 }
 
 .profile-bio {
   max-width: 280px;
   font-size: 18px;
-  color: #6b7280;
+  color: #806b6b;
   margin-bottom: 2rem;
 }
 
 .btn {
-  background-color: #6366f1;
+  background-color: #1e1e1f88;
   border: none;
   border-radius: 9999px;
   padding: 12px 36px;
@@ -169,11 +169,11 @@ header, #appHeader {
   color: white;
   cursor: pointer;
   transition: background-color 0.25s ease;
-  box-shadow: 0 10px 15px -3px rgb(99 102 241 / 0.4);
+  box-shadow: 0 10px 15px -3px rgba(173, 174, 197, 0.4);
   user-select: none;
 }
 .btn:hover {
-  background-color: #4f46e5;
+  background-color: #424244;
 }
 .btn:disabled,
 .btn[disabled] {
@@ -187,7 +187,7 @@ header, #appHeader {
   grid-area: chat;
   display: flex;
   flex-direction: column;
-  background: #000000;
+  /* background:*/
   border-radius: 0 0 0 0.75rem;
   overflow: hidden;
   height: 100%;
@@ -230,29 +230,36 @@ header, #appHeader {
 }
 
 .message {
-  max-width: 70%;
-  padding: 14px 20px;
-  border-radius: 1.5rem;
-  word-break: break-word;
-  font-size: 16px;
-  line-height: 1.4;
+  display: inline-block;
+  max-width: 75%;
+  padding: 6px 12px; /* smaller padding */
+  border-radius: 1rem;
+  font-size: 14px;     /* slightly smaller text */
+  line-height: 0.1;    /* tighter line spacing */
+  word-wrap: break-word;
+  white-space: pre-wrap;
   user-select: text;
-  position: relative;
-  box-shadow: 0 3px 5px rgb(0 0 0 / 0.08);
+  margin: 4px 0;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
 }
+
 .message.sent {
-  background: #010108;
-  color: white;
+  background-color: #0d0d0e;
+  color: rgb(230, 230, 230);
   align-self: flex-end;
-  border-bottom-right-radius: 0;
+  border-bottom-right-radius: 0.25rem;
+  margin-left: auto;
 }
+
 .message.received {
-  background: white;
-  color: #374151;
+  background-color: #f1f1f1;
+  color: #1a1a1a;
   align-self: flex-start;
-  border-bottom-left-radius: 0;
-  box-shadow: 0 2px 12px rgb(99 102 241 / 0.15);
+  border-bottom-left-radius: 0.25rem;
+  margin-right: auto;
+  box-shadow: 0 1px 8px rgba(99, 102, 241, 0.15);
 }
+
 
 /* Chat input area */
 #chatInputArea {
@@ -276,12 +283,12 @@ header, #appHeader {
 }
 #messageInput:focus {
   outline: none;
-  border-color: #383bc7;
-  box-shadow: 0 0 5px #707dc2;
+  border-color: #18181a;
+  box-shadow: 0 0 5px #4b5079;
 }
 
 #sendBtn {
-  background-color: #6366f1;
+  background-color: #43a07c;
   border: none;
   border-radius: 9999px;
   padding: 14px 28px;
@@ -293,10 +300,10 @@ header, #appHeader {
   transition: background-color 0.25s ease;
 }
 #sendBtn:hover:not(:disabled) {
-  background-color: #4f46e5;
+  background-color: #2d685b;
 }
 #sendBtn:disabled {
-  background-color: #c7d2fe;
+  background-color: #250b0b;
   cursor: default;
 }
 
@@ -363,7 +370,7 @@ header, #appHeader {
   .friend-name {
     text-align: center;
     font-weight: 700;
-    color: #4b5563;
+    color: #4b5563;                     
   }
   #profileSection {
     padding: 2rem 1.5rem;
@@ -499,4 +506,8 @@ header, #appHeader {
 
 #friendsList::-webkit-scrollbar {
   display: none; /* Safari and Chrome */
+}
+
+#chatHeader {
+  display: none;
 }

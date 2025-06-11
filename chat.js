@@ -53,7 +53,7 @@ function showSection(name) {
   appHeader.textContent =
     name === "friends" ? "Velox Chat" :
     name === "profile" ? "Profile" :
-    name === "chat" ? `Chat with ${selectedUser?.displayName || ""}` : "";
+    name === "chat" ? `${selectedUser?.displayName || ""}` : "";
 }
 
 // --- Load Friends ---
@@ -185,14 +185,17 @@ function startChat(uid) {
   showSection("chat");
 
   // Load selected user info for chat header
-  db.collection("users").doc(uid).get().then(doc => {
-    if (!doc.exists) {
-      selectedUser = { uid, displayName: "Unknown" };
-    } else {
-      selectedUser = { uid, ...doc.data() };
-    }
-    chatHeader.textContent = `Chat with ${selectedUser.displayName || "Unknown"}`;
-  });
+ db.collection("users").doc(uid).get().then(doc => {
+  if (!doc.exists) {
+    selectedUser = { uid, displayName: "Unknown" };
+  } else {
+    selectedUser = { uid, ...doc.data() };
+  }
+
+  // Remove or comment out this line to prevent header update:
+  // chatHeader.textContent = `${selectedUser.displayName || "Unknown"}`;
+});
+
 
   messageInput.value = "";
   sendBtn.disabled = true;
