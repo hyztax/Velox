@@ -83,19 +83,19 @@ function renderFriendItem(friend) {
 }
 
 async function loadFriends() {
-  if (!currentUser || !currentUser.uid) {
-    friendsListEl.textContent = "User not logged in or user ID missing";
+  if (!currentUser  || !currentUser .uid) {
+    friendsListEl.textContent = "User  not logged in or user ID missing";
     return;
   }
 
   friendsListEl.textContent = "Loading friends...";
 
   try {
-    // Only load friends who are in the 'list' subcollection
-    const friendsRef = db.collection("friends").doc(currentUser.uid).collection("list");
+    // Fetch only the direct friends from the 'list' subcollection
+    const friendsRef = db.collection("friends").doc(currentUser .uid).collection("list");
     const snapshot = await friendsRef.get();
 
-    friendsListEl.textContent = ""; // Clear the loading text
+    friendsListEl.textContent = ""; // Clear loading text
 
     if (snapshot.empty) {
       friendsListEl.textContent = "No friends yet.";
@@ -103,20 +103,15 @@ async function loadFriends() {
     }
 
     const friendElementsPromises = snapshot.docs.map(async (doc) => {
-      const friendUid = doc.id; // Friend UID from subcollection
-      // Check if the user exists in the users collection, and only render if they do
-      const userDoc = await db.collection("users").doc(friendUid).get();
-      if (!userDoc.exists) {
-        console.warn(`Friend UID ${friendUid} does not exist in 'users' collection`);
-        return null;  // Do not display this friend if they don't have a valid profile
-      }
-      return renderFriendItem(friendUid); // Proceed to render if the user exists
+      const friendUid = doc.id; // Get the UID of the friend
+      return renderFriendItem(friendUid); // Render the friend item
     });
 
-    // Wait for all promises to resolve, and filter out null values
+    // Wait for all promises to resolve and filter out null values
     const friendElements = (await Promise.all(friendElementsPromises)).filter(Boolean);
 
-    // Append friend elements to the list container
+    // Clear existing friends list to avoid duplicates
+    friendsListEl.innerHTML = '';
     friendElements.forEach(friendEl => {
       friendsListEl.appendChild(friendEl);
     });
@@ -126,6 +121,7 @@ async function loadFriends() {
     friendsListEl.textContent = `Failed to load friends: ${error.message || error}`;
   }
 }
+
 
 // Place this function anywhere in your script (outside loadFriends)
 async function testLoadFriends() {
