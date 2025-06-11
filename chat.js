@@ -124,25 +124,47 @@ async function loadFriends() {
 
 
 // Place this function anywhere in your script (outside loadFriends)
-async function testLoadFriends() {
+async function loadFriends() {
   if (!currentUser || !currentUser.uid) {
-    console.log("User not logged in or no uid");
+    friendsListEl.textContent = "User not logged in or user ID missing";
     return;
   }
+
+  friendsListEl.textContent = "Loading friends...";
 
   try {
     const friendsRef = db.collection("friends").doc(currentUser.uid).collection("list");
     const snapshot = await friendsRef.get();
 
-    console.log("Friends count:", snapshot.size);
+    friendsListEl.textContent = ""; // Clear loading text
 
-    snapshot.forEach(doc => {
-      console.log("Friend ID:", doc.id, "Data:", doc.data());
+    if (snapshot.empty) {
+      friendsListEl.textContent = "No friends yet.";
+      return;
+    }
+
+    const friendElementsPromises = snapshot.docs.map(async (doc) => {
+      const friendUid = doc.id;
+      const userDoc = await db.collection("users").doc(friendUid).get();
+      if (!userDoc.exists) {
+        console.warn(`Friend UID ${friendUid} not found in users collection`);
+        return null;
+      }
+      const friendData = userDoc.data();
+      return renderFriendItem({ uid: friendUid, ...friendData });
     });
+
+    const friendElements = (await Promise.all(friendElementsPromises)).filter(Boolean);
+
+    friendsListEl.innerHTML = '';
+    friendElements.forEach(friendEl => friendsListEl.appendChild(friendEl));
+
   } catch (error) {
-    console.error("Error loading friends in test:", error);
+    console.error("Error loading friends:", error);
+    friendsListEl.textContent = `Failed to load friends: ${error.message || error}`;
   }
-} 
+}
+
 
 
 // Call testLoadFriends after login, like:
