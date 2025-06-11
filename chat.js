@@ -82,10 +82,10 @@ function renderFriendItem(friend) {
   return div;
 }
 
-// --- Load Friends ---
 async function loadFriends() {
-  if (!currentUser) {
-    friendsListEl.textContent = "Not logged in";
+  if (!currentUser || !currentUser.uid) {
+    friendsListEl.textContent = "User not logged in or user ID missing";
+    console.warn("loadFriends called but currentUser or currentUser.uid is missing");
     return;
   }
 
@@ -93,10 +93,7 @@ async function loadFriends() {
 
   try {
     const friendsRef = db.collection("friends").doc(currentUser.uid).collection("list");
-    console.log("Friends reference:", friendsRef.path);
-
     const snapshot = await friendsRef.get();
-    console.log("Snapshot size:", snapshot.size);
 
     friendsListEl.textContent = "";
 
@@ -105,42 +102,45 @@ async function loadFriends() {
       return;
     }
 
-    const friendPromises = snapshot.docs.map(async doc => {
-      const friendId = doc.id;
-      console.log("Friend ID:", friendId);
-      try {
-        const userDoc = await db.collection("users").doc(friendId).get();
-        if (userDoc.exists) {
-          const friendData = userDoc.data();
-          console.log("Friend data:", friendData);
-          return { ...friendData, uid: friendId };
-        } else {
-          console.warn(`User document not found for friend ID: ${friendId}`);
-          return { uid: friendId, displayName: "Unknown User", bio: "Profile Missing", avatarUrl: null };
-        }
-      } catch (error) {
-        console.error(`Error fetching user data for friend ${friendId}:`, error);
-        return null;
-      }
-    });
-
-    const friends = (await Promise.all(friendPromises)).filter(friend => friend !== null);
-
-    if (friends.length === 0) {
-      friendsListEl.textContent = "No friends found.";
-      return;
-    }
-
-    friends.forEach(friend => {
-      const item = renderFriendItem(friend);
-      friendsListEl.appendChild(item);
-    });
+    // ... rest of your loading & rendering logic ...
 
   } catch (error) {
     console.error("Error loading friends:", error);
-    friendsListEl.textContent = "Failed to load friends.";
+    friendsListEl.textContent = `Failed to load friends: ${error.message || error}`;
   }
 }
+
+// Place this function anywhere in your script (outside loadFriends)
+async function testLoadFriends() {
+  if (!currentUser || !currentUser.uid) {
+    console.log("User not logged in or no uid");
+    return;
+  }
+
+  try {
+    const friendsRef = db.collection("friends").doc(currentUser.uid).collection("list");
+    const snapshot = await friendsRef.get();
+
+    console.log("Friends count:", snapshot.size);
+
+    snapshot.forEach(doc => {
+      console.log("Friend ID:", doc.id, "Data:", doc.data());
+    });
+  } catch (error) {
+    console.error("Error loading friends in test:", error);
+  }
+}
+
+// Call testLoadFriends after login, like:
+auth.onAuthStateChanged(user => {
+  if (user) {
+    currentUser = user;
+    loadFriends();
+    testLoadFriends(); // <---- call it here to check debug output
+  } else {
+    currentUser = null;
+  }
+});
 
 
 // --- Profile ---
@@ -351,3 +351,209 @@ firebase.auth().onAuthStateChanged((user) => {
     }
   }
 });
+
+// Assume you have a function to fetch friends list from your database (Firebase or elsewhere)
+function loadFriendsList(friends) {
+  const friendsListDiv = document.getElementById('friendsList');
+  friendsListDiv.innerHTML = ''; // Clear previous
+
+  friends.forEach(friend => {
+    const friendItem = document.createElement('div');
+    friendItem.setAttribute('role', 'listitem');
+    friendItem.className = 'friend-item';
+    friendItem.style = `
+      display: flex; align-items: center; gap: 10px;
+      background: #444; padding: 10px; border-radius: 8px; cursor: pointer;
+    `;
+
+    // Friend avatar
+    const avatar = document.createElement('div');
+    avatar.style = `
+      width: 40px; height: 40px; border-radius: 50%;
+      background-image: url(${friend.avatarUrl || 'default-avatar.png'});
+      background-size: cover; background-position: center;
+    `;
+    avatar.setAttribute('aria-label', `${friend.name}'s avatar`);
+
+    // Friend name
+    const name = document.createElement('span');
+    name.textContent = friend.name || friend.email || "Unnamed";
+    name.style = `color: white; font-weight: 500;`;
+
+    friendItem.appendChild(avatar);
+    friendItem.appendChild(name);
+
+    friendItem.onclick = () => {
+      showProfile(friend);
+    };
+
+    friendsListDiv.appendChild(friendItem);
+  });
+}
+
+async function loadFriends() {
+  if (!currentUser || !currentUser.uid) {
+    friendsListEl.textContent = "User not logged in or user ID missing";
+    return;
+  }
+
+  friendsListEl.textContent = "Loading friends...";
+
+  try {
+    const friendsRef = db.collection("friends").doc(currentUser.uid).collection("list");
+    const snapshot = await friendsRef.get();
+
+    friendsListEl.textContent = ""; // clear loading text
+
+    if (snapshot.empty) {
+      friendsListEl.textContent = "No friends yet.";
+      return;
+    }
+
+    // Create an array of promises to fetch each friend's full profile and render their item
+    const friendElementsPromises = snapshot.docs.map(async (doc) => {
+      const friendUid = doc.id;
+      return await renderFriendItem(friendUid);
+    });
+
+    // Wait for all friend elements to be ready
+    const friendElements = await Promise.all(friendElementsPromises);
+
+    // Append all friend elements to the list container
+    friendElements.forEach(friendEl => {
+      friendsListEl.appendChild(friendEl);
+    });
+
+  } catch (error) {
+    console.error("Error loading friends:", error);
+    friendsListEl.textContent = `Failed to load friends: ${error.message || error}`;
+  }
+}
+
+// Render friend item by fetching full user profile from 'users' collection by UID
+async function renderFriendItem(friendUid) {
+  try {
+    const userDoc = await db.collection("users").doc(friendUid).get();
+    if (!userDoc.exists) {
+      console.warn(`User profile not found for UID: ${friendUid}`);
+      return createFriendPlaceholder("Unknown User", friendUid);
+    }
+
+    const userData = userDoc.data();
+
+    // Create container div for friend item
+    const container = document.createElement("div");
+    container.classList.add("friend-item");
+    container.setAttribute("role", "listitem");
+    container.tabIndex = 0;
+
+    // Avatar div
+    const avatar = document.createElement("div");
+    avatar.classList.add("friend-avatar");
+    if (userData.avatarUrl) {
+      avatar.style.backgroundImage = `url(${userData.avatarUrl})`;
+      avatar.style.backgroundColor = "";
+    } else {
+      avatar.style.backgroundColor = "#555";
+    }
+    container.appendChild(avatar);
+
+    // Name span
+    const nameSpan = document.createElement("span");
+    nameSpan.textContent = userData.displayName || "Unknown";
+    container.appendChild(nameSpan);
+
+    // Click handler to open profile
+    container.addEventListener("click", () => openProfile(friendUid));
+
+    // Keyboard accessibility: open profile on Enter or Space
+    container.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        openProfile(friendUid);
+      }
+    });
+
+    return container;
+
+  } catch (err) {
+    console.error(`Error fetching user profile for UID ${friendUid}:`, err);
+    return createFriendPlaceholder("Unknown User", friendUid);
+  }
+}
+
+// Helper: create placeholder friend item if user data missing
+function createFriendPlaceholder(name, uid) {
+  const container = document.createElement("div");
+  container.classList.add("friend-item");
+  container.setAttribute("role", "listitem");
+  container.tabIndex = 0;
+
+  const avatar = document.createElement("div");
+  avatar.classList.add("friend-avatar");
+  avatar.style.backgroundColor = "#555";
+  container.appendChild(avatar);
+
+  const nameSpan = document.createElement("span");
+  nameSpan.textContent = name;
+  container.appendChild(nameSpan);
+
+  container.addEventListener("click", () => openProfile(uid));
+  container.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      openProfile(uid);
+    }
+  });
+
+  return container;
+}
+
+window.addEventListener('load', () => {
+  console.log('🔥 Debug Mode: Velox Chat JS Loaded');
+
+  firebase.auth().onAuthStateChanged(user => {
+    if (!user) {
+      console.warn('🚫 No user logged in.');
+      return;
+    }
+
+    console.log('✅ Logged in as:', user.uid);
+    
+    db.collection("friends")
+      .doc(user.uid)
+      .collection("list")
+      .get()
+      .then(snapshot => {
+        if (snapshot.empty) {
+          console.warn('📭 No friends found in Firestore.');
+        } else {
+          console.log(`✅ Found ${snapshot.docs.length} friend(s):`);
+          snapshot.docs.forEach(doc => console.log('👤 Friend UID:', doc.id));
+        }
+
+        return Promise.all(
+          snapshot.docs.map(doc => db.collection("users").doc(doc.id).get())
+        );
+      })
+      .then(friendDocs => {
+        friendDocs.forEach(doc => {
+          if (!doc.exists) {
+            console.warn('⚠️ Missing user profile for friend:', doc.id);
+          } else {
+            const data = doc.data();
+            console.log('👤 Friend Profile:', {
+              uid: doc.id,
+              name: data.displayName,
+              avatar: data.avatarUrl
+            });
+          }
+        });
+      })
+      .catch(error => {
+        console.error('🔥 Error fetching friends list or profiles:', error.message, error);
+      });
+  });
+});
+
+

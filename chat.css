@@ -484,3 +484,19 @@ header, #appHeader {
   border-bottom: 8px solid transparent;
   border-right: 10px solid #444;
 }
+
+#friendsList {
+  max-height: 800px;
+  overflow-y: auto;
+  padding-right: 8px;
+  border: 1px solid transparent; /* remove visible border */
+  background-color: transparent; /* fully transparent background */
+
+  /* Hide scrollbar for WebKit browsers (Chrome, Safari, Edge) */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;  /* IE and Edge */
+}
+
+#friendsList::-webkit-scrollbar {
+  display: none; /* Safari and Chrome */
+}
