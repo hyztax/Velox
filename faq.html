@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <link rel="icon" href="velox.image/Velox_logo.png" />
+  <title>Velox | FAQ</title>
+  <link rel="stylesheet" href="faq.css" />
+</head>
+<body>
+  <button id="backBtn" aria-label="Back to main page" title="Back to main page" type="button">← Back</button>
+
+  <main class="faq-container" role="region" aria-label="Frequently Asked Questions">
+    <h1 class="faq-title">Frequently Asked Questions</h1>
+
+    <section class="faq-item" aria-labelledby="q1">
+      <button type="button" class="faq-question" id="q1" aria-expanded="false" aria-controls="faq1">
+        What is Velox?
+        <span class="arrow" aria-hidden="true">▼</span>
+      </button>
+      <div id="faq1" class="faq-answer" role="region" aria-labelledby="q1" hidden>
+        Velox is a modern chat platform designed for fast, secure, and fun conversations.
+      </div>
+    </section>
+
+    <section class="faq-item" aria-labelledby="q2">
+      <button type="button" class="faq-question" id="q2" aria-expanded="false" aria-controls="faq2a">
+        How do I create an account?
+        <span class="arrow" aria-hidden="true">▼</span>
+      </button>
+      <div id="faq2a" class="faq-answer" role="region" aria-labelledby="q2" hidden>
+        Click on the "Sign Up" button on the main page and follow the instructions to register.
+      </div>
+    </section>
+
+    <section class="faq-item" aria-labelledby="q3">
+      <button type="button" class="faq-question" id="q3" aria-expanded="false" aria-controls="faq3a">
+        Is my data secure?
+        <span class="arrow" aria-hidden="true">▼</span>
+      </button>
+      <div id="faq3a" class="faq-answer" role="region" aria-labelledby="q3" hidden>
+        Yes! We use industry-standard encryption to keep your conversations private.
+      </div>
+    </section>
+  </main>
+
+  <script src="faq.js"></script>
+</body>
+</html>

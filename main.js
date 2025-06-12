@@ -18,7 +18,7 @@ const settingsBtn = document.getElementById('settingsBtn');
 const settingsMenu = document.getElementById('settingsMenu');
 const logoutBtn = document.getElementById('logoutBtn');
 const profileBtn = document.getElementById('showProfileBtn');
-const feedbackBtn = document.getElementById('feedbackBtn');
+const faqBtn = document.getElementById('faqBtn');
 const inviteBtn = document.getElementById('inviteBtn');
 
 const usersUl = document.getElementById('usersUl');
