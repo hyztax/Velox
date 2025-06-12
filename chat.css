@@ -210,6 +210,22 @@ header, #appHeader {
   display: none; /* hides scrollbar in Chrome, Safari and Opera */
 }
 
+.message {
+  display: block;
+  max-width: 55%;
+  padding: 10px 16px; /* slightly bigger padding */
+  border-radius: 1rem;
+  font-size: 14px;
+  line-height: 1.5;   /* a bit more line height for readability */
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: pre-wrap;
+  user-select: text;
+  margin: 6px 0;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  box-sizing: border-box; /* important for padding */
+}
+
 
 
 #chatSection.active {
@@ -305,7 +321,14 @@ header, #appHeader {
   border: 1px solid #202020;
   box-shadow: inset 0 1px 2px rgb(0 0 0 / 0.05);
   transition: border-color 0.3s ease;
+  resize: none; /* prevent manual resize */
+  overflow-y: hidden; /* hide scrollbar */
+  line-height: 1.4;
+  max-height: 5.6em; /* ~4 lines max */
 }
+
+
+
 #messageInput:focus {
   outline: none;
   border-color: #18181a;

@@ -338,3 +338,6 @@ document.addEventListener("click", function(event) {
     chatColumn.style.display = "none";
   }
 });
+
+
+// fixa så chatatrna kan expandera ordentligt
