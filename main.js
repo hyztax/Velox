@@ -487,3 +487,38 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
+// Friend search filter
+document.addEventListener("DOMContentLoaded", () => {
+  const searchInput = document.getElementById('searchFriends');
+  const friendsList = document.getElementById('friendsList');
+
+  if (searchInput && friendsList) {
+    searchInput.addEventListener('input', () => {
+      const searchTerm = searchInput.value.toLowerCase();
+      const friends = friendsList.querySelectorAll('li');
+
+      friends.forEach(friend => {
+        const name = friend.textContent.toLowerCase();
+        friend.style.display = name.includes(searchTerm) ? '' : 'none';
+      });
+    });
+  }
+});
+
+// Friend Requests search filter
+document.addEventListener("DOMContentLoaded", () => {
+  const searchRequestsInput = document.getElementById('searchRequests');
+  const requestsList = document.getElementById('friendRequestsList');
+
+  if (searchRequestsInput && requestsList) {
+    searchRequestsInput.addEventListener('input', () => {
+      const searchTerm = searchRequestsInput.value.toLowerCase();
+      const requests = requestsList.querySelectorAll('li');
+
+      requests.forEach(request => {
+        const name = request.textContent.toLowerCase();
+        request.style.display = name.includes(searchTerm) ? '' : 'none';
+      });
+    });
+  }
+});

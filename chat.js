@@ -317,3 +317,4 @@ async function cleanFriendList(uid) {
     }
   }
 }
+
