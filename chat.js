@@ -318,3 +318,23 @@ async function cleanFriendList(uid) {
   }
 }
 
+document.addEventListener("click", function(event) {
+  const chatColumn = document.getElementById("chatColumn");
+  if (!chatColumn) return;
+
+  const rect = chatColumn.getBoundingClientRect();
+  const x = event.clientX;
+  const y = event.clientY;
+
+  // Check if click is inside the chatColumn extended by 50px margin
+  const insideExtendedArea =
+    x >= rect.left - 50 &&
+    x <= rect.right + 50 &&
+    y >= rect.top - 50 &&
+    y <= rect.bottom + 50;
+
+  if (!insideExtendedArea) {
+    // Click is outside chatColumn + 50px margin — hide it
+    chatColumn.style.display = "none";
+  }
+});
