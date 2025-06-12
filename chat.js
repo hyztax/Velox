@@ -51,7 +51,7 @@ function showSection(name) {
   if (sections[name]) sections[name].classList.add("active");
 
   appHeader.textContent =
-    name === "friends" ? "Velox Chat" :
+    name === "friends" ? "Admin profile" :
     name === "profile" ? "Profile" :
     name === "chat" ? `${selectedUser?.displayName || ""}` : "";
 }
