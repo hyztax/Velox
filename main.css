@@ -60,28 +60,46 @@ header > span,
 
 /* Ensure hamburger button and lines are visible on mobile */
 #settingsBtn {
-  width: 35px;
-  height: 25px;
-  padding: 6px 10px;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  cursor: pointer;
-  position: absolute;
-  right: 20px;
-  background: transparent;
-  border: none;
-  z-index: 1200;
+  justify-content: center; /* Vertically centers the spans */
+  align-items: center;     /* Horizontally centers the spans */
+  gap: 6px;                /* Space between each span */
+  width: 30px;             /* Optional: button size */
+  height: 30px;
+  background: transparent; /* If you want no background */
+  border: none;            /* Remove default button border */
+  cursor: pointer;         /* Pointer cursor on hover */
+  position: fixed;
+  right: 45px;
 }
 
 #settingsBtn span {
   display: block;
-  height: 3px;
-  width: 100%;       /* Full width of button */
-  background: #eee;  /* Light color for visibility */
+  height: 3px;             /* Line thickness */
+  width: 24px;             /* Line length */
+  background: #eee;        /* Line color */
   border-radius: 2px;
   transition: background 0.3s ease;
+  pointer-events: none;
 }
+
+
+.BtnforMenu {
+  width: 20px;
+  height: 25px;
+  font-size: large;
+  position: absolute;
+  margin-right: 3px;
+  display: block; /* or inline-block if needed */
+  /* box-sizing: border-box;
+  outline: 1px solid rgb(232, 232, 240); */
+  color: white;
+  z-index: 50;
+  pointer-events: none;
+}
+
+
 
 /* Hover effect */
 #settingsBtn:hover span {
