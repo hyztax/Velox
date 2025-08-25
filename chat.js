@@ -286,7 +286,8 @@ auth.onAuthStateChanged(async user => {
     currentUser = null;
     selectedUser = null;
     showSection("friends");
-    friendsListEl.textContent = "Please log in to see your friends.";
+    friendsListEl.innerHTML = 'Please <a href="signin.html" style="color:red; text-decoration: underline;">log in</a> to see your friends.';
+
     if (chatUnsubscribe) {
       chatUnsubscribe();
       chatUnsubscribe = null;
