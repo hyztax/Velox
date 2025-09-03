@@ -171,3 +171,43 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+
+
+
+
+.Velox_Shop {
+  position: fixed;               /* stay fixed on screen */
+  top: 20px;                     /* distance from top */
+  right: 20px;                   /* distance from right */
+  display: flex;                 /* horizontal layout */
+  align-items: center;           /* vertically center text with image */
+  gap: 10px;                     /* space between image and text */
+  padding: 10px;
+  background-color: #22222277;        /* dark background for visibility */
+  border-radius: 8px;
+  text-decoration: none;         /* remove underline */
+  color: rgb(232, 226, 226);
+  z-index: 1000;      
+  transition: background 0.3s ease 0.1s;
+}
+
+.Velox_Shop:hover{
+  background-color: #07070782;    
+}
+
+.Velox_Shop span {
+  font-weight: bold;
+  font-size: 16px;
+  color: rgb(232, 226, 226);
+  text-shadow: 0 0 2px #fff, 0 0 4px #4b4848, 0 0 6px #0e0e0e; /* subtle glow */
+}
+
+.Velox_Shop img {
+  width: 25px;
+  height: 25px;
+  object-fit: contain;
+  transition: box-shadow 0.3s;
+}
+
+
