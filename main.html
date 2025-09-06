@@ -127,9 +127,30 @@
     <span>Velox Store</span>
   </a>
   
-<a href="https://hyztax.github.io/Login/" target="_blank" class="Velox_Connect">
+<a href="#" class="Velox_Connect" onclick="claimAndRedirect(event)">
   <span class="shine">Claim [tester]</span>
 </a>
+
+<script>
+function claimAndRedirect(event) {
+  event.preventDefault();
+
+  // Log the user out using Firebase Auth (if applicable)
+  if (firebase && firebase.auth) {
+    firebase.auth().signOut().then(() => {
+      console.log('Logged out successfully');
+    }).catch((error) => {
+      console.error('Logout error:', error);
+    });
+  }
+
+  // Open the login page in a new tab
+  window.open('https://hyztax.github.io/Login/', '_blank');
+
+  // Close the current tab (may be blocked by some browsers)
+  window.close();
+}
+</script>
 
 
 
