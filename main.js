@@ -206,16 +206,7 @@ saveProfileBtn.addEventListener('click', async () => {
 });
 
 auth.onAuthStateChanged(user => {
-  if (!user) {
-    // Delay logout detection to avoid false triggers
-    setTimeout(() => {
-      if (!auth.currentUser) {
-        location.href = 'signin.html';
-      }
-    }, 2000); // waits 2 sec before redirect
-    return;
-  }
-
+  if (!user) return location.href = 'signin.html';
   currentUser = user;
   usernameDisplay.textContent = user.displayName || user.email || 'User';
   ensureUserProfile(user);
@@ -223,14 +214,12 @@ auth.onAuthStateChanged(user => {
   listenUsersList();
   listenToFriendRequests();
   listenToFriends();
-
   const interval = setInterval(() => setUserPresence(user, 'online'), 30000);
   window.addEventListener('beforeunload', () => {
     setUserPresence(user, 'offline');
     clearInterval(interval);
   });
 });
-
 
 logoutBtn.addEventListener('click', () => {
   auth.signOut().then(() => location.href = 'signin.html');
