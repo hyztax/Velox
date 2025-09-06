@@ -522,3 +522,66 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 });
+
+
+
+
+
+// Redirect immediately if not logged in
+firebase.auth().onAuthStateChanged((user) => {
+    if (!user) {
+        // User is not logged in, redirect instantly
+        location.replace('signin.html'); // replace so back button doesn't work
+    } else {
+        // User is logged in, set currentUser
+        currentUser = user;
+        usernameDisplay.textContent = user.displayName || user.email || 'User';
+        ensureUserProfile(user);
+        setUserPresence(user, 'online');
+        listenUsersList();
+        listenToFriendRequests();
+        listenToFriends();
+
+        // Keep presence updated
+        const interval = setInterval(() => setUserPresence(user, 'online'), 30000);
+        window.addEventListener('beforeunload', () => {
+            setUserPresence(user, 'offline');
+            clearInterval(interval);
+        });
+    }
+});
+
+firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+  .then(() => {
+    // Listen for auth state changes
+    firebase.auth().onAuthStateChanged((user) => {
+      if (!user) {
+        // User is not logged in, redirect instantly
+        location.replace('signin.html'); // replace to prevent back navigation
+      } else {
+        // User is logged in
+        currentUser = user;
+        usernameDisplay.textContent = user.displayName || user.email || 'User';
+        ensureUserProfile(user);
+        setUserPresence(user, 'online');
+        listenUsersList();
+        listenToFriendRequests();
+        listenToFriends();
+
+        // Keep presence updated
+        const interval = setInterval(() => setUserPresence(user, 'online'), 30000);
+        window.addEventListener('beforeunload', () => {
+          setUserPresence(user, 'offline');
+          clearInterval(interval);
+        });
+      }
+    });
+  })
+  .catch((error) => {
+    console.error("Error setting persistence:", error);
+  });
+
+// Logout button
+logoutBtn.addEventListener('click', () => {
+  auth.signOut().then(() => location.replace('signin.html'));
+});
