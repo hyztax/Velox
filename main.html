@@ -131,14 +131,15 @@
   <span class="shine">Claim [tester]</span>
 </a>
 
+
 <script>
 function redirectNoBack(event) {
-  event.preventDefault(); // Prevent default link behavior
-  location.replace('https://hyztax.github.io/Login/'); // Redirect & prevent back
+  // Optional: prevent default if you want to do something before opening
+  // event.preventDefault();
+  // Use location.replace in the new tab
+  window.open('https://hyztax.github.io/Login/', '_blank');
 }
 </script>
-
-
 
 
   
