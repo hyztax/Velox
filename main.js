@@ -586,38 +586,3 @@ logoutBtn.addEventListener('click', () => {
   auth.signOut().then(() => location.replace('signin.html'));
 });
 
-// Set Firebase auth persistence to keep user logged in across reloads
-firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
-  .then(() => {
-    // Check user immediately
-    firebase.auth().onAuthStateChanged((user) => {
-      if (!user) {
-        // Not logged in → redirect instantly
-        location.replace('signin.html'); // replace prevents back navigation
-      } else {
-        // User is logged in → initialize page
-        currentUser = user;
-        usernameDisplay.textContent = user.displayName || user.email || 'User';
-        ensureUserProfile(user);
-        setUserPresence(user, 'online');
-        listenUsersList();
-        listenToFriendRequests();
-        listenToFriends();
-
-        // Keep presence updated
-        const interval = setInterval(() => setUserPresence(user, 'online'), 30000);
-        window.addEventListener('beforeunload', () => {
-          setUserPresence(user, 'offline');
-          clearInterval(interval);
-        });
-      }
-    });
-  })
-  .catch((error) => {
-    console.error("Error setting persistence:", error);
-  });
-
-// Logout button
-logoutBtn.addEventListener('click', () => {
-  auth.signOut().then(() => location.replace('signin.html'));
-});
