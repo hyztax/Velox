@@ -586,11 +586,3 @@ logoutBtn.addEventListener('click', () => {
   auth.signOut().then(() => location.replace('signin.html'));
 });
 
-function claimTester() {
-  // Call a Cloud Function to claim the tester reward
-  fetch('https://your-backend.cloudfunctions.net/claimTester', {
-    method: 'POST',
-    credentials: 'include' // keeps Firebase auth cookies
-  }).then(res => res.json())
-    .then(data => alert(data.message));
-}
