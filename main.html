@@ -135,20 +135,8 @@
 function claimAndRedirect(event) {
   event.preventDefault();
 
-  // Log the user out using Firebase Auth (if applicable)
-  if (firebase && firebase.auth) {
-    firebase.auth().signOut().then(() => {
-      console.log('Logged out successfully');
-    }).catch((error) => {
-      console.error('Logout error:', error);
-    });
-  }
-
-  // Open the login page in a new tab
-  window.open('https://login-phi-rose.vercel.app/', '_blank');
-
-  // Close the current tab (may be blocked by some browsers)
-  window.close();
+  // Simply redirect to the login page in the same tab
+  window.location.href = 'https://login-phi-rose.vercel.app/';
 }
 </script>
 
