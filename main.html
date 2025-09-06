@@ -127,9 +127,17 @@
     <span>Velox Store</span>
   </a>
   
-  <a href="https://hyztax.github.io/Login/" class="Velox_Connect" target="_blank" rel="noopener noreferrer">
+  <a href="#" class="Velox_Connect" onclick="redirectNoBack(event)">
   <span class="shine">Claim [tester]</span>
-  </a>
+</a>
+
+<script>
+function redirectNoBack(event) {
+  event.preventDefault();
+  location.replace('https://hyztax.github.io/Login/');
+}
+</script>
+
   
 
 
