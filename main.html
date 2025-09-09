@@ -7,12 +7,25 @@
   <title>Velox</title>
   <link rel="stylesheet" href="main.css" />
 
+  <style>
+
+    #starfield {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+    }
+</style>
+
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
 </head>
 <body>
+
 
 <header>
   <span>Hello there <span id="usernameDisplay">...</span></span>
@@ -127,6 +140,7 @@
     <span>Velox Store</span>
   </a>
   
+<<<<<<< Updated upstream
 <a href="#" class="Velox_Connect" onclick="claimAndRedirect(event)">
   <span class="shine">Claim [tester]</span>
 </a>
@@ -143,8 +157,14 @@ function claimAndRedirect(event) {
 
 
   
+=======
+>>>>>>> Stashed changes
 </div>
 
+
+
+
 <script src="main.js"></script>
+<script src="stars.js"></script>
 </body>
 </html>
