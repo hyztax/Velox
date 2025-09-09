@@ -17,7 +17,7 @@ body {
   align-items: center;
   color: #ddd;
   position: relative;
-
+  user-select: none;
   /* Hide scrollbar but keep scroll */
   -ms-overflow-style: none;  /* IE and Edge */
   scrollbar-width: none;     /* Firefox */
@@ -362,7 +362,7 @@ main {
   color: #d4dad3; /* a soft greenish color */
   font-weight: 800;
   user-select: none;
-  text-shadow: 0 0 8px rgba(255, 255, 255, 0.6); /* green glow */
+  text-shadow: 0 0 8px rgba(102, 100, 100, 0.6); /* green glow */
   font-size: 28px;
   letter-spacing: 2px;
   
@@ -378,9 +378,30 @@ main {
 }
 
 .velox-green {
-  color: #6abf69; /* a nice green shade */
-  text-shadow: 0 0 8px rgba(106, 191, 105, 0.7); /* subtle green glow */
+background: linear-gradient(
+    90deg,
+    #4e6a9c,
+    #4e70aa,
+    #89bfff,
+    #7396d3,
+    #4e6a9c 
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-size: 300% 100%;
+  animation: shine 3s linear infinite;
 }
+
+@keyframes shine {
+  0% {
+    background-position: 0% 0;
+  }
+  100% {
+    background-position: 300% 0;
+  }
+}
+
+
 
 .toggleProfile {
   margin-left: 10px;
