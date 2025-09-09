@@ -1005,6 +1005,45 @@ li button:hover:not(:disabled) {
   transition: background 0.3s ease 0.1s;
 }
 
+.Velox_Connect {
+  position: fixed;               /* stay fixed on screen */
+  top: 80px;                     /* distance from top */
+  right: 20px;                   /* distance from right */
+  display: flex;                 /* horizontal layout */
+  align-items: center;           /* vertically center text with image */
+  gap: 10px;                     /* space between image and text */
+  padding: 10px;
+  background-color: #22222277;        /* dark background for visibility */
+  border-radius: 8px;
+  text-decoration: none;         /* remove underline */
+  color: rgb(232, 226, 226);
+  z-index: 1000;      
+  transition: background 0.3s ease 0.1s;
+}
+
+.shine {
+  font-weight: bold;
+  color: #fff;
+  background: linear-gradient(90deg, #5c2323, #7e4848, #490f0f, #572525);
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shine 2s linear infinite;
+    text-shadow:
+    0 0 5px #b30000,
+    0 0 40px #802424;
+}
+
+.Velox_Connect:hover{
+ background-color: #07070782;   
+}
+
+
+@keyframes shine {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 100% 50%; }
+}
+
 .Velox_Shop:hover{
   background-color: #07070782;    
 }
