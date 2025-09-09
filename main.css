@@ -1017,11 +1017,8 @@ li button:hover:not(:disabled) {
 }
 
 .Velox_Shop img {
-  width: 25px;               /* keep your size */
+  width: 25px;
   height: 25px;
   object-fit: contain;
   transition: box-shadow 0.3s;
-
-  flex-shrink: 0;            /* prevent image from stretching or shrinking */
-  display: block;            /* prevent inline behavior from affecting layout */
 }
