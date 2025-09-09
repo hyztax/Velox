@@ -378,13 +378,15 @@ main {
 }
 
 .velox-green {
+  font-size:70px;
 background: linear-gradient(
     90deg,
-    #4e6a9c,
-    #4e70aa,
+    #4b6188,
     #89bfff,
-    #7396d3,
-    #4e6a9c 
+    #89bfff,
+    #5571a0,
+    #89bfff 
+   
   );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
