@@ -7,6 +7,16 @@
   <title>Velox | accounts</title>
   <link rel="stylesheet" href="style.css" />
   
+  <style>
+    #starfield {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+    }
+</style>
 
   <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
@@ -17,6 +27,7 @@
   <script src="java.js" defer></script>
 </head>
 <body>
+  
   <main class="welcome-screen">
   
 
@@ -49,7 +60,13 @@
         Already have an account? <a href="signin.html">Sign In</a>
       </p>
     </footer>
-
   </main>
+
+
+  <canvas id="starfield"></canvas>
+
+  
+  <script src="stars.js"></script>
+
 </body>
 </html>

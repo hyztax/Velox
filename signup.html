@@ -14,7 +14,17 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-analytics-compat.js"></script>
 
+<style>
 
+  #starfield {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+  }
+</style>
 
 </head>
 <body>
@@ -44,5 +54,8 @@
 
   <!-- Your signup.js script must come AFTER Firebase scripts -->
   <script src="signup.js"></script>
+  
+  <canvas id="starfield"></canvas>
+  <script src="stars.js"></script>
 </body>
 </html>

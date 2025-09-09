@@ -249,7 +249,7 @@ main {
 
 #usersList ul li {
   padding: 6px 0;
-  border-bottom: 1px solid rgba(255 255 255 / 0.1);
+  border-bottom: 1px solid rgba(153, 26, 26, 0.1);
   font-size: 16px;
   color: #ddd;
 }
@@ -330,8 +330,8 @@ main {
 
 
 #inviteBtn:hover {
-  background: rgba(255 255 255 / 0.3);
-  box-shadow: 0 10px 48px rgba(255 255 255 / 0.5);
+  background: rgba(24, 23, 23, 0.158);
+  box-shadow: 0 10px 48px rgba(32, 10, 10, 0.5);
 }
 
 /* Responsive font sizes */
@@ -417,10 +417,10 @@ main {
 #usersList {
   max-width: 400px;
   margin: 20px auto;
-  background: #1e1e1e;
+  background: #1309094d;
   border-radius: 8px;
   padding: 15px 20px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  box-shadow: 0 4px 10px rgba(59, 59, 59, 0.3);
   color: #eee;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
@@ -767,7 +767,7 @@ main {
 }
 
 section {
-  background: #222;
+  background: #16141431;
   padding: 15px;
   border-radius: 8px;
   flex: 1 1 320px; /* grow, shrink, basis min width */
