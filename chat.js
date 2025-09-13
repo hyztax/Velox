@@ -39,7 +39,7 @@ let chatId = null;
 let chatUnsubscribe = null;
 let selectedUserUnsubscribe = null;
 let profileUnsubscribe = null;
-let friendListeners = {}; // track friends list real-time listeners
+let friendListeners = {};
 
 // --- Helper Functions ---
 const escapeHtml = (text) =>
@@ -48,6 +48,18 @@ const escapeHtml = (text) =>
       .replace(/>/g, "&gt;")
       .replace(/"/g, "&quot;")
       .replace(/'/g, "&#039;");
+
+function setAvatar(element, avatarUrl, colorFallback) {
+  if (avatarUrl) {
+    element.style.backgroundImage = `url(${escapeHtml(avatarUrl)})`;
+    element.style.backgroundColor = "";
+    element.style.backgroundSize = "cover";
+    element.style.backgroundPosition = "center";
+  } else {
+    element.style.backgroundImage = "none";
+    element.style.backgroundColor = colorFallback || "#000000";
+  }
+}
 
 function showSection(name) {
   Object.values(sections).forEach(s => s.classList.remove("active"));
@@ -59,20 +71,18 @@ function showSection(name) {
     name === "chat" ? `${selectedUser?.displayName || ""}` : "";
 }
 
-// --- Load Friends (real-time) ---
+// --- Load Friends ---
 function loadFriends() {
   if (!currentUser || !currentUser.uid) return;
 
-  // Remove old listeners
   Object.values(friendListeners).forEach(unsub => unsub());
   friendListeners = {};
+  friendsListEl.innerHTML = "";
 
   db.collection("friends").doc(currentUser.uid).collection("list")
     .onSnapshot(snapshot => {
       snapshot.docs.forEach(doc => {
         const friendUid = doc.id;
-
-        // Check if element already exists
         let friendEl = document.querySelector(`.friend-item[data-uid="${friendUid}"]`);
         let avatarDiv, nameSpan;
 
@@ -91,7 +101,6 @@ function loadFriends() {
 
           friendsListEl.appendChild(friendEl);
 
-          // Open profile on click
           friendEl.addEventListener("click", () => openProfile(friendUid));
           friendEl.addEventListener("keydown", e => {
             if (e.key === "Enter" || e.key === " ") {
@@ -104,76 +113,45 @@ function loadFriends() {
           nameSpan = friendEl.querySelector("span");
         }
 
-        // Attach real-time listener for friend profile
         if (!friendListeners[friendUid]) {
-          const unsub = db.collection("users").doc(friendUid)
+          friendListeners[friendUid] = db.collection("users").doc(friendUid)
             .onSnapshot(userDoc => {
               const userData = userDoc.data() || {};
-
-              // Avatar or profileColor
-              if (userData.avatarUrl) {
-                avatarDiv.style.backgroundImage = `url(${escapeHtml(userData.avatarUrl)})`;
-                avatarDiv.style.backgroundColor = "";
-              } else {
-                avatarDiv.style.backgroundImage = "none";
-                avatarDiv.style.backgroundColor = userData.profileColor || "#555";
-              }
-
-              // Name update
               nameSpan.textContent = userData.displayName || "Unknown";
-            });
+              setAvatar(avatarDiv, userData.avatarUrl, userData.profileColor);
 
-          friendListeners[friendUid] = unsub;
+              if (selectedUser && selectedUser.uid === friendUid) {
+                selectedUser = { uid: friendUid, ...userData };
+                profileNameEl.textContent = userData.displayName || "No Name";
+                profileBioEl.textContent = userData.bio || "";
+                setAvatar(profileAvatarEl, userData.avatarUrl, userData.profileColor || "#bbb");
+                setAvatar(chatHeader, userData.avatarUrl, userData.profileColor || "#bbb");
+              }
+            });
         }
       });
     });
 }
 
-
-// --- Open Profile (real-time, updates color dynamically) ---
+// --- Open Profile ---
 function openProfile(uid) {
-  // Unsubscribe previous profile listener
   if (profileUnsubscribe) profileUnsubscribe();
 
   const userDocRef = db.collection("users").doc(uid);
-
-  // Persistent listener for profile updates
   profileUnsubscribe = userDocRef.onSnapshot(doc => {
     if (!doc.exists) return alert("User not found");
 
     selectedUser = { uid, ...doc.data() };
-
-    // Update profile section text
     profileNameEl.textContent = selectedUser.displayName || "No Name";
     profileBioEl.textContent = selectedUser.bio || "";
-
-    // Update avatar or profile color dynamically
-    if (selectedUser.avatarUrl) {
-      profileAvatarEl.style.backgroundImage = `url(${escapeHtml(selectedUser.avatarUrl)})`;
-      profileAvatarEl.style.backgroundColor = "";
-    } else {
-      profileAvatarEl.style.backgroundImage = "none";
-      profileAvatarEl.style.backgroundColor = selectedUser.profileColor || "#bbb";
-    }
-
-    // Update chat header if chatting with this user
-    if (chatId && chatId.includes(uid)) {
-      chatHeader.style.backgroundImage = selectedUser.avatarUrl
-        ? `url(${escapeHtml(selectedUser.avatarUrl)})`
-        : "none";
-      chatHeader.style.backgroundColor = selectedUser.avatarUrl
-        ? ""
-        : selectedUser.profileColor || "#bbb";
-    }
+    setAvatar(profileAvatarEl, selectedUser.avatarUrl, selectedUser.profileColor || "#bbb");
+    setAvatar(chatHeader, selectedUser.avatarUrl, selectedUser.profileColor || "#bbb");
 
     showSection("profile");
   });
 }
 
-
-
-
-// --- Start Chat (real-time) ---
+// --- Start Chat ---
 function startChat(uid) {
   if (!currentUser) return alert("Not logged in");
 
@@ -181,7 +159,6 @@ function startChat(uid) {
   chatMessages.innerHTML = "";
   showSection("chat");
 
-  // Unsubscribe previous listener
   if (selectedUserUnsubscribe) selectedUserUnsubscribe();
 
   selectedUserUnsubscribe = db.collection("users").doc(uid)
@@ -189,29 +166,15 @@ function startChat(uid) {
       if (!doc.exists) return;
 
       selectedUser = { uid, ...doc.data() };
-
       chatHeader.textContent = selectedUser.displayName || "Unknown";
-
-      if (selectedUser.avatarUrl) {
-        chatHeader.style.backgroundImage = `url(${escapeHtml(selectedUser.avatarUrl)})`;
-        chatHeader.style.backgroundColor = "";
-      } else {
-        chatHeader.style.backgroundImage = "none";
-        chatHeader.style.backgroundColor = selectedUser.profileColor || "#bbb";
-      }
+      setAvatar(chatHeader, selectedUser.avatarUrl, selectedUser.profileColor || "#bbb");
     });
 
   messageInput.value = "";
   sendBtn.disabled = true;
-  messageInput.oninput = () => {
-    sendBtn.disabled = messageInput.value.trim() === "";
-  };
+  messageInput.oninput = () => sendBtn.disabled = messageInput.value.trim() === "";
 
-  if (chatUnsubscribe) {
-    chatUnsubscribe();
-    chatUnsubscribe = null;
-  }
-
+  if (chatUnsubscribe) chatUnsubscribe();
   chatUnsubscribe = db.collection("chats").doc(chatId).collection("messages")
     .orderBy("timestamp")
     .onSnapshot(snapshot => {
@@ -249,29 +212,18 @@ function startChat(uid) {
 }
 
 // --- Profile Buttons ---
-backToFriendsBtn.onclick = () => {
-  selectedUser = null;
-  showSection("friends");
-};
-
-messageUserBtn.onclick = () => {
-  if (selectedUser) startChat(selectedUser.uid);
-};
+backToFriendsBtn.onclick = () => { selectedUser = null; showSection("friends"); };
+messageUserBtn.onclick = () => { if (selectedUser) startChat(selectedUser.uid); };
 
 // --- Auth Listener ---
 auth.onAuthStateChanged(async user => {
   if (user) {
     try {
       const userDoc = await db.collection("users").doc(user.uid).get();
-      if (userDoc.exists) {
-        currentUser = { uid: user.uid, ...userDoc.data() };
-      } else {
-        currentUser = { uid: user.uid, displayName: user.email || "No Name" };
-      }
+      currentUser = userDoc.exists ? { uid: user.uid, ...userDoc.data() } : { uid: user.uid, displayName: user.email || "No Name" };
     } catch {
       currentUser = { uid: user.uid, displayName: user.email || "No Name" };
     }
-
     showSection("friends");
     loadFriends();
   } else {
@@ -279,11 +231,7 @@ auth.onAuthStateChanged(async user => {
     selectedUser = null;
     showSection("friends");
     friendsListEl.innerHTML = 'Please <a href="signin.html" style="color:red; text-decoration: underline;">log in</a> to see your friends.';
-
-    if (chatUnsubscribe) {
-      chatUnsubscribe();
-      chatUnsubscribe = null;
-    }
+    if (chatUnsubscribe) chatUnsubscribe();
   }
 });
 
@@ -297,7 +245,6 @@ async function addFriend(currentUserUid, friendUid) {
 async function cleanFriendList(uid) {
   const friendsRef = db.collection("friends").doc(uid).collection("list");
   const snapshot = await friendsRef.get();
-
   for (const doc of snapshot.docs) {
     const friendUid = doc.id;
     const userDoc = await db.collection("users").doc(friendUid).get();
@@ -312,18 +259,8 @@ async function cleanFriendList(uid) {
 document.addEventListener("click", function(event) {
   const chatColumn = document.getElementById("chatColumn");
   if (!chatColumn) return;
-
   const rect = chatColumn.getBoundingClientRect();
-  const x = event.clientX;
-  const y = event.clientY;
-
-  const insideExtendedArea =
-    x >= rect.left - 50 &&
-    x <= rect.right + 50 &&
-    y >= rect.top - 50 &&
-    y <= rect.bottom + 50;
-
-  if (!insideExtendedArea) {
-    chatColumn.style.display = "none";
-  }
+  const x = event.clientX, y = event.clientY;
+  const insideExtendedArea = x >= rect.left - 50 && x <= rect.right + 50 && y >= rect.top - 50 && y <= rect.bottom + 50;
+  if (!insideExtendedArea) chatColumn.style.display = "none";
 });
