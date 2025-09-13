@@ -1,266 +1,226 @@
 // --- Firebase Setup ---
 const firebaseConfig = {
-  apiKey: "AIzaSyBXb9OhOEOo4gXNIv2WcCNmXfnm1x7R2EM",
-  authDomain: "velox-c39ad.firebaseapp.com",
-  projectId: "velox-c39ad",
-  storageBucket: "velox-c39ad.appspot.com",
-  messagingSenderId: "404832661601",
-  appId: "1:404832661601:web:9ad221c8bfb459410bba20",
-  measurementId: "G-X8W755KRF6"
+    apiKey: "AIzaSyBXb9OhOEOo4gXNIv2WcCNmXfnm1x7R2EM",
+    authDomain: "velox-c39ad.firebaseapp.com",
+    projectId: "velox-c39ad",
+    storageBucket: "velox-c39ad.appspot.com",
+    messagingSenderId: "404832601",
+    appId: "1:404832601:web:9ad221c8bfb459410bba20",
+    measurementId: "G-X8W755KRF6"
 };
 
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-// --- DOM References ---
-const sections = {
-  friends: document.getElementById("friendsSection"),
-  profile: document.getElementById("profileSection"),
-  chat: document.getElementById("chatSection"),
-};
-const appHeader = document.getElementById("appHeader");
-
-const friendsListEl = document.getElementById("friendsList");
-const profileAvatarEl = document.getElementById("profileAvatar");
-const profileNameEl = document.getElementById("profileName");
-const profileBioEl = document.getElementById("profileBio");
-const backToFriendsBtn = document.getElementById("backToFriendsBtn");
-const messageUserBtn = document.getElementById("messageUserBtn");
-
-const chatHeader = document.getElementById("chatHeader");
-const chatMessages = document.getElementById("chatMessages");
-const messageInput = document.getElementById("messageInput");
-const sendBtn = document.getElementById("sendBtn");
+// --- DOM Elements ---
+const friendsListEl = document.getElementById('friendsList');
+const profileAvatarEl = document.getElementById('profileAvatar');
+const profileNameEl = document.getElementById('profileName');
+const profileBioEl = document.getElementById('profileBio');
+const backToFriendsBtn = document.getElementById('backToFriendsBtn');
+const messageUserBtn = document.getElementById('messageUserBtn');
+const chatHeader = document.getElementById('chatHeader');
+const chatMessages = document.getElementById('chatMessages');
+const messageInput = document.getElementById('messageInput');
+const sendBtn = document.getElementById('sendBtn');
+const searchFriends = document.getElementById('searchFriends');
+const fakeProfile = document.getElementById('fakeProfile');
+const welcomeMsg = document.getElementById('welcomeMsg');
 
 let currentUser = null;
 let selectedUser = null;
 let chatId = null;
 let chatUnsubscribe = null;
-let selectedUserUnsubscribe = null;
-let profileUnsubscribe = null;
-let friendListeners = {};
 
-// --- Helper Functions ---
-const escapeHtml = (text) =>
-  text.replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#039;");
-
-function setAvatar(element, avatarUrl, colorFallback) {
-  if (avatarUrl) {
-    element.style.backgroundImage = `url(${escapeHtml(avatarUrl)})`;
-    element.style.backgroundColor = "";
-    element.style.backgroundSize = "cover";
-    element.style.backgroundPosition = "center";
-  } else {
-    element.style.backgroundImage = "none";
-    element.style.backgroundColor = colorFallback || "#000000";
-  }
+// --- Helpers ---
+function setAvatar(el, avatarUrl, color) {
+    if (!el) return;
+    if (avatarUrl) {
+        el.style.backgroundImage = `url(${avatarUrl})`;
+        el.style.backgroundSize = 'cover';
+        el.style.backgroundPosition = 'center';
+        el.textContent = '';
+    } else {
+        el.style.backgroundImage = '';
+        el.style.backgroundColor = color || '#000';
+        el.textContent = '';
+    }
 }
 
 function showSection(name) {
-  Object.values(sections).forEach(s => s.classList.remove("active"));
-  if (sections[name]) sections[name].classList.add("active");
+    document.getElementById('friendsSection').style.display = name === 'friends' ? 'block' : 'none';
+    document.getElementById('profileSection').style.display = name === 'profile' ? 'flex' : 'none';
+    document.getElementById('chatSection').style.display = name === 'chat' ? 'flex' : 'none';
 
-  appHeader.textContent =
-    name === "friends" ? "Admin profile" :
-    name === "profile" ? "Profile" :
-    name === "chat" ? `${selectedUser?.displayName || ""}` : "";
+    if (name === 'profile' && selectedUser && selectedUser.uid !== 'adminFake') {
+        fakeProfile.style.display = 'none';
+        welcomeMsg.style.display = 'none';
+    } else if (name === 'friends') {
+        fakeProfile.style.display = 'block';
+        welcomeMsg.style.display = 'block';
+    }
 }
 
-// --- Load Friends ---
-function loadFriends() {
-  if (!currentUser || !currentUser.uid) return;
+function scrollChatToBottom() {
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
 
-  Object.values(friendListeners).forEach(unsub => unsub());
-  friendListeners = {};
-  friendsListEl.innerHTML = "";
+// --- Listen to friends ---
+function listenToFriends() {
+    if (!currentUser) return;
+    db.collection('friends').doc(currentUser.uid).collection('list')
+        .onSnapshot(async snapshot => {
+            friendsListEl.innerHTML = '';
 
-  db.collection("friends").doc(currentUser.uid).collection("list")
-    .onSnapshot(snapshot => {
-      snapshot.docs.forEach(doc => {
-        const friendUid = doc.id;
-        let friendEl = document.querySelector(`.friend-item[data-uid="${friendUid}"]`);
-        let avatarDiv, nameSpan;
+            // Add admin fake
+           const adminLi = document.createElement('li');
+            adminLi.textContent = 'Admin';
+            adminLi.style.display = 'none'; // hide from view
+            friendsListEl.appendChild(adminLi);
 
-        if (!friendEl) {
-          friendEl = document.createElement("div");
-          friendEl.classList.add("friend-item");
-          friendEl.dataset.uid = friendUid;
-          friendEl.tabIndex = 0;
 
-          avatarDiv = document.createElement("div");
-          avatarDiv.classList.add("friend-avatar");
-          friendEl.appendChild(avatarDiv);
-
-          nameSpan = document.createElement("span");
-          friendEl.appendChild(nameSpan);
-
-          friendsListEl.appendChild(friendEl);
-
-          friendEl.addEventListener("click", () => openProfile(friendUid));
-          friendEl.addEventListener("keydown", e => {
-            if (e.key === "Enter" || e.key === " ") {
-              e.preventDefault();
-              openProfile(friendUid);
+            for (const doc of snapshot.docs) {
+                const friendUid = doc.id;
+                const profileDoc = await db.collection('profiles').doc(friendUid).get();
+                const data = profileDoc.data() || {};
+                const li = document.createElement('li');
+                li.style.cursor = 'pointer';
+                li.textContent = data.displayName || 'Unknown';
+                li.onclick = () => openProfile(friendUid);
+                friendsListEl.appendChild(li);
             }
-          });
-        } else {
-          avatarDiv = friendEl.querySelector(".friend-avatar");
-          nameSpan = friendEl.querySelector("span");
-        }
-
-        if (!friendListeners[friendUid]) {
-          friendListeners[friendUid] = db.collection("users").doc(friendUid)
-            .onSnapshot(userDoc => {
-              const userData = userDoc.data() || {};
-              nameSpan.textContent = userData.displayName || "Unknown";
-              setAvatar(avatarDiv, userData.avatarUrl, userData.profileColor);
-
-              if (selectedUser && selectedUser.uid === friendUid) {
-                selectedUser = { uid: friendUid, ...userData };
-                profileNameEl.textContent = userData.displayName || "No Name";
-                profileBioEl.textContent = userData.bio || "";
-                setAvatar(profileAvatarEl, userData.avatarUrl, userData.profileColor || "#bbb");
-                setAvatar(chatHeader, userData.avatarUrl, userData.profileColor || "#bbb");
-              }
-            });
-        }
-      });
-    });
+        });
 }
 
 // --- Open Profile ---
 function openProfile(uid) {
-  if (profileUnsubscribe) profileUnsubscribe();
+    if (uid === 'adminFake') {
+        selectedUser = { uid: 'adminFake' };
+        profileNameEl.textContent = 'Admin';
+        profileBioEl.textContent = 'Welcome to Velox! This is the admin profile.';
+        setAvatar(profileAvatarEl, 'velox.image/Velox_logo.png', '#000');
+        showSection('profile');
+        fakeProfile.style.display = 'block';
+        welcomeMsg.style.display = 'block';
+        return;
+    }
 
-  const userDocRef = db.collection("users").doc(uid);
-  profileUnsubscribe = userDocRef.onSnapshot(doc => {
-    if (!doc.exists) return alert("User not found");
+    fakeProfile.style.display = 'none';
+    welcomeMsg.style.display = 'none';
 
-    selectedUser = { uid, ...doc.data() };
-    profileNameEl.textContent = selectedUser.displayName || "No Name";
-    profileBioEl.textContent = selectedUser.bio || "";
-    setAvatar(profileAvatarEl, selectedUser.avatarUrl, selectedUser.profileColor || "#bbb");
-    setAvatar(chatHeader, selectedUser.avatarUrl, selectedUser.profileColor || "#bbb");
-
-    showSection("profile");
-  });
+    db.collection('profiles').doc(uid).get().then(doc => {
+        const data = doc.data() || {};
+        selectedUser = { uid, ...data };
+        profileNameEl.textContent = data.displayName || 'Unknown';
+        profileBioEl.textContent = data.bio || '';
+        setAvatar(profileAvatarEl, data.avatarUrl, data.profileColor || '#000');
+        showSection('profile');
+    });
 }
 
-// --- Start Chat ---
-function startChat(uid) {
-  if (!currentUser) return alert("Not logged in");
+// --- Start chat ---
+async function startChat(uid) {
+    if (!currentUser || !uid || uid === 'adminFake') return alert("Cannot chat with this user.");
 
-  chatId = [currentUser.uid, uid].sort().join("_");
-  chatMessages.innerHTML = "";
-  showSection("chat");
+    const profileDoc = await db.collection('profiles').doc(uid).get();
+    selectedUser = { uid, ...profileDoc.data() };
+    chatId = [currentUser.uid, uid].sort().join('_');
 
-  if (selectedUserUnsubscribe) selectedUserUnsubscribe();
+    chatMessages.innerHTML = '';
+    chatHeader.textContent = selectedUser.displayName || 'Unknown';
 
-  selectedUserUnsubscribe = db.collection("users").doc(uid)
-    .onSnapshot(doc => {
-      if (!doc.exists) return;
+    if (chatUnsubscribe) chatUnsubscribe();
 
-      selectedUser = { uid, ...doc.data() };
-      chatHeader.textContent = selectedUser.displayName || "Unknown";
-      setAvatar(chatHeader, selectedUser.avatarUrl, selectedUser.profileColor || "#bbb");
-    });
+    // Listen to messages
+    chatUnsubscribe = db.collection('chats').doc(chatId).collection('messages')
+        .orderBy('timestamp')
+        .onSnapshot(async snapshot => {
+            snapshot.docChanges().forEach(async change => {
+                if (change.type === 'added') {
+                    const msg = change.doc.data();
+                    let senderName = 'Unknown';
 
-  messageInput.value = "";
-  sendBtn.disabled = true;
-  messageInput.oninput = () => sendBtn.disabled = messageInput.value.trim() === "";
+                    if (msg.sender === currentUser.uid) {
+                        senderName = 'You';
+                    } else if (msg.sender === selectedUser.uid) {
+                        senderName = selectedUser.displayName || 'Unknown';
+                    } else {
+                        // Fetch unknown sender
+                        const unknownProfile = await db.collection('profiles').doc(msg.sender).get();
+                        senderName = unknownProfile.data()?.displayName || msg.sender;
+                    }
 
-  if (chatUnsubscribe) chatUnsubscribe();
-  chatUnsubscribe = db.collection("chats").doc(chatId).collection("messages")
-    .orderBy("timestamp")
-    .onSnapshot(snapshot => {
-      chatMessages.innerHTML = "";
-      snapshot.forEach(doc => {
-        const msg = doc.data();
-        const div = document.createElement("div");
-        div.className = `message ${msg.sender === currentUser.uid ? "sent" : "received"}`;
-        const p = document.createElement("p");
-        p.textContent = msg.text;
-        div.appendChild(p);
-        chatMessages.appendChild(div);
-      });
-      chatMessages.scrollTop = chatMessages.scrollHeight;
-    });
+                    const div = document.createElement('div');
+                    div.textContent = `${senderName}: ${msg.text}`;
+                    div.classList.add('message', msg.sender === currentUser.uid ? 'sent' : 'received');
+                    chatMessages.appendChild(div);
+                    scrollChatToBottom();
+                }
+            });
+        });
 
-  sendBtn.onclick = () => {
+    showSection('chat');
+}
+
+// --- Send message ---
+async function sendMessage(e) {
+    if (e) e.preventDefault();
+    if (!chatId || !currentUser) return;
+
     const text = messageInput.value.trim();
     if (!text) return;
 
-    sendBtn.disabled = true;
-    db.collection("chats").doc(chatId).collection("messages").add({
-      sender: currentUser.uid,
-      text,
-      timestamp: firebase.firestore.FieldValue.serverTimestamp()
-    }).then(() => {
-      messageInput.value = "";
-      sendBtn.disabled = true;
-    }).catch(err => {
-      console.error("Error sending message:", err);
-      alert("Failed to send message.");
-      sendBtn.disabled = false;
-    });
-  };
+    try {
+        await db.collection('chats').doc(chatId).collection('messages').add({
+            sender: currentUser.uid,
+            text,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        messageInput.value = '';
+    } catch (err) {
+        console.error("Error sending message:", err);
+        alert("Failed to send message. Check console.");
+    }
 }
 
-// --- Profile Buttons ---
-backToFriendsBtn.onclick = () => { selectedUser = null; showSection("friends"); };
-messageUserBtn.onclick = () => { if (selectedUser) startChat(selectedUser.uid); };
+// --- Event listeners ---
+sendBtn.addEventListener('click', sendMessage);
 
-// --- Auth Listener ---
-auth.onAuthStateChanged(async user => {
-  if (user) {
-    try {
-      const userDoc = await db.collection("users").doc(user.uid).get();
-      currentUser = userDoc.exists ? { uid: user.uid, ...userDoc.data() } : { uid: user.uid, displayName: user.email || "No Name" };
-    } catch {
-      currentUser = { uid: user.uid, displayName: user.email || "No Name" };
+messageInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
     }
-    showSection("friends");
-    loadFriends();
-  } else {
-    currentUser = null;
-    selectedUser = null;
-    showSection("friends");
-    friendsListEl.innerHTML = 'Please <a href="signin.html" style="color:red; text-decoration: underline;">log in</a> to see your friends.';
-    if (chatUnsubscribe) chatUnsubscribe();
-  }
 });
 
-// --- Friend Management ---
-async function addFriend(currentUserUid, friendUid) {
-  const timestamp = firebase.firestore.FieldValue.serverTimestamp();
-  await db.collection("friends").doc(currentUserUid).collection("list").doc(friendUid).set({ addedAt: timestamp });
-  await db.collection("friends").doc(friendUid).collection("list").doc(currentUserUid).set({ addedAt: timestamp });
-}
+// Enable send button only when typing
+messageInput.addEventListener('input', () => {
+    sendBtn.disabled = messageInput.value.trim() === '';
+});
 
-async function cleanFriendList(uid) {
-  const friendsRef = db.collection("friends").doc(uid).collection("list");
-  const snapshot = await friendsRef.get();
-  for (const doc of snapshot.docs) {
-    const friendUid = doc.id;
-    const userDoc = await db.collection("users").doc(friendUid).get();
-    if (!userDoc.exists) {
-      console.log(`Removing friend UID ${friendUid} from user ${uid} friend list`);
-      await friendsRef.doc(friendUid).delete();
-    }
-  }
-}
+// --- Buttons ---
+backToFriendsBtn.onclick = () => { selectedUser = null; showSection('friends'); };
+messageUserBtn.onclick = () => { if (selectedUser) startChat(selectedUser.uid); };
 
-// --- Click outside chat to hide ---
-document.addEventListener("click", function(event) {
-  const chatColumn = document.getElementById("chatColumn");
-  if (!chatColumn) return;
-  const rect = chatColumn.getBoundingClientRect();
-  const x = event.clientX, y = event.clientY;
-  const insideExtendedArea = x >= rect.left - 50 && x <= rect.right + 50 && y >= rect.top - 50 && y <= rect.bottom + 50;
-  if (!insideExtendedArea) chatColumn.style.display = "none";
+// --- Search friends ---
+searchFriends.addEventListener('input', () => {
+    const term = searchFriends.value.toLowerCase();
+    friendsListEl.querySelectorAll('li').forEach(li => {
+        li.style.display = li.textContent.toLowerCase().includes(term) ? '' : 'none';
+    });
+});
+
+// --- Auth Listener ---
+auth.onAuthStateChanged(user => {
+    if (!user) return location.href = 'signin.html';
+    currentUser = user;
+    listenToFriends();
+    showSection('friends');
+});
+
+const goBackBtn = document.getElementById('goBackBtn');
+
+goBackBtn.addEventListener('click', () => {
+    window.location.href = 'chat.html'; // redirect to chat.html
 });

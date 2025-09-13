@@ -11,84 +11,55 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
 
   <style>
-    #starfield {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        z-index: -1;
-    }
-</style>
-
+    #starfield { position: fixed; top:0; left:0; width:100%; height:100%; z-index:-1; }
+  </style>
 </head>
 <body>
-
-
-  <div id="app" role="main" aria-label="Velox chat application">
-    <section id="friendsSection" tabindex="0" aria-label="Friends list">
+  <div id="app">
+    <!-- Friends List Section -->
+    <section id="friendsSection">
       <h2 style="color: white;">
-        Friends | <a href="main.html" style="color: white; text-decoration: underline;">Go back</a>
+        Friends | <a href="main.html" style="color:white; text-decoration: underline;">Go back</a>
       </h2>
-      
-      <div id="friendsList" role="list" aria-live="polite" aria-relevant="additions"></div>
+      <input id="searchFriends" placeholder="Search friends..." />
+      <div id="friendsList"></div>
     </section>
-    
-    <header id="appHeader" role="banner">Admin</header>
-    <section id="profileSection" aria-live="polite" aria-atomic="true" aria-label="User profile">
-      
-      <div id="profileAvatar" class="profile-avatar" role="img" aria-label="User avatar"></div>
+
+    <!-- Profile Section -->
+    <section id="profileSection">
+      <div id="profileAvatar" class="profile-avatar"></div>
       <h3 id="profileName" class="profile-name"></h3>
       <p id="profileBio" class="profile-bio"></p>
-
       <div>
-        <button id="backToFriendsBtn" class="btn" type="button">Back to Friends</button>
-        <button id="messageUserBtn" class="btn" type="button">Message User</button>
+        <button id="backToFriendsBtn" type="button">Back to Friends</button>
+        <button id="messageUserBtn" type="button">Message User</button>
       </div>
     </section>
-    
 
-<div class="chat_column" id="chatColumn">
-  <!-- Profile section -->
-  <div id="fakeProfile">
-    <img 
-      src="velox.image/Velox_logo.png" 
-      alt="fake"
-    />
-    <h2>Admin</h2>
-    <p>
-      Welcome to Velox! We hope you enjoy your time here. Feel free to invite your friends!
-    </p>
-  </div>
-
-  <!-- Message section -->
-  <div class="fake_msg" id="welcomeMsg">This is a admin profile, you cannot reply to this.</div>
-</div>
-
-
-
-
-
-    
-    <section id="chatSection" aria-live="polite" aria-atomic="false" aria-label="Chat messages">
+    <!-- Chat Section -->
+    <section id="chatSection">
+       <button id="goBackBtn">← Go back</button>
       <header id="chatHeader"></header>
-      <div id="chatMessages" tabindex="0" role="log" aria-live="polite" aria-relevant="additions"></div>
+      <div id="chatMessages"></div>
+      <form id="chatInputArea" onsubmit="return false;">
+        <input id="messageInput" type="text" placeholder="Enter message..." />
+        <button id="sendBtn" type="submit" disabled>↑</button>
+      </form>
     </section>
-  
-    <form id="chatInputArea" onsubmit="return false;" aria-label="Message input area">
-      <input id="messageInput" name="message" type="text" autocomplete="off" placeholder="Enter message..." aria-label="Message input" />
-      <button id="sendBtn" type="submit" disabled>Send</button>
-    </form>
+
+    <!-- Fake admin profile -->
+    <div class="chat_column" id="chatColumn">
+      <div id="fakeProfile">
+        <img src="velox.image/Velox_logo.png" alt="admin" />
+        <h2>Admin</h2>
+        <p>Welcome to Velox! You cannot reply to this user. Feel free to invite your friends!</p>
+      </div>
+      <div class="fake_msg" id="welcomeMsg">This is an admin profile, you cannot reply to this.</div>
+    </div>
   </div>
 
- 
-    
   <canvas id="starfield"></canvas>
   <script src="stars.js"></script>
-
   <script src="chat.js"></script>
 </body>
 </html>
-
-
-<!-- vet inte wallah -->
