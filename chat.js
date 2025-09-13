@@ -69,82 +69,109 @@ function loadFriends() {
 
   db.collection("friends").doc(currentUser.uid).collection("list")
     .onSnapshot(snapshot => {
-      friendsListEl.innerHTML = "";
-
       snapshot.docs.forEach(doc => {
         const friendUid = doc.id;
 
-        // Create friend element
-        let friendEl = document.createElement("div");
-        friendEl.classList.add("friend-item");
-        friendEl.dataset.uid = friendUid;
-        friendEl.tabIndex = 0;
+        // Check if element already exists
+        let friendEl = document.querySelector(`.friend-item[data-uid="${friendUid}"]`);
+        let avatarDiv, nameSpan;
 
-        const avatarDiv = document.createElement("div");
-        avatarDiv.classList.add("friend-avatar");
-        friendEl.appendChild(avatarDiv);
+        if (!friendEl) {
+          friendEl = document.createElement("div");
+          friendEl.classList.add("friend-item");
+          friendEl.dataset.uid = friendUid;
+          friendEl.tabIndex = 0;
 
-        const nameSpan = document.createElement("span");
-        friendEl.appendChild(nameSpan);
+          avatarDiv = document.createElement("div");
+          avatarDiv.classList.add("friend-avatar");
+          friendEl.appendChild(avatarDiv);
 
-        friendsListEl.appendChild(friendEl);
+          nameSpan = document.createElement("span");
+          friendEl.appendChild(nameSpan);
 
-        // Open profile on click or enter/space
-        friendEl.addEventListener("click", () => openProfile(friendUid));
-        friendEl.addEventListener("keydown", e => {
-          if (e.key === "Enter" || e.key === " ") {
-            e.preventDefault();
-            openProfile(friendUid);
-          }
-        });
+          friendsListEl.appendChild(friendEl);
 
-        // Real-time friend profile listener
-        const unsub = db.collection("users").doc(friendUid)
-          .onSnapshot(userDoc => {
-            const userData = userDoc.data() || {};
-
-            // Update avatar
-            if (userData.avatarUrl) {
-              avatarDiv.style.backgroundImage = `url(${escapeHtml(userData.avatarUrl)})`;
-              avatarDiv.style.backgroundColor = "";
-            } else {
-              avatarDiv.style.backgroundImage = "none";
-              avatarDiv.style.backgroundColor = userData.profileColor || "#555";
+          // Open profile on click
+          friendEl.addEventListener("click", () => openProfile(friendUid));
+          friendEl.addEventListener("keydown", e => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              openProfile(friendUid);
             }
-
-            // Update username
-            nameSpan.textContent = userData.displayName || "Unknown";
           });
+        } else {
+          avatarDiv = friendEl.querySelector(".friend-avatar");
+          nameSpan = friendEl.querySelector("span");
+        }
 
-        friendListeners[friendUid] = unsub;
+        // Attach real-time listener for friend profile
+        if (!friendListeners[friendUid]) {
+          const unsub = db.collection("users").doc(friendUid)
+            .onSnapshot(userDoc => {
+              const userData = userDoc.data() || {};
+
+              // Avatar or profileColor
+              if (userData.avatarUrl) {
+                avatarDiv.style.backgroundImage = `url(${escapeHtml(userData.avatarUrl)})`;
+                avatarDiv.style.backgroundColor = "";
+              } else {
+                avatarDiv.style.backgroundImage = "none";
+                avatarDiv.style.backgroundColor = userData.profileColor || "#555";
+              }
+
+              // Name update
+              nameSpan.textContent = userData.displayName || "Unknown";
+            });
+
+          friendListeners[friendUid] = unsub;
+        }
       });
     });
 }
 
-// --- Open Profile (real-time) ---
+
+// --- Open Profile (real-time, updates color dynamically) ---
 function openProfile(uid) {
   // Unsubscribe previous profile listener
   if (profileUnsubscribe) profileUnsubscribe();
 
-  profileUnsubscribe = db.collection("users").doc(uid)
-    .onSnapshot(doc => {
-      if (!doc.exists) return alert("User not found");
-      selectedUser = { uid, ...doc.data() };
+  const userDocRef = db.collection("users").doc(uid);
 
-      profileNameEl.textContent = selectedUser.displayName || "No Name";
-      profileBioEl.textContent = selectedUser.bio || "";
+  // Persistent listener for profile updates
+  profileUnsubscribe = userDocRef.onSnapshot(doc => {
+    if (!doc.exists) return alert("User not found");
 
-      if (selectedUser.avatarUrl) {
-        profileAvatarEl.style.backgroundImage = `url(${escapeHtml(selectedUser.avatarUrl)})`;
-        profileAvatarEl.style.backgroundColor = "";
-      } else {
-        profileAvatarEl.style.backgroundImage = "none";
-        profileAvatarEl.style.backgroundColor = selectedUser.profileColor || "#bbb";
-      }
+    selectedUser = { uid, ...doc.data() };
 
-      showSection("profile");
-    });
+    // Update profile section text
+    profileNameEl.textContent = selectedUser.displayName || "No Name";
+    profileBioEl.textContent = selectedUser.bio || "";
+
+    // Update avatar or profile color dynamically
+    if (selectedUser.avatarUrl) {
+      profileAvatarEl.style.backgroundImage = `url(${escapeHtml(selectedUser.avatarUrl)})`;
+      profileAvatarEl.style.backgroundColor = "";
+    } else {
+      profileAvatarEl.style.backgroundImage = "none";
+      profileAvatarEl.style.backgroundColor = selectedUser.profileColor || "#bbb";
+    }
+
+    // Update chat header if chatting with this user
+    if (chatId && chatId.includes(uid)) {
+      chatHeader.style.backgroundImage = selectedUser.avatarUrl
+        ? `url(${escapeHtml(selectedUser.avatarUrl)})`
+        : "none";
+      chatHeader.style.backgroundColor = selectedUser.avatarUrl
+        ? ""
+        : selectedUser.profileColor || "#bbb";
+    }
+
+    showSection("profile");
+  });
 }
+
+
+
 
 // --- Start Chat (real-time) ---
 function startChat(uid) {
