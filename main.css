@@ -249,7 +249,7 @@ main {
 
 #usersList ul li {
   padding: 6px 0;
-  border-bottom: 1px solid rgba(153, 26, 26, 0.1);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
   font-size: 16px;
   color: #ddd;
 }

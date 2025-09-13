@@ -35,8 +35,11 @@ const sendBtn = document.getElementById("sendBtn");
 
 let currentUser = null;
 let selectedUser = null;
-let chatUnsubscribe = null;
 let chatId = null;
+let chatUnsubscribe = null;
+let selectedUserUnsubscribe = null;
+let profileUnsubscribe = null;
+let friendListeners = {}; // track friends list real-time listeners
 
 // --- Helper Functions ---
 const escapeHtml = (text) =>
@@ -56,102 +59,75 @@ function showSection(name) {
     name === "chat" ? `${selectedUser?.displayName || ""}` : "";
 }
 
-// --- Load Friends ---
-async function loadFriends() {
-  if (!currentUser || !currentUser.uid) {
-    friendsListEl.textContent = "User not logged in or user ID missing";
-    return;
-  }
+// --- Load Friends (real-time) ---
+function loadFriends() {
+  if (!currentUser || !currentUser.uid) return;
 
-  friendsListEl.textContent = "Loading friends...";
+  // Remove old listeners
+  Object.values(friendListeners).forEach(unsub => unsub());
+  friendListeners = {};
 
-  try {
-    const friendsRef = db.collection("friends").doc(currentUser.uid).collection("list");
-    const snapshot = await friendsRef.get();
+  db.collection("friends").doc(currentUser.uid).collection("list")
+    .onSnapshot(snapshot => {
+      friendsListEl.innerHTML = "";
 
-    if (snapshot.empty) {
-      console.log(`No friends found for user ${currentUser.uid}`);
-      friendsListEl.textContent = "No friends yet.";
-      return;
-    }
+      snapshot.docs.forEach(doc => {
+        const friendUid = doc.id;
 
-    friendsListEl.textContent = "";
+        // Create friend element
+        let friendEl = document.createElement("div");
+        friendEl.classList.add("friend-item");
+        friendEl.dataset.uid = friendUid;
+        friendEl.tabIndex = 0;
 
-    const friendElementsPromises = snapshot.docs.map(async (doc) => {
-      const friendUid = doc.id;
-      console.log(`Loading friend UID: ${friendUid}`);
+        const avatarDiv = document.createElement("div");
+        avatarDiv.classList.add("friend-avatar");
+        friendEl.appendChild(avatarDiv);
 
-      const userDoc = await db.collection("users").doc(friendUid).get();
-      if (!userDoc.exists) {
-        console.warn(`Friend UID ${friendUid} missing in users collection`);
-        return null;
-      }
-      return renderFriendItem(friendUid);
+        const nameSpan = document.createElement("span");
+        friendEl.appendChild(nameSpan);
+
+        friendsListEl.appendChild(friendEl);
+
+        // Open profile on click or enter/space
+        friendEl.addEventListener("click", () => openProfile(friendUid));
+        friendEl.addEventListener("keydown", e => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            openProfile(friendUid);
+          }
+        });
+
+        // Real-time friend profile listener
+        const unsub = db.collection("users").doc(friendUid)
+          .onSnapshot(userDoc => {
+            const userData = userDoc.data() || {};
+
+            // Update avatar
+            if (userData.avatarUrl) {
+              avatarDiv.style.backgroundImage = `url(${escapeHtml(userData.avatarUrl)})`;
+              avatarDiv.style.backgroundColor = "";
+            } else {
+              avatarDiv.style.backgroundImage = "none";
+              avatarDiv.style.backgroundColor = userData.profileColor || "#555";
+            }
+
+            // Update username
+            nameSpan.textContent = userData.displayName || "Unknown";
+          });
+
+        friendListeners[friendUid] = unsub;
+      });
     });
-
-    const friendElements = (await Promise.all(friendElementsPromises)).filter(Boolean);
-
-    if (friendElements.length === 0) {
-      friendsListEl.textContent = "No friends found in users collection.";
-      return;
-    }
-
-    friendElements.forEach(friendEl => friendsListEl.appendChild(friendEl));
-
-  } catch (error) {
-    console.error("Error loading friends:", error);
-    friendsListEl.textContent = `Failed to load friends: ${error.message || error}`;
-  }
 }
 
-
-// --- Render Friend Item ---
-async function renderFriendItem(friendUid) {
-  try {
-    const userDoc = await db.collection("users").doc(friendUid).get();
-    if (!userDoc.exists) return null;
-
-    const userData = userDoc.data();
-
-    const container = document.createElement("div");
-    container.classList.add("friend-item");
-    container.setAttribute("role", "listitem");
-    container.tabIndex = 0;
-
-    const avatar = document.createElement("div");
-    avatar.classList.add("friend-avatar");
-    if (userData.avatarUrl) {
-      avatar.style.backgroundImage = `url(${escapeHtml(userData.avatarUrl)})`;
-      avatar.style.backgroundColor = "";
-    } else {
-      avatar.style.backgroundColor = "#555";
-    }
-    container.appendChild(avatar);
-
-    const nameSpan = document.createElement("span");
-    nameSpan.textContent = userData.displayName || "Unknown";
-    container.appendChild(nameSpan);
-
-    // Open profile on click or keyboard enter/space
-    container.addEventListener("click", () => openProfile(friendUid));
-    container.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        openProfile(friendUid);
-      }
-    });
-
-    return container;
-  } catch (err) {
-    console.error("Error rendering friend:", err);
-    return null;
-  }
-}
-
-// --- Open Profile ---
+// --- Open Profile (real-time) ---
 function openProfile(uid) {
-  db.collection("users").doc(uid).get()
-    .then(doc => {
+  // Unsubscribe previous profile listener
+  if (profileUnsubscribe) profileUnsubscribe();
+
+  profileUnsubscribe = db.collection("users").doc(uid)
+    .onSnapshot(doc => {
       if (!doc.exists) return alert("User not found");
       selectedUser = { uid, ...doc.data() };
 
@@ -163,82 +139,73 @@ function openProfile(uid) {
         profileAvatarEl.style.backgroundColor = "";
       } else {
         profileAvatarEl.style.backgroundImage = "none";
-        profileAvatarEl.style.backgroundColor = "#bbb";
+        profileAvatarEl.style.backgroundColor = selectedUser.profileColor || "#bbb";
       }
 
       showSection("profile");
-    })
-    .catch(err => {
-      console.error(err);
-      alert("Failed to load profile.");
     });
 }
 
-// --- Start Chat ---
+// --- Start Chat (real-time) ---
 function startChat(uid) {
   if (!currentUser) return alert("Not logged in");
 
-  // Create chat ID consistently: sorted UIDs joined with "_"
   chatId = [currentUser.uid, uid].sort().join("_");
-
   chatMessages.innerHTML = "";
   showSection("chat");
 
-  // Load selected user info for chat header
- db.collection("users").doc(uid).get().then(doc => {
-  if (!doc.exists) {
-    selectedUser = { uid, displayName: "Unknown" };
-  } else {
-    selectedUser = { uid, ...doc.data() };
-  }
+  // Unsubscribe previous listener
+  if (selectedUserUnsubscribe) selectedUserUnsubscribe();
 
-  // Remove or comment out this line to prevent header update:
-  // chatHeader.textContent = `${selectedUser.displayName || "Unknown"}`;
-});
+  selectedUserUnsubscribe = db.collection("users").doc(uid)
+    .onSnapshot(doc => {
+      if (!doc.exists) return;
 
+      selectedUser = { uid, ...doc.data() };
+
+      chatHeader.textContent = selectedUser.displayName || "Unknown";
+
+      if (selectedUser.avatarUrl) {
+        chatHeader.style.backgroundImage = `url(${escapeHtml(selectedUser.avatarUrl)})`;
+        chatHeader.style.backgroundColor = "";
+      } else {
+        chatHeader.style.backgroundImage = "none";
+        chatHeader.style.backgroundColor = selectedUser.profileColor || "#bbb";
+      }
+    });
 
   messageInput.value = "";
   sendBtn.disabled = true;
-
   messageInput.oninput = () => {
     sendBtn.disabled = messageInput.value.trim() === "";
   };
 
-  // Unsubscribe previous listener if any to avoid duplicates
   if (chatUnsubscribe) {
     chatUnsubscribe();
     chatUnsubscribe = null;
   }
 
-  // Listen to messages realtime, ordered by timestamp
   chatUnsubscribe = db.collection("chats").doc(chatId).collection("messages")
     .orderBy("timestamp")
     .onSnapshot(snapshot => {
       chatMessages.innerHTML = "";
-
       snapshot.forEach(doc => {
         const msg = doc.data();
-
         const div = document.createElement("div");
         div.className = `message ${msg.sender === currentUser.uid ? "sent" : "received"}`;
-
         const p = document.createElement("p");
         p.textContent = msg.text;
         div.appendChild(p);
-
         chatMessages.appendChild(div);
       });
-
       chatMessages.scrollTop = chatMessages.scrollHeight;
     });
 
-  // Send message handler
   sendBtn.onclick = () => {
     const text = messageInput.value.trim();
     if (!text) return;
 
     sendBtn.disabled = true;
-
     db.collection("chats").doc(chatId).collection("messages").add({
       sender: currentUser.uid,
       text,
@@ -264,10 +231,9 @@ messageUserBtn.onclick = () => {
   if (selectedUser) startChat(selectedUser.uid);
 };
 
-// --- Auth Listener (only one) ---
+// --- Auth Listener ---
 auth.onAuthStateChanged(async user => {
   if (user) {
-    // Try to load user profile from Firestore
     try {
       const userDoc = await db.collection("users").doc(user.uid).get();
       if (userDoc.exists) {
@@ -281,7 +247,6 @@ auth.onAuthStateChanged(async user => {
 
     showSection("friends");
     loadFriends();
-
   } else {
     currentUser = null;
     selectedUser = null;
@@ -295,13 +260,10 @@ auth.onAuthStateChanged(async user => {
   }
 });
 
+// --- Friend Management ---
 async function addFriend(currentUserUid, friendUid) {
   const timestamp = firebase.firestore.FieldValue.serverTimestamp();
-
-  // Add friend to your list
   await db.collection("friends").doc(currentUserUid).collection("list").doc(friendUid).set({ addedAt: timestamp });
-
-  // Add yourself to their friend list
   await db.collection("friends").doc(friendUid).collection("list").doc(currentUserUid).set({ addedAt: timestamp });
 }
 
@@ -319,6 +281,7 @@ async function cleanFriendList(uid) {
   }
 }
 
+// --- Click outside chat to hide ---
 document.addEventListener("click", function(event) {
   const chatColumn = document.getElementById("chatColumn");
   if (!chatColumn) return;
@@ -327,7 +290,6 @@ document.addEventListener("click", function(event) {
   const x = event.clientX;
   const y = event.clientY;
 
-  // Check if click is inside the chatColumn extended by 50px margin
   const insideExtendedArea =
     x >= rect.left - 50 &&
     x <= rect.right + 50 &&
@@ -335,10 +297,6 @@ document.addEventListener("click", function(event) {
     y <= rect.bottom + 50;
 
   if (!insideExtendedArea) {
-    // Click is outside chatColumn + 50px margin — hide it
     chatColumn.style.display = "none";
   }
 });
-
-
-// fixa så chatatrna kan expandera ordentligt
