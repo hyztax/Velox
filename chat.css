@@ -192,16 +192,112 @@ header, #appHeader {
     gap: 5px;
 }
 
-
-
-/* Individual messages */
-.message {
-  margin-bottom: 5px;
-  padding: 5px 10px;
-  border-radius: 10px;
-  max-width: 70%;
-  word-wrap: break-word;
+/* --- Chat Messages Alignment Fix --- */
+.messageContainer {
+    display: flex;           /* Make container flex */
+    width: 100%;             /* Full width to align bubbles */
+    flex-direction: column;  /* Stack message and time vertically */
+    margin-bottom: 6px;      /* Space between messages */
 }
+
+.messageContainer.sent {
+    justify-content: flex-end;  /* Your messages align right */
+    align-items: flex-end;      /* Bubble + time align right */
+}
+
+.messageContainer.received {
+    justify-content: flex-start; /* Others' messages align left */
+    align-items: flex-start;     /* Bubble + time align left */
+}
+
+/* Bubble styling remains */
+.message {
+    display: inline-block;
+    max-width: 70%;
+    padding: 8px 12px;
+    border-radius: 12px;
+    color: #fff;
+    word-wrap: break-word;
+    line-height: 1.4;
+}
+
+/* Bubble colors */
+.messageContainer.sent .message {
+    background-color: #3c2655b6; /* Green for your messages */
+}
+
+.messageContainer.received .message {
+    background-color: #723a74a4; /* Dark for others */
+}
+
+/* Timestamp styling */
+.messageTime {
+    font-size: 0.7em;
+    color: #aaa;
+    margin-top: 2px;
+    text-align: right; /* aligns with bubble automatically */
+}
+
+/* --- Date Separator --- */
+.messageDate {
+    text-align: center;
+    width: 100%;
+    font-size: 0.75em;
+    color: #aaa;
+    margin: 12px 0;
+    position: relative;
+    font-weight: 600;
+}
+
+.messageDate::before,
+.messageDate::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    width: 40%;
+    height: 1px;
+    background-color: #555;
+}
+
+.messageDate::before {
+    left: 0;
+}
+
+.messageDate::after {
+    right: 0;
+}
+
+.messageDate span {
+    padding: 0 8px;
+    background-color: #272727; /* matches chat background */
+    position: relative;
+}
+
+#chatSection {
+    display: none;
+}
+
+.dateSeparator {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin: 15px 0;
+    font-size: 12px;
+    color: #888;
+    font-weight: 600;
+}
+
+.dateSeparator::before,
+.dateSeparator::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: #555;
+    margin: 0 10px;
+}
+
+
+
 
 /* --- Chat Input --- */
 #chatInputArea {
@@ -212,20 +308,6 @@ header, #appHeader {
   background: #0e0c0c00;
 }
 
-.sent {
-  text-align: right;
-  background-color: #39398183;
-  color: white;
-  margin-left: auto;
-}
-
-/* Messages received */
-.received {
-  text-align: left;
-  background-color: #97449386;
-  color: white;
-  margin-right: auto;
-}
 
 #messageInput {
   flex: 1;
@@ -329,7 +411,7 @@ header, #appHeader {
 
 
 #friendsList li {
-  background: #2a2a3d;
+  background: #131314;
   border-radius: 12px;
   padding: 10px 14px;
   color: #f5f5f5;
@@ -345,7 +427,7 @@ header, #appHeader {
 }
 
 #friendsList li:hover {
-  background: #15151d;
+  background: #1c1c25;
   transform: translateY(-3px);
   box-shadow: 0 6px 12px rgba(0,0,0,0.4);
 }
@@ -363,16 +445,33 @@ header, #appHeader {
 
 
 .friendName {
-  flex: 1;
+  flex: 1 1 auto;
+  display: inline-block;
+  max-width: 200px; /* adjust width as needed */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
+
+
+
 
 .statusDot {
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  margin-left: auto;
+  margin-left: 8px; /* keep some spacing from name */
   box-shadow: 0 0 6px rgba(0,0,0,0.5);
   transition: background-color 0.3s ease;
+  flex-shrink: 0; /* prevent shrinking */
+}
+
+
+.latestMsg {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 120px; /* adjust width if needed */
 }
 
 
