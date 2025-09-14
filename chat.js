@@ -66,32 +66,70 @@ function scrollChatToBottom() {
     chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
-// --- Listen to friends ---
+// --- Listen to friends with live online status ---
 function listenToFriends() {
     if (!currentUser) return;
+
     db.collection('friends').doc(currentUser.uid).collection('list')
-        .onSnapshot(async snapshot => {
-            friendsListEl.innerHTML = '';
+      .onSnapshot(async snapshot => {
+        friendsListEl.innerHTML = '';
 
-            // Add admin fake
-           const adminLi = document.createElement('li');
-            adminLi.textContent = 'Admin';
-            adminLi.style.display = 'none'; // hide from view
-            friendsListEl.appendChild(adminLi);
+        // Optional: admin fake
+        const adminLi = document.createElement('li');
+        adminLi.textContent = 'Admin';
+        adminLi.style.display = 'none';
+        friendsListEl.appendChild(adminLi);
 
+        // Track listeners to avoid duplicates
+        const unsubscribers = [];
 
-            for (const doc of snapshot.docs) {
-                const friendUid = doc.id;
-                const profileDoc = await db.collection('profiles').doc(friendUid).get();
-                const data = profileDoc.data() || {};
-                const li = document.createElement('li');
-                li.style.cursor = 'pointer';
-                li.textContent = data.displayName || 'Unknown';
-                li.onclick = () => openProfile(friendUid);
-                friendsListEl.appendChild(li);
-            }
-        });
+        for (const doc of snapshot.docs) {
+          const friendUid = doc.id;
+
+          // Create li element
+          const li = document.createElement('li');
+          li.style.cursor = 'pointer';
+          li.onclick = () => openProfile(friendUid);
+
+          // Avatar
+          const avatar = document.createElement('div');
+          avatar.className = 'avatar';
+
+          // Name
+          const name = document.createElement('span');
+          name.className = 'friendName';
+
+          // Status dot
+          const statusDot = document.createElement('div');
+          statusDot.className = 'statusDot status-offline';
+
+          li.appendChild(avatar);
+          li.appendChild(name);
+          li.appendChild(statusDot);
+          friendsListEl.appendChild(li);
+
+          // Real-time listener for this friend's profile
+          const unsubscribe = db.collection('profiles').doc(friendUid)
+              .onSnapshot(profileDoc => {
+                  const data = profileDoc.data() || {};
+                  setAvatar(avatar, data.avatarUrl, data.profileColor || '#000000ff');
+                  name.textContent = data.displayName || 'Unknown';
+                  statusDot.className = 'statusDot ' + (data.online ? 'status-online' : 'status-offline');
+              });
+
+          unsubscribers.push(unsubscribe);
+        }
+
+        // Clean up previous listeners when snapshot updates
+        return () => unsubscribers.forEach(fn => fn());
+    });
 }
+
+
+
+
+
+ 
 
 // --- Open Profile ---
 function openProfile(uid) {
@@ -211,16 +249,35 @@ searchFriends.addEventListener('input', () => {
     });
 });
 
-// --- Auth Listener ---
+// --- Auth Listener with online status ---
 auth.onAuthStateChanged(user => {
     if (!user) return location.href = 'signin.html';
     currentUser = user;
+    
     listenToFriends();
     showSection('friends');
-});
 
+    // --- Online status logic ---
+    const userRef = db.collection('profiles').doc(currentUser.uid);
+
+    // Set online true when page loads
+    userRef.set({ online: true }, { merge: true })
+      .then(() => console.log("Online set!"))
+      .catch(err => console.error("Failed to set online:", err));
+
+    // Set online false when page closes or refreshes
+    window.addEventListener('beforeunload', () => {
+        userRef.set({ online: false }, { merge: true });
+    });
+}); // ← close auth.onAuthStateChanged properly
+
+// Go back button listener
 const goBackBtn = document.getElementById('goBackBtn');
-
 goBackBtn.addEventListener('click', () => {
     window.location.href = 'chat.html'; // redirect to chat.html
 });
+
+
+
+
+// kind of works
