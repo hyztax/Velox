@@ -37,31 +37,21 @@
       </div>
     </section>
 
-    <!-- Chat Section -->
-    <section id="chatSection">
-       <button id="goBackBtn">← Go back</button>
-      <header id="chatHeader"></header>
-      <div id="chatMessages"></div>
-      <form id="chatInputArea" onsubmit="return false;">
-        <input id="messageInput" type="text" placeholder="Enter message..." />
-        <button id="sendBtn" type="submit" disabled>↑</button>
-      </form>
-    </section>
-
-
-
-    <!-- Fake admin profile -->
-    <div class="chat_column" id="chatColumn">
-      <div id="fakeProfile">
-        <img src="velox.image/Velox_logo.png" alt="admin" />
-        <h2>Admin</h2>
-        <p>Welcome to Velox! You cannot reply to this user. Feel free to invite your friends!</p>
-      </div>
-      <div class="fake_msg" id="welcomeMsg">This is an admin profile, you cannot reply to this.</div>
+   <!-- Chat Section -->
+<section id="chatSection">
+ 
+  <header id="chatHeader"></header>
+  <div id="chatMessages"></div>
+  <form id="chatInputArea" onsubmit="return false" style="display: flex; flex-direction: column;">
+    <div style="display: flex; align-items: flex-end;">
+      <textarea id="messageInput" placeholder="Enter message..." rows="1" style="flex: 1; resize: none; overflow-y: hidden;"></textarea>
+      <button id="sendBtn" type="submit" disabled>↑</button>
     </div>
-  </div>
+    <div id="charCounter" style="align-self: flex-end; font-size: 0.8em; color: #aaa;">0 / 300</div>
+  </form>
+</section>
 
-  
+
   <div id="notificationContainer"></div>
 
   <canvas id="starfield"></canvas>

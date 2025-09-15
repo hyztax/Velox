@@ -42,7 +42,14 @@ body {
 /* --- Header --- */
 header, #appHeader {
   grid-area: header;
-  background: linear-gradient(135deg, #36343460, #00000000);
+  background: linear-gradient(135deg, #36343400, #00000000);
+-webkit-mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);
+-webkit-mask-repeat: no-repeat;
+-webkit-mask-size: 100% 100%;
+mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);
+mask-repeat: no-repeat;
+mask-size: 100% 100%;
+
   color: white;
   font-weight: 700;
   border-radius: 7px;
@@ -175,13 +182,10 @@ header, #appHeader {
   flex-direction: column;
   padding: 1rem;
   overflow: hidden;
- 
-  /* Absolute center */
   position: absolute;
   top: 50%;
-  left: 50%;
+  left: 60%;
   transform: translate(-50%, -50%); /* center horizontally and vertically */
-
   align-items: center; /* center children horizontally */
   justify-content: center; /* center children vertically inside the column */
 }
@@ -197,7 +201,7 @@ header, #appHeader {
   font-size: 20px;
   font-weight: 700;
   margin-bottom: 8px;
-  width: 900px;
+  width: 400px;
   border-bottom: 1px solid #1d1c1c;
   padding-bottom: 8px;
   color: #8d8888;
@@ -205,14 +209,14 @@ header, #appHeader {
 
 /* Chat messages container */
 #chatMessages {
-    height: 400px; /* or whatever fits your design */
+    height: 600px; /* or whatever fits your design */
     overflow-y: auto;
-    width: 900px;
+    width: 800px;
     padding: 10px;
     display: flex;
     background-color: #35333331;
     flex-direction: column;
-     border-radius: 7px;
+    border-radius: 7px;
     gap: 5px;
 }
 
@@ -342,6 +346,7 @@ header, #appHeader {
   background: #111;
   color: #eee;
 }
+
 #sendBtn {
   padding: auto;          
   height: 34px;    
@@ -370,6 +375,13 @@ header, #appHeader {
   box-shadow: none;
   opacity: 0.7;
 }
+
+.chatInputContainer {
+  display: flex;
+  align-items: center;
+  gap: 10px;  /* space between textarea and button */
+}
+
 
 
 /* --- Fake admin profile --- */

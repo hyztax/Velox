@@ -24,14 +24,29 @@ const chatMessages = document.getElementById('chatMessages');
 const messageInput = document.getElementById('messageInput');
 const sendBtn = document.getElementById('sendBtn');
 const searchFriends = document.getElementById('searchFriends');
-const fakeProfile = document.getElementById('fakeProfile');
-const welcomeMsg = document.getElementById('welcomeMsg');
-const goBackBtn = document.getElementById('goBackBtn');
 
+// --- Chat settings ---
+const MAX_LENGTH = 300;
+
+// --- Globals ---
 let currentUser = null;
 let selectedUser = null;
 let chatId = null;
 let chatUnsubscribe = null;
+let lastRenderedDate = null;
+const friendsState = {}; // store friend info
+const friendElements = {}; // store friend list DOM elements
+
+// --- Character counter ---
+let charCounter = document.getElementById('charCounter');
+if (!charCounter) {
+    charCounter = document.createElement('span');
+    charCounter.id = 'charCounter';
+    charCounter.style.fontSize = '0.8em';
+    charCounter.style.color = '#aaa';
+    charCounter.style.marginLeft = '5px';
+    messageInput.parentNode.appendChild(charCounter);
+}
 
 // --- Helpers ---
 function setAvatar(el, avatarUrl, color) {
@@ -49,45 +64,27 @@ function setAvatar(el, avatarUrl, color) {
 }
 
 function showSection(name) {
-    document.getElementById('friendsSection').style.display = name === 'friends' ? 'block' : 'none';
+    // friendsSection always visible
+    document.getElementById('friendsSection').style.display = 'block';
+    // profileSection only visible if 'profile' selected
     document.getElementById('profileSection').style.display = name === 'profile' ? 'flex' : 'none';
+    // chatSection visible if 'chat' selected
     document.getElementById('chatSection').style.display = name === 'chat' ? 'flex' : 'none';
-
-    if (name === 'profile' && selectedUser && selectedUser.uid !== 'adminFake') {
-        fakeProfile.style.display = 'none';
-        welcomeMsg.style.display = 'none';
-    } else if (name === 'friends') {
-        fakeProfile.style.display = 'block';
-        welcomeMsg.style.display = 'block';
-    }
 }
 
 function scrollChatToBottom() {
     chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
-// --- Format timestamp ---
-function formatTimestamp(timestamp) {
-    if (!timestamp) return { dayLabel: '', time: '' };
-    const date = timestamp?.toDate ? timestamp.toDate() : new Date(timestamp);
-    const now = new Date();
-    const yesterday = new Date();
-    yesterday.setDate(now.getDate() - 1);
+// --- Auto-focus chat input on keypress ---
+document.addEventListener('keydown', (e) => {
+    const activeTag = document.activeElement.tagName.toLowerCase();
+    if (activeTag !== 'input' && activeTag !== 'textarea') {
+        messageInput.focus();
+    }
+});
 
-    let dayLabel;
-    if (date.toDateString() === now.toDateString()) dayLabel = 'Today';
-    else if (date.toDateString() === yesterday.toDateString()) dayLabel = 'Yesterday';
-    else dayLabel = date.toDateString();
-
-    const hours = date.getHours().toString().padStart(2,'0');
-    const minutes = date.getMinutes().toString().padStart(2,'0');
-
-    return { dayLabel, time: `${hours}:${minutes}` };
-}
-
-// --- Render message ---
-let lastRenderedDate = null; // reset per chat when opening a new chat
-
+// --- Render Messages ---
 function renderMessage(msg, msgId = null) {
     const container = document.createElement('div');
     container.className = 'messageContainer ' + (msg.sender === currentUser.uid ? 'sent' : 'received');
@@ -97,7 +94,6 @@ function renderMessage(msg, msgId = null) {
     msgDiv.className = 'message';
     msgDiv.textContent = msg.deleted ? "*deleted message*" : msg.text;
 
-    // Apply deleted styling if needed
     if (msg.deleted) {
         msgDiv.style.fontStyle = 'italic';
         msgDiv.style.color = '#aaa';
@@ -106,25 +102,17 @@ function renderMessage(msg, msgId = null) {
     const timeDiv = document.createElement('div');
     timeDiv.className = 'messageTime';
 
-    // Determine message date
     let msgDate = null;
     if (msg.timestamp) {
-        if (msg.timestamp.toDate) {
-            msgDate = msg.timestamp.toDate();
-        } else {
-            msgDate = new Date(msg.timestamp);
-        }
+        msgDate = msg.timestamp.toDate ? msg.timestamp.toDate() : new Date(msg.timestamp);
         timeDiv.textContent = msgDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    } else {
-        timeDiv.textContent = '';
     }
 
-    // Insert date separator if date changed
+    // Date separator
     if (msgDate) {
         const msgDateStr = msgDate.toDateString();
         if (lastRenderedDate !== msgDateStr) {
             lastRenderedDate = msgDateStr;
-
             const separator = document.createElement('div');
             separator.className = 'dateSeparator';
 
@@ -132,13 +120,9 @@ function renderMessage(msg, msgId = null) {
             const yesterday = new Date();
             yesterday.setDate(now.getDate() - 1);
 
-            if (msgDate.toDateString() === now.toDateString()) {
-                separator.textContent = ' Today ';
-            } else if (msgDate.toDateString() === yesterday.toDateString()) {
-                separator.textContent = ' Yesterday ';
-            } else {
-                separator.textContent = '' + msgDate.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' }) + '';
-            }
+            if (msgDate.toDateString() === now.toDateString()) separator.textContent = ' Today ';
+            else if (msgDate.toDateString() === yesterday.toDateString()) separator.textContent = ' Yesterday ';
+            else separator.textContent = msgDate.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
 
             chatMessages.appendChild(separator);
         }
@@ -147,7 +131,7 @@ function renderMessage(msg, msgId = null) {
     container.appendChild(msgDiv);
     container.appendChild(timeDiv);
 
-    // Context menu for message actions
+    // Context menu
     container.addEventListener('contextmenu', e => {
         e.preventDefault();
         showContextMenu(msgId, msg, container, e);
@@ -155,30 +139,7 @@ function renderMessage(msg, msgId = null) {
 
     chatMessages.appendChild(container);
     scrollChatToBottom();
-
-    // --- Live update for deletion ---
-    if (msg.deleted) {
-        // Immediate DOM update is already applied above
-        // If using real-time listener, update this message in place
-        const observer = new MutationObserver(() => scrollChatToBottom());
-        observer.observe(msgDiv, { childList: true, characterData: true });
-    }
 }
-
-// --- Optional helper: instant delete a message ---
-function deleteMessage(msgId) {
-    const msgContainer = chatMessages.querySelector(`[data-msg-id='${msgId}']`);
-    if (msgContainer) {
-        const msgDiv = msgContainer.querySelector('.message');
-        msgDiv.textContent = "*deleted message*";
-        msgDiv.style.fontStyle = 'italic';
-        msgDiv.style.color = '#aaa';
-        scrollChatToBottom();
-    }
-}
-
-
-
 
 // --- Context Menu ---
 function showContextMenu(msgId, msg, container, event) {
@@ -198,28 +159,18 @@ function showContextMenu(msgId, msg, container, event) {
         remove.textContent = 'Remove';
         remove.style.cursor = 'pointer';
         remove.onclick = async () => {
-    // Instant local update
-    const msgEl = chatMessages.querySelector(`[data-msg-id='${msgId}']`);
-    if (msgEl) {
-        const msgDiv = msgEl.querySelector('.message');
-        msgDiv.textContent = "*deleted message*";
-        msgDiv.style.fontStyle = 'italic';
-        msgDiv.style.color = '#aaa';
-    }
-
-    // Firestore update in background
-    try {
-        await db.collection('chats').doc(chatId)
-                .collection('messages')
-                .doc(msgId)
-                .update({ deleted: true });
-    } catch (err) {
-        console.error('Failed to delete message:', err);
-    }
-
-    menu.remove();
-};
-
+            const msgEl = chatMessages.querySelector(`[data-msg-id='${msgId}']`);
+            if (msgEl) {
+                const msgDiv = msgEl.querySelector('.message');
+                msgDiv.textContent = "*deleted message*";
+                msgDiv.style.fontStyle = 'italic';
+                msgDiv.style.color = '#aaa';
+            }
+            try {
+                await db.collection('chats').doc(chatId).collection('messages').doc(msgId).update({ deleted: true });
+            } catch(err) { console.error(err); }
+            menu.remove();
+        };
         menu.appendChild(remove);
     }
 
@@ -240,74 +191,85 @@ function showContextMenu(msgId, msg, container, event) {
 }
 
 // --- Listen to friends ---
-function listenToFriends() {
+function listenToFriendsRealtime() {
     if (!currentUser) return;
+
     db.collection('friends').doc(currentUser.uid).collection('list')
-      .onSnapshot(async snapshot => {
-        friendsListEl.innerHTML = '';
-        for (const doc of snapshot.docs) {
-            const friendUid = doc.id;
+      .onSnapshot(async (snapshot) => {
+        for (const docChange of snapshot.docChanges()) {
+            const friendUid = docChange.doc.id;
+            const data = docChange.doc.data() || {};
+
             const profileDoc = await db.collection('profiles').doc(friendUid).get();
-            const data = profileDoc.data() || {};
+            const profileData = profileDoc.data() || {};
 
-            const li = document.createElement('li');
-            li.style.cursor = 'pointer';
-            li.onclick = () => openProfile(friendUid);
+            friendsState[friendUid] = {
+                uid: friendUid,
+                data: profileData,
+                latestMsg: data.lastMessage || '',
+                lastChatTimestamp: data.lastChatTimestamp ? data.lastChatTimestamp.toMillis() : 0
+            };
+        }
 
-            const avatar = document.createElement('div');
-            avatar.className = 'avatar';
-            setAvatar(avatar, data.avatarUrl, data.profileColor || '#000');
+        const friendsArray = Object.values(friendsState)
+                                   .sort((a,b) => b.lastChatTimestamp - a.lastChatTimestamp);
 
-            const name = document.createElement('span');
-            name.className = 'friendName';
-            name.textContent = data.displayName || 'Unknown';
+        friendsListEl.innerHTML = '';
+        friendsArray.forEach(friend => renderOrUpdateFriend(friend.uid));
 
-            const latestMsg = document.createElement('span');
-            latestMsg.className = 'latestMsg';
-            latestMsg.style.color = '#aaa5a5ff';
-            latestMsg.style.fontSize = '0.8em';
-            latestMsg.style.display = 'block';
-
-        // Latest message preview (skip deleted)
-const chatIdTemp = [currentUser.uid, friendUid].sort().join('_');
-const messagesSnapshot = await db.collection('chats').doc(chatIdTemp)
-                               .collection('messages')
-                               .orderBy('timestamp', 'desc')
-                               .get();
-if (!messagesSnapshot.empty) {
-    const msgDoc = messagesSnapshot.docs.find(d => !d.data().deleted);
-    latestMsg.textContent = msgDoc ? msgDoc.data().text.slice(0, 20) : '';
-}
-
-
-            const statusDot = document.createElement('div');
-            statusDot.className = 'statusDot ' + (data.online ? 'status-online' : 'status-offline');
-
-            li.appendChild(avatar);
-            li.appendChild(name);
-            li.appendChild(latestMsg);
-            li.appendChild(statusDot);
-
-            friendsListEl.appendChild(li);
+        const lastChatUid = localStorage.getItem('lastChatUid');
+        if (lastChatUid && chatId !== [currentUser.uid, lastChatUid].sort().join('_')) {
+            startChat(lastChatUid, false);
         }
     });
 }
 
+
+
+// --- Render or update single friend ---
+function renderOrUpdateFriend(friendUid) {
+    const friend = friendsState[friendUid];
+    if (!friend) return;
+
+    let li = friendElements[friendUid];
+    if (!li) {
+        li = document.createElement('li');
+        li.style.cursor = 'pointer';
+        li.addEventListener('click', e => { e.preventDefault(); startChat(friendUid); });
+        li.addEventListener('contextmenu', e => { e.preventDefault(); openProfile(friendUid); });
+        friendElements[friendUid] = li;
+    }
+    li.innerHTML = '';
+
+    const avatar = document.createElement('div');
+    avatar.className = 'avatar';
+    setAvatar(avatar, friend.data.avatarUrl, friend.data.profileColor || '#000');
+
+    const name = document.createElement('span');
+    name.className = 'friendName';
+    name.textContent = friend.data.displayName || 'Unknown';
+
+    const latestMsg = document.createElement('span');
+    latestMsg.className = 'latestMsg';
+    latestMsg.style.color = '#aaa5a5ff';
+    latestMsg.style.fontSize = '0.8em';
+    latestMsg.style.display = 'block';
+    latestMsg.textContent = friend.latestMsg;
+
+    const statusDot = document.createElement('div');
+    statusDot.className = 'statusDot ' + (friend.data.online ? 'status-online' : 'status-offline');
+
+    li.appendChild(avatar);
+    li.appendChild(name);
+    li.appendChild(latestMsg);
+    li.appendChild(statusDot);
+
+    friendsListEl.appendChild(li);
+}
+
+
 // --- Open Profile ---
 function openProfile(uid) {
-    if (uid === 'adminFake') {
-        selectedUser = { uid: 'adminFake' };
-        profileNameEl.textContent = 'Admin';
-        profileBioEl.textContent = 'Welcome to Velox! This is the admin profile.';
-        setAvatar(profileAvatarEl, 'velox.image/Velox_logo.png', '#000');
-        showSection('profile');
-        fakeProfile.style.display = 'block';
-        welcomeMsg.style.display = 'block';
-        return;
-    }
-    fakeProfile.style.display = 'none';
-    welcomeMsg.style.display = 'none';
-
     db.collection('profiles').doc(uid).get().then(doc => {
         const data = doc.data() || {};
         selectedUser = { uid, ...data };
@@ -319,42 +281,33 @@ function openProfile(uid) {
 }
 
 // --- Start Chat ---
-async function startChat(uid) {
-    if (!currentUser || !uid || uid === 'adminFake') return;
+async function startChat(uid, remember = true) {
+    if (!currentUser || !uid) return;
 
-    const chatSection = document.getElementById('chatSection');
-    chatSection.style.display = 'none'; // hide chat immediately
-
-    chatMessages.innerHTML = '';
-    chatHeader.textContent = '...'; // optional placeholder
+    if (chatId !== [currentUser.uid, uid].sort().join('_')) {
+        chatMessages.innerHTML = '';
+        chatHeader.textContent = '...';
+    }
 
     const profileDoc = await db.collection('profiles').doc(uid).get();
-    selectedUser = { uid, ...profileDoc.data() };
+    selectedUser = { uid, ...(profileDoc.data() || {}) };
     chatId = [currentUser.uid, uid].sort().join('_');
 
-    // Unsubscribe previous listener
+    if (remember) localStorage.setItem('lastChatUid', uid);
+
     if (chatUnsubscribe) chatUnsubscribe();
 
-    // Keep track of rendered messages to prevent duplicates
     const renderedMsgIds = new Set();
-
-    // Attach real-time listener for all messages
-    chatUnsubscribe = db.collection('chats').doc(chatId)
-        .collection('messages')
+    chatUnsubscribe = db.collection('chats').doc(chatId).collection('messages')
         .orderBy('timestamp')
         .onSnapshot(snap => {
             snap.docChanges().forEach(change => {
                 const msg = change.doc.data();
                 const msgId = change.doc.id;
-
-                // Already rendered check
                 if (change.type === 'added' && !renderedMsgIds.has(msgId)) {
                     renderMessage(msg, msgId);
                     renderedMsgIds.add(msgId);
-                }
-
-                // Handle modifications (deleted or edited)
-                else if (change.type === 'modified') {
+                } else if (change.type === 'modified') {
                     const msgEl = chatMessages.querySelector(`[data-msg-id="${msgId}"]`);
                     if (msgEl) {
                         const msgDiv = msgEl.querySelector('.message');
@@ -370,17 +323,12 @@ async function startChat(uid) {
                     }
                 }
             });
-
             scrollChatToBottom();
         });
 
-    // Finally, show the chat section AFTER messages are rendering
     chatHeader.textContent = selectedUser.displayName || 'Unknown';
-    chatSection.style.display = 'flex';
     showSection('chat');
 }
-
-
 
 // --- Send Message ---
 async function sendMessage(e) {
@@ -388,19 +336,31 @@ async function sendMessage(e) {
     if (!chatId || !currentUser) return;
 
     const text = messageInput.value.trim();
-    if (!text) return;
+    if (!text || text.length > MAX_LENGTH) return;
 
     sendBtn.disabled = true;
     messageInput.disabled = true;
 
     try {
+        const timestamp = firebase.firestore.FieldValue.serverTimestamp();
+
         await db.collection('chats').doc(chatId).collection('messages').add({
             sender: currentUser.uid,
             text,
-            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            timestamp
         });
+
+        // Update lastMessage and lastChatTimestamp for both users
+        const friendUid = selectedUser.uid;
+        await db.collection('friends').doc(currentUser.uid)
+                .collection('list').doc(friendUid)
+                .set({ lastMessage: text.slice(0,20), lastChatTimestamp: timestamp }, { merge: true });
+
+        await db.collection('friends').doc(friendUid)
+                .collection('list').doc(currentUser.uid)
+                .set({ lastMessage: text.slice(0,20), lastChatTimestamp: timestamp }, { merge: true });
+
         messageInput.value = '';
-        // No local render → Firestore listener handles everything
     } catch (err) {
         console.error(err);
         alert("Failed to send message.");
@@ -410,12 +370,32 @@ async function sendMessage(e) {
     }
 }
 
-// --- Event Listeners ---
+
+// --- Input events ---
+messageInput.addEventListener('input', () => {
+    messageInput.style.height = 'auto';
+    messageInput.style.height = messageInput.scrollHeight + 'px';
+
+    const length = messageInput.value.length;
+    charCounter.textContent = `${length} / ${MAX_LENGTH}`;
+
+    if (length > MAX_LENGTH) {
+        messageInput.style.border = '2px solid red';
+        charCounter.style.color = 'red';
+        sendBtn.disabled = true;
+    } else {
+        messageInput.style.border = '';
+        charCounter.style.color = '#aaa';
+        sendBtn.disabled = messageInput.value.trim() === '';
+    }
+});
+
 sendBtn.addEventListener('click', sendMessage);
 messageInput.addEventListener('keydown', e => {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
 });
-messageInput.addEventListener('input', () => { sendBtn.disabled = messageInput.value.trim() === ''; });
+
+// --- Navigation ---
 backToFriendsBtn.addEventListener('click', () => { selectedUser = null; showSection('friends'); });
 messageUserBtn.addEventListener('click', () => { if (selectedUser) startChat(selectedUser.uid); });
 searchFriends.addEventListener('input', () => {
@@ -424,22 +404,23 @@ searchFriends.addEventListener('input', () => {
         li.style.display = li.textContent.toLowerCase().includes(term) ? '' : 'none';
     });
 });
-goBackBtn.addEventListener('click', () => { showSection('friends'); });
 
-// --- Auth & Online Status ---
-auth.onAuthStateChanged(user => {
+// --- Auth ---
+auth.onAuthStateChanged(async user => {
     if (!user) return location.href = 'signin.html';
     currentUser = user;
-    listenToFriends();
+
+    listenToFriendsRealtime();
+
     showSection('friends');
 
     const userRef = db.collection('profiles').doc(currentUser.uid);
-    userRef.set({ online: true, lastOnline: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
+    await userRef.set({ online: true, lastOnline: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
+
+    const lastChatUid = localStorage.getItem('lastChatUid');
+    if (lastChatUid) startChat(lastChatUid, false);
 
     window.addEventListener('beforeunload', () => {
         userRef.set({ online: false, lastOnline: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
     });
 });
-
-
-// works
