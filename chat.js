@@ -35,7 +35,9 @@ const firebaseConfig = {
   const groupNameInput = document.getElementById('groupNameInput');
   
   const groupSidebar = document.getElementById('groupSidebar');
+  
   const groupMembersList = document.getElementById('groupMembersList');
+  
   const addMemberSearch = document.getElementById('addMemberSearch');
   const addMemberBtn = document.getElementById('addMemberBtn');
   
@@ -47,6 +49,7 @@ const firebaseConfig = {
     charCounter.style.color = '#aaa';
     if (messageInput && messageInput.parentNode) messageInput.parentNode.appendChild(charCounter);
   }
+  
   
   // -------------------- State --------------------
   const MAX_LENGTH = 300;
@@ -78,7 +81,7 @@ const firebaseConfig = {
       el.textContent = '';
     } else {
       el.style.backgroundImage = '';
-      el.style.backgroundColor = color || '#333';
+      el.style.backgroundColor = color || '#333333ff';
       el.textContent = '';
     }
   }
@@ -105,7 +108,6 @@ const firebaseConfig = {
     leaveBtn.className = 'leave-btn';
     leaveBtn.textContent = 'Leave Group';
     leaveBtn.style.display = 'none';
-    // basic styling (you can move to CSS)
     leaveBtn.style.position = 'fixed';
     leaveBtn.style.top = '14px';
     leaveBtn.style.right = '20px';
@@ -130,10 +132,10 @@ const firebaseConfig = {
     toggleMembersBtn.textContent = '👥';
     toggleMembersBtn.style.display = 'none';
 
-    // fixed positioning
+    //positioning
     toggleMembersBtn.style.position = 'fixed';
     toggleMembersBtn.style.top = '13px';
-    toggleMembersBtn.style.right = '120px'; // <-- move it more left
+    toggleMembersBtn.style.right = '120px'; 
     toggleMembersBtn.style.background = 'transparent';
     toggleMembersBtn.style.color = '#fff';
     toggleMembersBtn.style.border = 'none';
@@ -149,6 +151,7 @@ const firebaseConfig = {
         else showGroupSidebar(selectedUser);
     });
 }
+
 
   
   // small helper to dedupe arrays
@@ -395,7 +398,8 @@ const firebaseConfig = {
       li.className = 'group-item';
       li.style.display = 'flex';
       li.style.alignItems = 'center';
-      li.style.gap = '8px';
+      li.style.background = "#350a4642";
+      li.style.gap = "10px";
       li.style.cursor = 'pointer';
       li.addEventListener('click', (e) => { e.preventDefault(); startGroupChat(group.chatId); });
       friendElements[group.chatId] = li;
@@ -881,11 +885,15 @@ const firebaseConfig = {
     // ensure leave & toggle are visible (handled in startGroupChat)
   }
   
+// hide sidebar on page load
+document.addEventListener('DOMContentLoaded', () => {
+    hideGroupSidebar();
+});
   function hideGroupSidebar() {
-    if (!groupSidebar) return;
-    groupSidebar.style.display = 'none';
+    if (groupSidebar) groupSidebar.style.display = 'none';
   }
-  
+
+
   // render members (deduped)
   async function renderGroupMembers(group) {
     if (!group || !group.members || !groupMembersList) return;
@@ -927,11 +935,18 @@ const firebaseConfig = {
     const av = document.createElement('div');
     av.className = 'member-avatar';
     av.style.width = '40px'; av.style.height = '40px'; av.style.borderRadius = '8px';
-    setAvatar(av, avatarUrl, '#444');
+  setAvatar(av, avatarUrl, 'rgb(106, 44, 111)'); // purple fallback
+if (!avatarUrl) {
+  av.style.boxShadow = '0 0 15px 5px rgba(43, 4, 46, 0.7)'; // glow effect
+} else {
+  av.style.boxShadow = ''; // remove glow if avatar exists
+}
+
+
   
     const nameSpan = document.createElement('div');
     nameSpan.textContent = displayName || uid;
-    nameSpan.style.color = '#fff';
+    nameSpan.style.color = '#fff';  
     nameSpan.style.flex = '1';
     nameSpan.style.fontWeight = '600';
   
@@ -1001,5 +1016,12 @@ const firebaseConfig = {
     }
   }
   
-  // -------------------- End of script --------------------
   
+  // -------------------- End of script --------------------
+  // Force hide any element with id "groupSidebar" on page load
+window.addEventListener('DOMContentLoaded', () => {
+    const sidebar = document.getElementById('groupSidebar');
+    if (sidebar) {
+        sidebar.style.display = 'none';
+    }
+});

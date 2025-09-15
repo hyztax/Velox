@@ -275,6 +275,43 @@ mask-size: 100% 100%;
   cursor: default;
 }
 
+.friend-item,
+.group-item {
+  padding: 10px;          /* space inside each item */
+  margin-bottom: 8px;     /* space between items */
+  border-radius: 6px;     /* optional: softer look */
+}
+
+#groupSidebar {
+    display: hidden; 
+}
+
+#addMemberSearch {
+    width: 100%;
+    max-width: 400px;
+    padding: 10px 15px;
+    border: 2px solid #220a1fe0;
+    border-radius: 7px;
+    font-size: 16px;
+    outline: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    background-color: #000000;
+    color: #fff;
+}
+
+#addMemberSearch::placeholder {
+    color: #747373;
+}
+
+#addMemberSearch:focus {
+    border-color: #612b66; /* highlight on focus */
+    box-shadow: 0 4px 10px rgba(69, 36, 112, 0.637);
+    background-color: #000000;
+}
+
+
+
 #groupMembersList li button {
   background: #ff5555;
   color: white;
