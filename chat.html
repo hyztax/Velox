@@ -68,34 +68,38 @@
     </section>
 
    <!-- Chat Section -->
-<section id="chatSection">
- 
+    <section id="chatSection">
+
   <header id="chatHeader"></header>
+
   <div id="chatMessages"></div>
+
+  <!-- Group members sidebar (hidden by default) -->
+  <div id="groupSidebar" style="display: none;">
+    <h3>Members</h3>
+    <ul id="groupMembersList"></ul>
+    <div id="addMemberSection">
+      <input type="text" id="addMemberSearch" placeholder="Search friend..." />
+      <button id="addMemberBtn">Add</button>
+    </div>
+  </div>
+
   <form id="chatInputArea" onsubmit="return false" style="display: flex; flex-direction: column;">
     <div style="display: flex; align-items: flex-end;">
       <textarea 
-      id="messageInput" 
-      placeholder="Enter message..." 
-      rows="1" 
-      style="flex: 1; resize: none; overflow-y: hidden; max-height: 90px;"></textarea>
-  
-  <script>
-  const textarea = document.getElementById('messageInput');
-  
-  textarea.addEventListener('input', () => {
-    textarea.style.height = 'auto'; // reset height
-    textarea.style.height = Math.min(textarea.scrollHeight, 90) + 'px'; // grow but max 90px
-  });
-  </script>
-  
-      <button id="sendBtn" type="submit" disabled style="margin-left: 10px;">↑</button>
+        id="messageInput" 
+        placeholder="Enter message..." 
+        rows="1" 
+        style="flex: 1; resize: none; overflow-y: hidden; max-height: 90px;">
+      </textarea>
 
+      <button id="sendBtn" type="submit" disabled style="margin-left: 10px;">↑</button>
     </div>
     <div id="charCounter" style="align-self: flex-end; font-size: 0.8em; color: #aaa;">0 / 300</div>
   </form>
 </section>
 
+  </div>
 
   <div id="notificationContainer"></div>
 

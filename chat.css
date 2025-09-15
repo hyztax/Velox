@@ -246,6 +246,66 @@ mask-size: 100% 100%;
 }
 
 
+/* Group sidebar */
+#groupSidebar {
+  width: 200px;
+  background: #222;
+  border-radius: 8px;
+  padding: 10px;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Group members list */
+#groupMembersList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  flex: 1;
+  overflow-y: auto;
+}
+
+#groupMembersList li {
+  padding: 5px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: default;
+}
+
+#groupMembersList li button {
+  background: #ff5555;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 0.8em;
+  cursor: pointer;
+}
+
+/* Add member section */
+#addMemberSection {
+  display: flex;
+  gap: 5px;
+}
+
+#addMemberSearch {
+  flex: 1;
+  padding: 3px;
+}
+
+#addMemberBtn {
+  padding: 3px 6px;
+  background: #5555ff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+
 /* --- Group Modal --- */
 #groupModal {
   position: fixed;
