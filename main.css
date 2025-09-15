@@ -283,6 +283,66 @@ main {
   }
 }
 
+/* Profile modal action buttons */
+#profileActions button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+
+/* Profile modal buttons container */
+#profileActions {
+  display: flex;
+  gap: 10px;        /* space between buttons */
+  margin-top: 4px;  /* move buttons closer to bio */
+  padding: 3px;     /* padding inside container */
+  flex-wrap: wrap;  /* wrap buttons if too many */
+}
+
+/* Common button style */
+#profileActions button {
+  padding: 8px 16px;      /* top-bottom, left-right */
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.2s;
+}
+
+/* Add Friend button */
+#profileActions .addFriendBtn {
+  background-color: #191a19; /* green */
+  color: white;
+}
+#profileActions .addFriendBtn:hover {
+  background-color: #202020;
+}
+
+/* Remove Friend button */
+#profileActions .removeFriendBtn {
+  background-color: #5c0e09; /* red */
+  color: white;
+}
+#profileActions .removeFriendBtn:hover {
+  background-color: #460b0b;
+}
+
+/* Message button */
+#profileActions .messageBtn {
+  background-color: #dddedf; /* blue */
+  color: rgb(51, 50, 50);
+}
+#profileActions .messageBtn:hover {
+  background-color: #686969;
+}
+
+
+
 
 #inviteBtn {
   position: fixed;

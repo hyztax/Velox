@@ -434,11 +434,23 @@ if (editorColor) editorColor.addEventListener('input', async () => {
   });
 });
 
+
+
 // --- SHOW FRIEND PROFILE ---
-function showFriendProfile(friend) {
-  profileNameDisplay.textContent = friend.displayName;
+async function showFriendProfile(friend) {
+  profileNameDisplay.textContent = friend.displayName || 'Unknown';
   profileBioDisplay.textContent = friend.bio || 'No bio provided.';
-  document.getElementById('profileTag').textContent = friend.tag || 'Friend';
+
+  // Show member since
+  const tagDiv = document.getElementById('profileTag');
+  if (friend.joinedAt) {
+    const joinedDate = friend.joinedAt.toDate ? friend.joinedAt.toDate() : new Date(friend.joinedAt);
+    tagDiv.textContent = `Member since ${joinedDate.toLocaleDateString()}`;
+  } else {
+    tagDiv.textContent = 'Member since unknown';
+  }
+
+  // Avatar
   profileAvatar.innerHTML = '';
   const firstLetter = (friend.displayName || 'U').charAt(0).toUpperCase();
   if (friend.avatarUrl) {
@@ -447,5 +459,63 @@ function showFriendProfile(friend) {
     profileAvatar.textContent = firstLetter;
     profileAvatar.style.background = friend.profileColor || '#000000';
   }
+
+  // Buttons container
+  const actionsContainer = document.getElementById('profileActions');
+  actionsContainer.innerHTML = ''; // Clear old buttons
+
+  if (friend.uid === currentUser.uid) {
+    // Hide buttons for yourself
+  } else {
+    const areFriends = await areUsersFriends(currentUser.uid, friend.uid);
+
+    if (areFriends) {
+      // Message button
+      const msgBtn = document.createElement('button');
+      msgBtn.textContent = 'Message';
+      msgBtn.className = 'messageBtn';
+      msgBtn.onclick = () => {
+        localStorage.setItem('chatWith', friend.uid); // pass UID to chat page
+        window.location.href = 'chat.html';
+      };
+      actionsContainer.appendChild(msgBtn);
+
+      // Remove Friend button
+      const removeBtn = document.createElement('button');
+      removeBtn.textContent = 'Remove';
+      removeBtn.className = 'removeFriendBtn';
+      removeBtn.onclick = async () => {
+        await db.collection('friends').doc(currentUser.uid).collection('list').doc(friend.uid).delete();
+        await db.collection('friends').doc(friend.uid).collection('list').doc(currentUser.uid).delete();
+        alert('Friend removed.');
+        showFriendProfile(friend); // Refresh buttons
+        listenToFriends(); // Refresh friend list
+      };
+      actionsContainer.appendChild(removeBtn);
+
+    } else {
+      // Add Friend button
+      const addBtn = document.createElement('button');
+      addBtn.textContent = 'Add Friend';
+      addBtn.className = 'addFriendBtn';
+      addBtn.onclick = async () => {
+        const ref = db.collection('friendRequests').doc(friend.uid).collection('requests').doc(currentUser.uid);
+        const snap = await ref.get();
+        if (!snap.exists) {
+          await ref.set({
+            from: currentUser.uid,
+            displayName: currentUser.displayName || currentUser.email,
+            sentAt: firebase.firestore.FieldValue.serverTimestamp()
+          });
+          alert('Friend request sent!');
+          showFriendProfile(friend); // Refresh buttons
+        } else {
+          alert('Request already sent.');
+        }
+      };
+      actionsContainer.appendChild(addBtn);
+    }
+  }
+
   profileModal.classList.remove('hidden');
 }
