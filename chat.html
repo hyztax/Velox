@@ -17,14 +17,44 @@
 </head>
 <body>
   <div id="app">
-    <!-- Friends List Section -->
-    <section id="friendsSection">
-      <h2 style="color: white;">
-        Friends | <a href="main.html" style="color:white; text-decoration: underline;">Go back</a>
-      </h2>
-      <input id="searchFriends" placeholder="Search friends..." />
-      <div id="friendsList"></div>
-    </section>
+   <!-- Friends List Section -->
+<section id="friendsSection">
+  <h2 style="color: white;">
+    Friends | <a href="main.html" style="color:white; text-decoration: underline;">Go back</a>
+  </h2>
+
+  <!-- Search + Create Group Button Container -->
+  <div style="display: flex; align-items: stretch; gap: 5px; margin-bottom: 10px;">
+    <input id="searchFriends" placeholder="Search friends..." style="flex: 1; padding: 5px;" />
+    <button id="createGroupBtn" title="Create Group" 
+        style="padding: 0 10px; cursor: pointer; height: 100%; 
+               background: none; border: none; color: white; font-size: 1.1em;">
+        👥
+    </button>
+  </div>
+
+  <div id="friendsList"></div>
+</section>
+
+<!-- Group Chat Modal -->
+<div id="groupModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; 
+     background: rgba(0,0,0,0.7); justify-content:center; align-items:center; z-index:1000;">
+  <div style="background:#222; padding:20px; border-radius:8px; max-width:400px; width:90%;">
+    <h3 style="color:white;">Create Group Chat</h3>
+    <input id="groupNameInput" placeholder="Group name" style="width:100%; margin-bottom:10px; padding:5px;" />
+    <div id="groupFriendsList" style="max-height:200px; overflow-y:auto; margin-bottom:10px;"></div>
+    <button id="createGroupConfirmBtn" style="padding:5px 10px; cursor:pointer;">Create Group</button>
+    <button id="createGroupCancelBtn" style="padding:5px 10px; cursor:pointer; margin-left:5px;">Cancel</button>
+  </div>
+</div>
+
+<div id="contextMenu" style="
+    position: absolute; display: none; background: #222; color: white; 
+    padding: 5px; border-radius: 5px; z-index: 10000; min-width: 120px;
+"></div>
+
+
+
 
     <!-- Profile Section -->
     <section id="profileSection">
@@ -44,8 +74,23 @@
   <div id="chatMessages"></div>
   <form id="chatInputArea" onsubmit="return false" style="display: flex; flex-direction: column;">
     <div style="display: flex; align-items: flex-end;">
-      <textarea id="messageInput" placeholder="Enter message..." rows="1" style="flex: 1; resize: none; overflow-y: hidden;"></textarea>
-      <button id="sendBtn" type="submit" disabled>↑</button>
+      <textarea 
+      id="messageInput" 
+      placeholder="Enter message..." 
+      rows="1" 
+      style="flex: 1; resize: none; overflow-y: hidden; max-height: 90px;"></textarea>
+  
+  <script>
+  const textarea = document.getElementById('messageInput');
+  
+  textarea.addEventListener('input', () => {
+    textarea.style.height = 'auto'; // reset height
+    textarea.style.height = Math.min(textarea.scrollHeight, 90) + 'px'; // grow but max 90px
+  });
+  </script>
+  
+      <button id="sendBtn" type="submit" disabled style="margin-left: 10px;">↑</button>
+
     </div>
     <div id="charCounter" style="align-self: flex-end; font-size: 0.8em; color: #aaa;">0 / 300</div>
   </form>
