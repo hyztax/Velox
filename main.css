@@ -960,6 +960,8 @@ li button:hover:not(:disabled) {
   }
 }
 
+
+
 /* Make modal-content a column flex container to order buttons vertically */
 .modal-content {
   display: flex;
