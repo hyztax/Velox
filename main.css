@@ -749,7 +749,7 @@ background: linear-gradient(
 
 /* Modal content wrapper */
 .modal-content {
-  background: #2f3136;
+  background: #111111d0;
   border-radius: 10px;
   padding: 30px 40px;
   width: 320px;

@@ -436,18 +436,18 @@ if (editorColor) editorColor.addEventListener('input', async () => {
 
 
 
-// --- SHOW FRIEND PROFILE ---
+// --- show friend profile -----//
 async function showFriendProfile(friend) {
   profileNameDisplay.textContent = friend.displayName || 'Unknown';
   profileBioDisplay.textContent = friend.bio || 'No bio provided.';
 
-  // Show member since
-  const tagDiv = document.getElementById('profileTag');
+  // Member since / OG user
+  const profileTagEl = document.getElementById('profileTag');
   if (friend.joinedAt) {
-    const joinedDate = friend.joinedAt.toDate ? friend.joinedAt.toDate() : new Date(friend.joinedAt);
-    tagDiv.textContent = `Member since ${joinedDate.toLocaleDateString()}`;
+    const date = friend.joinedAt.toDate ? friend.joinedAt.toDate() : new Date(friend.joinedAt);
+    profileTagEl.textContent = `Member since ${date.toLocaleDateString()}`;
   } else {
-    tagDiv.textContent = 'Member since unknown';
+    profileTagEl.textContent = 'OG user';
   }
 
   // Avatar
@@ -460,12 +460,32 @@ async function showFriendProfile(friend) {
     profileAvatar.style.background = friend.profileColor || '#000000';
   }
 
+  // --- MUTUAL FRIENDS ---
+  const mutualEl = document.getElementById('mutualFriendsCount');
+  try {
+    const currentUserFriendsSnap = await db.collection('friends').doc(currentUser.uid).collection('list').get();
+    const friendFriendsSnap = await db.collection('friends').doc(friend.uid).collection('list').get();
+
+    const currentUserFriendIds = new Set(currentUserFriendsSnap.docs.map(d => d.id));
+    const friendFriendIds = new Set(friendFriendsSnap.docs.map(d => d.id));
+
+    let mutualCount = 0;
+    friendFriendIds.forEach(id => {
+      if (currentUserFriendIds.has(id)) mutualCount++;
+    });
+
+    mutualEl.textContent = `Mutual friends: ${mutualCount}`;
+  } catch (err) {
+    console.warn('Error calculating mutual friends:', err);
+    mutualEl.textContent = `Mutual friends: 0`;
+  }
+
   // Buttons container
   const actionsContainer = document.getElementById('profileActions');
   actionsContainer.innerHTML = ''; // Clear old buttons
 
   if (friend.uid === currentUser.uid) {
-    // Hide buttons for yourself
+    // No buttons for yourself
   } else {
     const areFriends = await areUsersFriends(currentUser.uid, friend.uid);
 
@@ -475,12 +495,12 @@ async function showFriendProfile(friend) {
       msgBtn.textContent = 'Message';
       msgBtn.className = 'messageBtn';
       msgBtn.onclick = () => {
-        localStorage.setItem('chatWith', friend.uid); // pass UID to chat page
+        localStorage.setItem('chatWith', friend.uid);
         window.location.href = 'chat.html';
       };
       actionsContainer.appendChild(msgBtn);
 
-      // Remove Friend button
+      // Remove button
       const removeBtn = document.createElement('button');
       removeBtn.textContent = 'Remove';
       removeBtn.className = 'removeFriendBtn';
@@ -489,7 +509,7 @@ async function showFriendProfile(friend) {
         await db.collection('friends').doc(friend.uid).collection('list').doc(currentUser.uid).delete();
         alert('Friend removed.');
         showFriendProfile(friend); // Refresh buttons
-        listenToFriends(); // Refresh friend list
+        listenToFriends();
       };
       actionsContainer.appendChild(removeBtn);
 
@@ -508,7 +528,7 @@ async function showFriendProfile(friend) {
             sentAt: firebase.firestore.FieldValue.serverTimestamp()
           });
           alert('Friend request sent!');
-          showFriendProfile(friend); // Refresh buttons
+          showFriendProfile(friend);
         } else {
           alert('Request already sent.');
         }
