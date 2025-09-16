@@ -390,28 +390,56 @@ const firebaseConfig = {
     friendsListEl.appendChild(li);
   }
   
-  // group list item (purple)
   function renderOrUpdateGroup(group) {
-    let li = friendElements[group.chatId];
-    if (!li) {;
-      li = document.createElement('li');
-      li.className = 'group-item';
-      li.style.display = 'flex';
-      li.style.alignItems = 'center';
-      li.style.background = "#350a4642";
-      li.style.gap = "10px";
-      li.style.cursor = 'pointer';
-      li.addEventListener('click', (e) => { e.preventDefault(); startGroupChat(group.chatId); });
-      friendElements[group.chatId] = li;
-    }
-    li.innerHTML = '';
-    const avatar = document.createElement('div'); avatar.className = 'avatar';
-    avatar.style.width = '40px'; avatar.style.height = '40px'; avatar.style.borderRadius = '8px'; avatar.style.backgroundColor = '#6a2c6f';
-    const name = document.createElement('div'); name.className = 'friendName'; name.textContent = group.name || 'Group Chat'; name.style.color = '#c38bd6'; name.style.fontWeight = '700';
-    const preview = document.createElement('div'); preview.className = 'groupPreview'; preview.textContent = group.lastMessagePreview || ''; preview.style.color = '#aaa'; preview.style.fontSize = '0.8em';
-    li.appendChild(avatar); li.appendChild(name); li.appendChild(preview);
-    friendsListEl.appendChild(li);
+  let li = friendElements[group.chatId];
+  if (!li) {
+    li = document.createElement('li');
+    li.className = 'group-item';
+    li.style.display = 'flex';
+    li.style.alignItems = 'center';
+    li.style.background = "#350a4642";
+    li.style.gap = "10px";
+    li.style.whiteSpace = "normal";
+    li.style.maxHeight = "60px";
+    li.style.cursor = 'pointer';
+    li.addEventListener('click', (e) => { e.preventDefault(); startGroupChat(group.chatId); });
+    friendElements[group.chatId] = li;
   }
+
+  li.innerHTML = '';
+  
+  const avatar = document.createElement('div'); 
+  avatar.className = 'avatar';
+  avatar.style.width = '40px'; 
+  avatar.style.height = '40px'; 
+  avatar.style.borderRadius = '8px'; 
+  avatar.style.backgroundColor = '#6a2c6f';
+
+  const name = document.createElement('div'); 
+  name.className = 'friendName';
+  let groupName = group.name || 'Group Chat';
+  // truncate to 9 characters
+  if (groupName.length > 9) groupName = groupName.slice(0, 9) + '...';
+  name.textContent = groupName;
+  name.style.color = '#c38bd6'; 
+  name.style.fontWeight = '700';
+
+  const preview = document.createElement('div'); 
+  preview.className = 'groupPreview';
+  let lastMessage = group.lastMessagePreview || '';
+  // truncate preview to 9 characters
+  if (lastMessage.length > 9) lastMessage = lastMessage.slice(0, 9) + '...';
+  preview.textContent = lastMessage;
+  preview.style.color = '#aaa'; 
+  preview.style.fontSize = '0.8em';
+
+  li.appendChild(avatar); 
+  li.appendChild(name); 
+  li.appendChild(preview);
+
+  friendsListEl.appendChild(li);
+}
+
   
   // -------------------- Open profile --------------------
   function openProfile(uid) {
@@ -806,24 +834,40 @@ const firebaseConfig = {
   }
   
   // kick member (only creator)
-  async function kickMember(uidToKick) {
-    if (!selectedUser || !selectedUser.isGroup) return;
-    const chatDoc = await db.collection('chats').doc(selectedUser.chatId).get();
-    if (!chatDoc.exists) return alert('Group not found');
-    const data = chatDoc.data() || {};
-    const creator = data.createdBy;
-    if (creator !== currentUser.uid) return alert('Only the group creator can kick members');
-    if (!confirm('Kick this member?')) return;
-    try {
-      await db.collection('chats').doc(selectedUser.chatId).update({ members: firebase.firestore.FieldValue.arrayRemove(uidToKick) });
-      if (groupChatsState[selectedUser.chatId]) groupChatsState[selectedUser.chatId].members = groupChatsState[selectedUser.chatId].members.filter(u => u !== uidToKick);
-      selectedUser.members = selectedUser.members.filter(u => u !== uidToKick);
-      renderGroupMembers(selectedUser);
-    } catch (err) {
-      console.error('kick failed', err);
-      alert('Failed to kick member');
+async function kickMember(uidToKick) {
+  if (!selectedUser || !selectedUser.isGroup) return;
+
+  const chatDoc = await db.collection('chats').doc(selectedUser.chatId).get();
+  if (!chatDoc.exists) return alert('Group not found');
+
+  const data = chatDoc.data() || {};
+  const creator = data.createdBy;
+  if (creator !== currentUser.uid) return alert('Only the group creator can kick members');
+
+  if (!confirm('Kick this member?')) return;
+
+  try {
+    // 1️⃣ Update Firestore
+    await db.collection('chats').doc(selectedUser.chatId)
+      .update({ members: firebase.firestore.FieldValue.arrayRemove(uidToKick) });
+
+    // 2️⃣ Update local state instantly
+    if (groupChatsState[selectedUser.chatId]) {
+      groupChatsState[selectedUser.chatId].members =
+        groupChatsState[selectedUser.chatId].members.filter(u => u !== uidToKick);
     }
+    selectedUser.members = selectedUser.members.filter(u => u !== uidToKick);
+
+    // 3️⃣ Re-render the member list in the UI
+    renderGroupMembers(selectedUser);
+
+    alert('Member kicked successfully!');
+  } catch (err) {
+    console.error('kick failed', err);
+    alert('Failed to kick member');
   }
+}
+
   
   // -------------------- Group sidebar UI --------------------
   function showGroupSidebar(group) {
@@ -1026,3 +1070,7 @@ window.addEventListener('DOMContentLoaded', () => {
         sidebar.style.display = 'none';
     }
 });
+
+
+
+ // works
