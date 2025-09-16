@@ -21,6 +21,7 @@ body {
   /* Hide scrollbar but keep scroll */
   -ms-overflow-style: none;  /* IE and Edge */
   scrollbar-width: none;     /* Firefox */
+  overflow: hidden; /* keep full screen body with no scroll */
 }
 body::-webkit-scrollbar {
   display: none;             /* Chrome, Safari, Opera */
@@ -851,6 +852,7 @@ background: linear-gradient(
 section {
   background: #16141431;
   padding: 15px;
+  max-height: 350px;
   border-radius: 8px;
   flex: 1 1 320px; /* grow, shrink, basis min width */
   display: flex;
