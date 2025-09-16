@@ -834,11 +834,11 @@ const firebaseConfig = {
   }
   
   // kick member (only creator)
+// -------------------- Open group chat listener --------------------
+// -------------------- Open group chat listener (real-time refresh) --------------------
 let unsubscribeGroupListener = null;
 
-// Open a group chat and listen to real-time updates
 function openGroupChat(groupId) {
-  // Close previous listener if any
   if (unsubscribeGroupListener) unsubscribeGroupListener();
 
   const groupRef = db.collection('chats').doc(groupId);
@@ -849,28 +849,55 @@ function openGroupChat(groupId) {
     const data = doc.data();
     const members = data.members || [];
 
-    // Ensure selectedUser is the right chat
-    if (!selectedUser || selectedUser.chatId !== groupId) return;
-
-    // Update local member list
-    selectedUser.members = members;
-    if (groupChatsState[groupId]) {
-      groupChatsState[groupId].members = members;
-    }
-
-    // If current user was kicked, close chat
+    // If current user was kicked → close UI
     if (!members.includes(currentUser.uid)) {
       closeGroupChatUI();
       alert('You were removed from this group.');
       return;
     }
 
-    // Re-render member list instantly
+    // Update local state
+    if (!selectedUser || selectedUser.chatId !== groupId) return;
+    selectedUser.members = members;
+    selectedUser.createdBy = data.createdBy;
+    if (groupChatsState[groupId]) groupChatsState[groupId].members = members;
+
+    // ✅ Re-render the sidebar instantly
     renderGroupMembers(selectedUser);
   });
 }
 
-// -------------------- Close group chat UI --------------------
+// -------------------- Kick member --------------------
+async function kickMember(uidToKick) {
+  if (!selectedUser || !selectedUser.isGroup) return;
+  const chatRef = db.collection('chats').doc(selectedUser.chatId);
+  const chatDoc = await chatRef.get();
+  if (!chatDoc.exists) return alert('Group not found');
+
+  const data = chatDoc.data() || {};
+  if (data.createdBy !== currentUser.uid) return alert('Only the group creator can kick members');
+  if (!confirm('Kick this member?')) return;
+
+  try {
+    await chatRef.update({
+      members: firebase.firestore.FieldValue.arrayRemove(uidToKick)
+    });
+    // local update
+    selectedUser.members = selectedUser.members.filter(u => u !== uidToKick);
+    if (groupChatsState[selectedUser.chatId]) {
+      groupChatsState[selectedUser.chatId].members = selectedUser.members;
+    }
+    // re-render sidebar immediately
+    renderGroupMembers(selectedUser);
+
+    if (uidToKick !== currentUser.uid) alert('Member kicked successfully!');
+  } catch (err) {
+    console.error('Kick failed', err);
+    alert('Failed to kick member');
+  }
+}
+
+// -------------------- Close UI helper --------------------
 function closeGroupChatUI() {
   selectedUser = null;
   chatId = null;
@@ -884,73 +911,101 @@ function closeGroupChatUI() {
   renderCombinedList();
 }
 
+
+// Firestore reference
+const groupRef = db.collection("groups").doc(groupId);
+
+// Listen for member updates
+groupRef.onSnapshot((doc) => {
+    if (!doc.exists) return;
+    const data = doc.data();
+    const members = data.members || [];
+
+    // Remove kicked user from the UI instantly
+    renderGroupMembers(members);
+
+    // If current user was kicked, auto-close chat
+    if (!members.includes(currentUser.uid)) {
+        closeGroupChat(); // Hide chat UI, maybe alert the user
+    }
+});
+
+
 // -------------------- Kick a member (updated) --------------------
 async function kickMember(uidToKick) {
   if (!selectedUser || !selectedUser.isGroup) return;
 
-  const chatDoc = await db.collection('chats').doc(selectedUser.chatId).get();
+  const chatRef = db.collection('chats').doc(selectedUser.chatId);
+  const chatDoc = await chatRef.get();
+
   if (!chatDoc.exists) return alert('Group not found');
 
   const data = chatDoc.data() || {};
   const creator = data.createdBy;
-  if (creator !== currentUser.uid) return alert('Only the group creator can kick members');
 
+  if (creator !== currentUser.uid) return alert('Only the group creator can kick members');
   if (!confirm('Kick this member?')) return;
 
   try {
-    await db.collection('chats').doc(selectedUser.chatId)
-      .update({ members: firebase.firestore.FieldValue.arrayRemove(uidToKick) });
+    await chatRef.update({
+      members: firebase.firestore.FieldValue.arrayRemove(uidToKick)
+    });
 
-    // Update local state
-    selectedUser.members = selectedUser.members.filter(u => u !== uidToKick);
-    if (groupChatsState[selectedUser.chatId]) {
-      groupChatsState[selectedUser.chatId].members =
-        groupChatsState[selectedUser.chatId].members.filter(u => u !== uidToKick);
-    }
-
-    // If current user was kicked, close the chat UI
-    if (uidToKick === currentUser.uid) {
-      closeGroupChatUI();
-      alert('You were removed from this group.');
-      return;
-    }
-
-    renderGroupMembers(selectedUser);
-    alert('Member kicked successfully!');
+    // Optional: show alert only to the kicker
+    if (uidToKick !== currentUser.uid) alert('Member kicked successfully!');
   } catch (err) {
-    console.error('kick failed', err);
+    console.error('Kick failed', err);
     alert('Failed to kick member');
   }
 }
-
-// -------------------- Also update openGroupChat listener --------------------
 function openGroupChat(groupId) {
-  if (unsubscribeGroupListener) unsubscribeGroupListener();
+    // Unsubscribe previous listener
+    if (unsubscribeGroupListener) unsubscribeGroupListener();
 
-  const groupRef = db.collection('chats').doc(groupId);
+    const groupRef = db.collection('chats').doc(groupId);
 
-  unsubscribeGroupListener = groupRef.onSnapshot(doc => {
-    if (!doc.exists) return;
+    unsubscribeGroupListener = groupRef.onSnapshot(doc => {
+        try {
+            if (!doc.exists) return;
 
-    const data = doc.data();
-    const members = data.members || [];
+            const data = doc.data();
+            const members = data.members || [];
 
-    // If current user is no longer in group, close UI
-    if (!members.includes(currentUser.uid)) {
-      closeGroupChatUI();
-      alert('You were removed from this group.');
-      return;
-    }
+            console.log('Group snapshot:', groupId, members);
 
-    if (!selectedUser || selectedUser.chatId !== groupId) return;
+            // If current user is removed
+            if (!members.includes(currentUser.uid)) {
+                closeGroupChatUI();
+                alert('You were removed from this group.');
+                return;
+            }
 
-    selectedUser.members = members;
-    if (groupChatsState[groupId]) groupChatsState[groupId].members = members;
+            // If no selected user or different chat
+            if (!selectedUser || selectedUser.chatId !== groupId) {
+                console.log('Selected user not matching groupId, skipping render.');
+                return;
+            }
 
-    renderGroupMembers(selectedUser);
-  });
+            // Update local state
+            selectedUser.members = members;
+            if (groupChatsState[groupId]) groupChatsState[groupId].members = members;
+
+            // Render members
+            if (typeof renderGroupMembers === 'function') {
+                renderGroupMembers({
+                    members: members,
+                    createdBy: data.createdBy
+                });
+            } else {
+                console.error('renderGroupMembers is not a function or missing!');
+            }
+        } catch (err) {
+            console.error('Error in group chat listener:', err);
+        }
+    }, err => {
+        console.error('Firestore onSnapshot error:', err);
+    });
 }
-
 
   
   // -------------------- Group sidebar UI --------------------
@@ -1024,32 +1079,46 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
   // render members (deduped)
-  async function renderGroupMembers(group) {
-    if (!group || !group.members || !groupMembersList) return;
-    groupMembersList.innerHTML = '';
-    // dedupe
-    const members = uniqueArray(group.members);
-    for (const uid of members) {
-      let displayName = uid;
-      let avatarUrl = null;
-      if (friendsState[uid]) {
-        displayName = friendsState[uid].data.displayName || uid;
-        avatarUrl = friendsState[uid].data.avatarUrl || null;
-      } else {
-        try {
-          const p = await db.collection('profiles').doc(uid).get();
-          if (p.exists) {
-            const pd = p.data();
-            displayName = pd.displayName || uid;
-            avatarUrl = pd.avatarUrl || null;
-          }
-        } catch (e) { /*ignore*/ }
+async function renderGroupMembers(group) {
+  if (!group || !Array.isArray(group.members) || !groupMembersList) return;
+
+  // Clear current list
+  groupMembersList.innerHTML = '';
+
+  // Ensure uniqueness
+  const members = [...new Set(group.members)];
+
+  for (const uid of members) {
+    let displayName = uid;
+    let avatarUrl = null;
+
+    // Use cached state if available
+    if (friendsState[uid]) {
+      const friend = friendsState[uid].data;
+      displayName = friend.displayName || uid;
+      avatarUrl = friend.avatarUrl || null;
+    } else {
+      // Otherwise fetch from Firestore
+      try {
+        const profileSnap = await db.collection('profiles').doc(uid).get();
+        if (profileSnap.exists) {
+          const profile = profileSnap.data();
+          displayName = profile.displayName || uid;
+          avatarUrl = profile.avatarUrl || null;
+        }
+      } catch (err) {
+        console.error("Failed to load profile for", uid, err);
       }
-      const canKick = (selectedUser && selectedUser.createdBy === currentUser.uid && uid !== currentUser.uid);
-      const li = makeMemberListItem(uid, displayName, avatarUrl, canKick, kickMember);
-      groupMembersList.appendChild(li);
     }
+
+    // Only creator can kick, and not themselves
+    const canKick = group.createdBy === currentUser.uid && uid !== currentUser.uid;
+
+    // Create list item
+    const li = makeMemberListItem(uid, displayName, avatarUrl, canKick, kickMember);
+    groupMembersList.appendChild(li);
   }
+}
   
   // helper to create member <li> with avatar + name + optional Kick button
   function makeMemberListItem(uid, displayName, avatarUrl, canKick = false, onKick = null) {
