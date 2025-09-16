@@ -834,67 +834,69 @@ const firebaseConfig = {
   }
   
   // kick member (only creator)
-// -------------------- Open group chat listener --------------------
-// -------------------- Open group chat listener (real-time refresh) --------------------
 let unsubscribeGroupListener = null;
 
 function openGroupChat(groupId) {
-  if (unsubscribeGroupListener) unsubscribeGroupListener();
+    // Unsubscribe previous
+    if (unsubscribeGroupListener) unsubscribeGroupListener();
 
-  const groupRef = db.collection('chats').doc(groupId);
+    const groupRef = db.collection('chats').doc(groupId);
 
-  unsubscribeGroupListener = groupRef.onSnapshot(doc => {
-    if (!doc.exists) return;
+    unsubscribeGroupListener = groupRef.onSnapshot(async doc => {
+        if (!doc.exists) return;
 
-    const data = doc.data();
-    const members = data.members || [];
+        const data = doc.data();
+        const members = data.members || [];
 
-    // If current user was kicked → close UI
-    if (!members.includes(currentUser.uid)) {
-      closeGroupChatUI();
-      alert('You were removed from this group.');
-      return;
-    }
+        // If current user was kicked → close UI
+        if (!members.includes(currentUser.uid)) {
+            closeGroupChatUI();
+            alert('You were removed from this group.');
+            return;
+        }
 
-    // Update local state
-    if (!selectedUser || selectedUser.chatId !== groupId) return;
-    selectedUser.members = members;
-    selectedUser.createdBy = data.createdBy;
-    if (groupChatsState[groupId]) groupChatsState[groupId].members = members;
+        // Update selected user state
+        if (!selectedUser || selectedUser.chatId !== groupId) return;
+        selectedUser.members = members;
+        selectedUser.createdBy = data.createdBy;
+        if (groupChatsState[groupId]) groupChatsState[groupId].members = members;
 
-    // ✅ Re-render the sidebar instantly
-    renderGroupMembers(selectedUser);
-  });
+        // Re-render sidebar instantly
+        await renderGroupMembers(selectedUser);
+    }, err => console.error('Group listener error:', err));
 }
+
 
 // -------------------- Kick member --------------------
 async function kickMember(uidToKick) {
-  if (!selectedUser || !selectedUser.isGroup) return;
-  const chatRef = db.collection('chats').doc(selectedUser.chatId);
-  const chatDoc = await chatRef.get();
-  if (!chatDoc.exists) return alert('Group not found');
+    if (!selectedUser || !selectedUser.isGroup) return;
 
-  const data = chatDoc.data() || {};
-  if (data.createdBy !== currentUser.uid) return alert('Only the group creator can kick members');
-  if (!confirm('Kick this member?')) return;
+    const chatRef = db.collection('chats').doc(selectedUser.chatId);
+    const chatDoc = await chatRef.get();
+    if (!chatDoc.exists) return alert('Group not found');
 
-  try {
-    await chatRef.update({
-      members: firebase.firestore.FieldValue.arrayRemove(uidToKick)
-    });
-    // local update
-    selectedUser.members = selectedUser.members.filter(u => u !== uidToKick);
-    if (groupChatsState[selectedUser.chatId]) {
-      groupChatsState[selectedUser.chatId].members = selectedUser.members;
+    const data = chatDoc.data() || {};
+    if (data.createdBy !== currentUser.uid) return alert('Only creator can kick.');
+    if (!confirm('Kick this member?')) return;
+
+    try {
+        await chatRef.update({
+            members: firebase.firestore.FieldValue.arrayRemove(uidToKick)
+        });
+
+        // local update immediately
+        selectedUser.members = selectedUser.members.filter(u => u !== uidToKick);
+        if (groupChatsState[selectedUser.chatId]) {
+            groupChatsState[selectedUser.chatId].members = selectedUser.members;
+        }
+
+        renderGroupMembers(selectedUser);
+
+        if (uidToKick !== currentUser.uid) alert('Member kicked successfully!');
+    } catch (err) {
+        console.error('Kick failed', err);
+        alert('Failed to kick member.');
     }
-    // re-render sidebar immediately
-    renderGroupMembers(selectedUser);
-
-    if (uidToKick !== currentUser.uid) alert('Member kicked successfully!');
-  } catch (err) {
-    console.error('Kick failed', err);
-    alert('Failed to kick member');
-  }
 }
 
 // -------------------- Close UI helper --------------------
@@ -931,33 +933,6 @@ groupRef.onSnapshot((doc) => {
 });
 
 
-// -------------------- Kick a member (updated) --------------------
-async function kickMember(uidToKick) {
-  if (!selectedUser || !selectedUser.isGroup) return;
-
-  const chatRef = db.collection('chats').doc(selectedUser.chatId);
-  const chatDoc = await chatRef.get();
-
-  if (!chatDoc.exists) return alert('Group not found');
-
-  const data = chatDoc.data() || {};
-  const creator = data.createdBy;
-
-  if (creator !== currentUser.uid) return alert('Only the group creator can kick members');
-  if (!confirm('Kick this member?')) return;
-
-  try {
-    await chatRef.update({
-      members: firebase.firestore.FieldValue.arrayRemove(uidToKick)
-    });
-
-    // Optional: show alert only to the kicker
-    if (uidToKick !== currentUser.uid) alert('Member kicked successfully!');
-  } catch (err) {
-    console.error('Kick failed', err);
-    alert('Failed to kick member');
-  }
-}
 function openGroupChat(groupId) {
     // Unsubscribe previous listener
     if (unsubscribeGroupListener) unsubscribeGroupListener();
@@ -1080,47 +1055,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // render members (deduped)
 async function renderGroupMembers(group) {
-  if (!group || !Array.isArray(group.members) || !groupMembersList) return;
+    if (!group || !Array.isArray(group.members) || !groupMembersList) return;
+    groupMembersList.innerHTML = '';
 
-  // Clear current list
-  groupMembersList.innerHTML = '';
+    const members = [...new Set(group.members)];
 
-  // Ensure uniqueness
-  const members = [...new Set(group.members)];
-
-  for (const uid of members) {
-    let displayName = uid;
-    let avatarUrl = null;
-
-    // Use cached state if available
-    if (friendsState[uid]) {
-      const friend = friendsState[uid].data;
-      displayName = friend.displayName || uid;
-      avatarUrl = friend.avatarUrl || null;
-    } else {
-      // Otherwise fetch from Firestore
-      try {
-        const profileSnap = await db.collection('profiles').doc(uid).get();
-        if (profileSnap.exists) {
-          const profile = profileSnap.data();
-          displayName = profile.displayName || uid;
-          avatarUrl = profile.avatarUrl || null;
+    for (const uid of members) {
+        let displayName = uid, avatarUrl = null;
+        if (friendsState[uid]) {
+            const f = friendsState[uid].data;
+            displayName = f.displayName || uid;
+            avatarUrl = f.avatarUrl || null;
+        } else {
+            try {
+                const p = await db.collection('profiles').doc(uid).get();
+                if (p.exists) { displayName = p.data().displayName || uid; avatarUrl = p.data().avatarUrl || null; }
+            } catch(e) { console.error('Failed profile fetch', uid, e); }
         }
-      } catch (err) {
-        console.error("Failed to load profile for", uid, err);
-      }
+
+        const canKick = group.createdBy === currentUser.uid && uid !== currentUser.uid;
+        const li = makeMemberListItem(uid, displayName, avatarUrl, canKick, kickMember);
+        groupMembersList.appendChild(li);
     }
-
-    // Only creator can kick, and not themselves
-    const canKick = group.createdBy === currentUser.uid && uid !== currentUser.uid;
-
-    // Create list item
-    const li = makeMemberListItem(uid, displayName, avatarUrl, canKick, kickMember);
-    groupMembersList.appendChild(li);
-  }
 }
-  
-  // helper to create member <li> with avatar + name + optional Kick button
+
   function makeMemberListItem(uid, displayName, avatarUrl, canKick = false, onKick = null) {
     const li = document.createElement('li');
     li.className = 'member-item';
@@ -1129,46 +1087,34 @@ async function renderGroupMembers(group) {
     li.style.gap = '8px';
     li.style.padding = '6px 2px';
     li.style.borderBottom = '1px solid rgba(255,255,255,0.03)';
-  
+
     const av = document.createElement('div');
-    av.className = 'member-avatar';
     av.style.width = '40px'; av.style.height = '40px'; av.style.borderRadius = '8px';
-  setAvatar(av, avatarUrl, 'rgb(106, 44, 111)'); // purple fallback
-if (!avatarUrl) {
-  av.style.boxShadow = '0 0 15px 5px rgba(43, 4, 46, 0.7)'; // glow effect
-} else {
-  av.style.boxShadow = ''; // remove glow if avatar exists
+    setAvatar(av, avatarUrl, '#6a2c6f');
+
+    const nameDiv = document.createElement('div');
+    nameDiv.textContent = displayName; nameDiv.style.color = '#fff'; nameDiv.style.fontWeight = '600';
+    nameDiv.style.flex = '1';
+
+    li.appendChild(av);
+    li.appendChild(nameDiv);
+
+    if (canKick && onKick) {
+        const btn = document.createElement('button');
+        btn.textContent = 'Kick';
+        btn.style.background = 'red';
+        btn.style.color = '#fff';
+        btn.style.border = 'none';
+        btn.style.borderRadius = '4px';
+        btn.style.padding = '4px 8px';
+        btn.style.cursor = 'pointer';
+        btn.onclick = () => onKick(uid);
+        li.appendChild(btn);
+    }
+
+    return li;
 }
 
-
-  
-    const nameSpan = document.createElement('div');
-    nameSpan.textContent = displayName || uid;
-    nameSpan.style.color = '#fff';  
-    nameSpan.style.flex = '1';
-    nameSpan.style.fontWeight = '600';
-  
-    li.appendChild(av);
-    li.appendChild(nameSpan);
-  
-    if (canKick) {
-      const kickBtn = document.createElement('button');
-      kickBtn.textContent = 'Kick';
-      kickBtn.className = 'kick-btn';
-      kickBtn.style.background = '#cc3333';
-      kickBtn.style.color = '#fff';
-      kickBtn.style.border = 'none';
-      kickBtn.style.borderRadius = '6px';
-      kickBtn.style.padding = '6px 8px';
-      kickBtn.style.cursor = 'pointer';
-      kickBtn.onclick = (e) => {
-        e.stopPropagation();
-        if (onKick) onKick(uid);
-      };
-      li.appendChild(kickBtn);
-    }
-    return li;
-  }
   
   // -------------------- Update last preview after deletion --------------------
   async function updateLastPreviewForChat(chatIdToUpdate) {
