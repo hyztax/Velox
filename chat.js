@@ -870,7 +870,21 @@ function openGroupChat(groupId) {
   });
 }
 
-// Kick a member (only by group creator)
+// -------------------- Close group chat UI --------------------
+function closeGroupChatUI() {
+  selectedUser = null;
+  chatId = null;
+  chatMessages.innerHTML = '';
+  chatHeader.textContent = '';
+  if (leaveBtn) leaveBtn.style.display = 'none';
+  if (toggleMembersBtn) toggleMembersBtn.style.display = 'none';
+  hideGroupSidebar();
+  localStorage.removeItem('lastGroupChatId');
+  showSection('friends');
+  renderCombinedList();
+}
+
+// -------------------- Kick a member (updated) --------------------
 async function kickMember(uidToKick) {
   if (!selectedUser || !selectedUser.isGroup) return;
 
@@ -884,26 +898,59 @@ async function kickMember(uidToKick) {
   if (!confirm('Kick this member?')) return;
 
   try {
-    // Remove member from Firestore
     await db.collection('chats').doc(selectedUser.chatId)
       .update({ members: firebase.firestore.FieldValue.arrayRemove(uidToKick) });
 
-    // Update local state instantly
+    // Update local state
     selectedUser.members = selectedUser.members.filter(u => u !== uidToKick);
     if (groupChatsState[selectedUser.chatId]) {
       groupChatsState[selectedUser.chatId].members =
         groupChatsState[selectedUser.chatId].members.filter(u => u !== uidToKick);
     }
 
-    // Re-render member list
-    renderGroupMembers(selectedUser);
+    // If current user was kicked, close the chat UI
+    if (uidToKick === currentUser.uid) {
+      closeGroupChatUI();
+      alert('You were removed from this group.');
+      return;
+    }
 
+    renderGroupMembers(selectedUser);
     alert('Member kicked successfully!');
   } catch (err) {
     console.error('kick failed', err);
     alert('Failed to kick member');
   }
 }
+
+// -------------------- Also update openGroupChat listener --------------------
+function openGroupChat(groupId) {
+  if (unsubscribeGroupListener) unsubscribeGroupListener();
+
+  const groupRef = db.collection('chats').doc(groupId);
+
+  unsubscribeGroupListener = groupRef.onSnapshot(doc => {
+    if (!doc.exists) return;
+
+    const data = doc.data();
+    const members = data.members || [];
+
+    // If current user is no longer in group, close UI
+    if (!members.includes(currentUser.uid)) {
+      closeGroupChatUI();
+      alert('You were removed from this group.');
+      return;
+    }
+
+    if (!selectedUser || selectedUser.chatId !== groupId) return;
+
+    selectedUser.members = members;
+    if (groupChatsState[groupId]) groupChatsState[groupId].members = members;
+
+    renderGroupMembers(selectedUser);
+  });
+}
+
 
   
   // -------------------- Group sidebar UI --------------------
