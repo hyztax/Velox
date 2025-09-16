@@ -874,34 +874,51 @@ auth.onAuthStateChanged(async (user) => {
 let unsubscribeGroupListener = null;
 
 function openGroupChat(groupId) {
-    // Unsubscribe previous
+    // Unsubscribe previous listener
     if (unsubscribeGroupListener) unsubscribeGroupListener();
 
     const groupRef = db.collection('chats').doc(groupId);
 
-    unsubscribeGroupListener = groupRef.onSnapshot(async doc => {
-        if (!doc.exists) return;
+    unsubscribeGroupListener = groupRef.onSnapshot(doc => {
+        try {
+            if (!doc.exists) return;
 
-        const data = doc.data();
-        const members = data.members || [];
+            const data = doc.data();
+            const members = data.members || [];
 
-        // If current user was kicked → close UI
-        if (!members.includes(currentUser.uid)) {
-            closeGroupChatUI();
-            alert('You were removed from this group.');
-            return;
+            console.log('Group snapshot:', groupId, members);
+
+            // If current user is removed
+            if (!members.includes(currentUser.uid)) {
+                closeGroupChatUI();
+                alert('You were removed from this group.');
+                return;
+            }
+
+            // If no selected user or different chat
+            if (!selectedUser || selectedUser.chatId !== groupId) return;
+
+            // Update local state
+            selectedUser.members = members;
+            if (groupChatsState[groupId]) groupChatsState[groupId].members = members;
+
+            // Render members dynamically
+            if (typeof renderGroupMembers === 'function') {
+                renderGroupMembers({
+                    members: members,
+                    createdBy: data.createdBy
+                });
+            } else {
+                console.error('renderGroupMembers is not a function or missing!');
+            }
+        } catch (err) {
+            console.error('Error in group chat listener:', err);
         }
-
-        // Update selected user state
-        if (!selectedUser || selectedUser.chatId !== groupId) return;
-        selectedUser.members = members;
-        selectedUser.createdBy = data.createdBy;
-        if (groupChatsState[groupId]) groupChatsState[groupId].members = members;
-
-        // Re-render sidebar instantly
-        await renderGroupMembers(selectedUser);
-    }, err => console.error('Group listener error:', err));
+    }, err => {
+        console.error('Firestore onSnapshot error:', err);
+    });
 }
+
 
 
 // -------------------- Kick member --------------------
@@ -913,28 +930,63 @@ async function kickMember(uidToKick) {
     if (!chatDoc.exists) return alert('Group not found');
 
     const data = chatDoc.data() || {};
-    if (data.createdBy !== currentUser.uid) return alert('Only creator can kick.');
+    if (data.createdBy !== currentUser.uid) return alert('Only the creator can kick.');
     if (!confirm('Kick this member?')) return;
 
     try {
+        // Remove member from Firestore
         await chatRef.update({
             members: firebase.firestore.FieldValue.arrayRemove(uidToKick)
         });
 
-        // local update immediately
+        // Local update for the current client
         selectedUser.members = selectedUser.members.filter(u => u !== uidToKick);
         if (groupChatsState[selectedUser.chatId]) {
             groupChatsState[selectedUser.chatId].members = selectedUser.members;
         }
 
         renderGroupMembers(selectedUser);
-
         if (uidToKick !== currentUser.uid) alert('Member kicked successfully!');
     } catch (err) {
         console.error('Kick failed', err);
         alert('Failed to kick member.');
     }
 }
+
+// -------------------- Real-time member listener --------------------
+function listenToGroupMembers(chatId) {
+    const chatRef = db.collection('chats').doc(chatId);
+    chatRef.onSnapshot(doc => {
+        if (!doc.exists) return;
+
+        const data = doc.data();
+        const members = data.members || [];
+
+        // Update local state
+        if (selectedUser && selectedUser.chatId === chatId) {
+            selectedUser.members = members;
+        }
+        if (groupChatsState[chatId]) {
+            groupChatsState[chatId].members = members;
+        }
+
+        // Re-render the members list for everyone
+        renderGroupMembers(selectedUser);
+
+        // Close chat if current user was kicked
+        if (!members.includes(currentUser.uid)) {
+            closeGroupChatUI();
+            alert('You were removed from the group!');
+        }
+    });
+}
+
+// -------------------- Usage --------------------
+// Call this once when opening a group chat
+if (selectedUser && selectedUser.isGroup) {
+    listenToGroupMembers(selectedUser.chatId);
+}
+
 
 // -------------------- Close UI helper --------------------
 function closeGroupChatUI() {
