@@ -7,7 +7,36 @@ body {
   color: #c9c9ca;
   font-size: 16px;
   line-height: 1.5;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden; /* keep full screen body with no scroll */
 }
+
+/* --- Sidebar / Friends --- */
+#friendsSection {
+  background: linear-gradient(135deg, #2423232f, #131313);
+  border-right: 1px solid #111;
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+  overflow-y: auto; /* allow vertical scroll inside sidebar */
+  height: 100vh;    /* fill full height of screen */
+  scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none;  /* IE 10+ */
+}
+
+
+#friendsSection input {
+  margin-bottom: 12px;
+  width: 100%;
+  padding: 8px 12px;
+  border-radius: 9px;
+  border: 1px solid #333;
+  background: #1a1a1a; /* this is the search bar for friend list */
+  color: #eee;
+}
+
+
 
 /* --- Container --- */
 #app {
@@ -61,28 +90,7 @@ mask-size: 100% 100%;
 
 }
 
-/* --- Sidebar / Friends --- */
-#friendsSection {
-  grid-area: sidebar;
-  background: linear-gradient(135deg, #2423232f, #131313);
-  border-right: 1px solid #111;
-  display: flex;
-  flex-direction: column;
-  padding: 1rem;
-  overflow-y: auto;
-  
-}
 
-
-#friendsSection input {
-  margin-bottom: 12px;
-  width: 100%;
-  padding: 8px 12px;
-  border-radius: 9px;
-  border: 1px solid #333;
-  background: #1a1a1a; /* this is the search bar for friend list */
-  color: #eee;
-}
 
 
 #notificationContainer {
@@ -248,6 +256,7 @@ mask-size: 100% 100%;
 
 /* Group sidebar */
 #groupSidebar {
+  display: none; /* hidden by default */
   width: 200px;
   background: #222;
   border-radius: 8px;
@@ -280,10 +289,6 @@ mask-size: 100% 100%;
   padding: 10px;          /* space inside each item */
   margin-bottom: 8px;     /* space between items */
   border-radius: 6px;     /* optional: softer look */
-}
-
-#groupSidebar {
-    display: hidden; 
 }
 
 #addMemberSearch {
@@ -672,7 +677,7 @@ mask-size: 100% 100%;
 
 
 #friendsList li {
-  background: #131314;
+  background: #1a1a23;
   border-radius: 12px;
   padding: 10px 14px;
   color: #f5f5f5;
@@ -688,7 +693,7 @@ mask-size: 100% 100%;
 }
 
 #friendsList li:hover {
-  background: #1c1c25;
+  background: #1e1e2e;
   transform: translateY(-3px);
   box-shadow: 0 6px 12px rgba(0,0,0,0.4);
 }

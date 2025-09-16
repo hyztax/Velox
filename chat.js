@@ -393,7 +393,7 @@ const firebaseConfig = {
   // group list item (purple)
   function renderOrUpdateGroup(group) {
     let li = friendElements[group.chatId];
-    if (!li) {
+    if (!li) {;
       li = document.createElement('li');
       li.className = 'group-item';
       li.style.display = 'flex';
@@ -771,9 +771,6 @@ const firebaseConfig = {
         }
         scrollChatToBottom();
       });
-  
-    // show members sidebar
-    showGroupSidebar(selectedUser);
   }
   
   // add member handler (any group member can add ANY friend from their list)
@@ -874,6 +871,7 @@ const firebaseConfig = {
       closeX.style.zIndex = '4000';
       groupSidebar.appendChild(closeX);
       closeX.addEventListener('click', hideGroupSidebar);
+      hideGroupSidebar();
     }
     // ensure add section visible
     const addSection = document.getElementById('addMemberSection');
