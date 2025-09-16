@@ -603,31 +603,68 @@ const firebaseConfig = {
     });
   });
   
-  // -------------------- Auth handling & restore --------------------
-  auth.onAuthStateChanged(async (user) => {
-    if (!user) return location.href = 'signin.html';
-    currentUser = user;
-  
-    // ensure input starts empty and focused
-    if (messageInput) { messageInput.value = ''; messageInput.focus(); }
-    if (charCounter) charCounter.textContent = `0 / ${MAX_LENGTH}`;
-  
-    listenToFriendsRealtime();
-    showSection('friends');
-  
-    const userRef = db.collection('profiles').doc(currentUser.uid);
-    await userRef.set({ online: true, lastOnline: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
-  
-    const lastChatUid = localStorage.getItem('lastChatUid');
-    const lastGroupId = localStorage.getItem('lastGroupChatId');
-  
-    if (lastChatUid) startChat(lastChatUid, false);
-    else if (lastGroupId) startGroupChat(lastGroupId);
-  
-    window.addEventListener('beforeunload', () => {
-      userRef.set({ online: false, lastOnline: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
-    });
+ // -------------------- Auth Handling & Restore --------------------
+// -------------------- Auth handling & restore --------------------
+auth.onAuthStateChanged(async (user) => {
+  if (!user) return location.href = 'signin.html';
+  currentUser = user;
+
+  // ensure input starts empty and focused
+  if (messageInput) { messageInput.value = ''; messageInput.focus(); }
+  if (charCounter) charCounter.textContent = `0 / ${MAX_LENGTH}`;
+
+  listenToFriendsRealtime();
+  showSection('friends');
+
+  const userRef = db.collection('profiles').doc(currentUser.uid);
+  await userRef.set(
+    { online: true, lastOnline: firebase.firestore.FieldValue.serverTimestamp() },
+    { merge: true }
+  );
+
+  const lastChatUid = localStorage.getItem('lastChatUid');
+  const lastGroupId = localStorage.getItem('lastGroupChatId');
+
+  // check last private chat
+  if (lastChatUid) {
+    const chatRef = db.collection('privateChats').doc(lastChatUid);
+    const chatDoc = await chatRef.get();
+    if (chatDoc.exists) {
+      const participants = chatDoc.data().participants || [];
+      if (participants.includes(currentUser.uid)) {
+        startChat(lastChatUid, false);
+      } else {
+        localStorage.removeItem('lastChatUid'); // kicked, clear local storage
+      }
+    } else {
+      localStorage.removeItem('lastChatUid'); // chat deleted
+    }
+  } 
+  // check last group chat
+  else if (lastGroupId) {
+    const groupRef = db.collection('groupChats').doc(lastGroupId);
+    const groupDoc = await groupRef.get();
+    if (groupDoc.exists) {
+      const members = groupDoc.data().members || [];
+      if (members.includes(currentUser.uid)) {
+        startGroupChat(lastGroupId);
+      } else {
+        localStorage.removeItem('lastGroupChatId'); // kicked, clear local storage
+      }
+    } else {
+      localStorage.removeItem('lastGroupChatId'); // group deleted
+    }
+  }
+
+  window.addEventListener('beforeunload', async () => {
+    await userRef.set(
+      { online: false, lastOnline: firebase.firestore.FieldValue.serverTimestamp() },
+      { merge: true }
+    );
   });
+});
+
+
   
   // -------------------- ========== GROUPS ========== --------------------
   
