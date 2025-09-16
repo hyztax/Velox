@@ -834,6 +834,43 @@ const firebaseConfig = {
   }
   
   // kick member (only creator)
+let unsubscribeGroupListener = null;
+
+// Open a group chat and listen to real-time updates
+function openGroupChat(groupId) {
+  // Close previous listener if any
+  if (unsubscribeGroupListener) unsubscribeGroupListener();
+
+  const groupRef = db.collection('chats').doc(groupId);
+
+  unsubscribeGroupListener = groupRef.onSnapshot(doc => {
+    if (!doc.exists) return;
+
+    const data = doc.data();
+    const members = data.members || [];
+
+    // Ensure selectedUser is the right chat
+    if (!selectedUser || selectedUser.chatId !== groupId) return;
+
+    // Update local member list
+    selectedUser.members = members;
+    if (groupChatsState[groupId]) {
+      groupChatsState[groupId].members = members;
+    }
+
+    // If current user was kicked, close chat
+    if (!members.includes(currentUser.uid)) {
+      closeGroupChatUI();
+      alert('You were removed from this group.');
+      return;
+    }
+
+    // Re-render member list instantly
+    renderGroupMembers(selectedUser);
+  });
+}
+
+// Kick a member (only by group creator)
 async function kickMember(uidToKick) {
   if (!selectedUser || !selectedUser.isGroup) return;
 
@@ -847,18 +884,18 @@ async function kickMember(uidToKick) {
   if (!confirm('Kick this member?')) return;
 
   try {
-    // 1️⃣ Update Firestore
+    // Remove member from Firestore
     await db.collection('chats').doc(selectedUser.chatId)
       .update({ members: firebase.firestore.FieldValue.arrayRemove(uidToKick) });
 
-    // 2️⃣ Update local state instantly
+    // Update local state instantly
+    selectedUser.members = selectedUser.members.filter(u => u !== uidToKick);
     if (groupChatsState[selectedUser.chatId]) {
       groupChatsState[selectedUser.chatId].members =
         groupChatsState[selectedUser.chatId].members.filter(u => u !== uidToKick);
     }
-    selectedUser.members = selectedUser.members.filter(u => u !== uidToKick);
 
-    // 3️⃣ Re-render the member list in the UI
+    // Re-render member list
     renderGroupMembers(selectedUser);
 
     alert('Member kicked successfully!');
