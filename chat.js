@@ -580,6 +580,13 @@ async function sendMessage(e) {
   }
 }
 
+function disableMessageInput(disabled) {
+  messageInput.disabled = disabled;
+  messageInput.placeholder = disabled ? "You have been kicked" : "Enter message...";
+  sendBtn.disabled = disabled;
+}
+
+
   
   // -------------------- Input autosize / char counter / focus on typing --------------------
   messageInput.addEventListener('input', () => {
