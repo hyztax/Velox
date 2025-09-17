@@ -516,77 +516,52 @@ const firebaseConfig = {
   }
   
   // -------------------- Send message --------------------
-async function sendMessage(e) {
-  if (e) e.preventDefault();
-  if (!chatId || !currentUser) return;
-
-  const text = messageInput.value.trim();
-  if (!text || text.length > MAX_LENGTH) return;
-
-  const isGroup = selectedUser?.isGroup === true;
-
-  // 🔥 Kick check for groups
-  if (isGroup) {
-      const group = groupChatsState[chatId];
-      const kicked = group?.kicked || [];
-      if (kicked.includes(currentUser.uid)) {
-          alert("You have been kicked from this group.");
-          return;
-      }
-  }
-
-  sendBtn.disabled = true;
-  messageInput.disabled = true;
-
-  try {
+  async function sendMessage(e) {
+    if (e) e.preventDefault();
+    if (!chatId || !currentUser) return;
+    const text = messageInput.value.trim();
+    if (!text || text.length > MAX_LENGTH) return;
+  
+    sendBtn.disabled = true;
+    messageInput.disabled = true;
+  
+    try {
       const timestamp = firebase.firestore.FieldValue.serverTimestamp();
+      const isGroup = selectedUser?.isGroup === true;
       const msgData = { sender: currentUser.uid, text, timestamp };
-
+  
       if (isGroup) {
-          // embed senderName for easier display later
-          const profSnap = await db.collection('profiles').doc(currentUser.uid).get();
-          msgData.senderName = (profSnap.exists && profSnap.data().displayName)
-              ? profSnap.data().displayName
-              : '';
+        // embed senderName for easier display later
+        const profSnap = await db.collection('profiles').doc(currentUser.uid).get();
+        msgData.senderName = (profSnap.exists && profSnap.data().displayName) ? profSnap.data().displayName : '';
       }
-
+  
       await db.collection('chats').doc(chatId).collection('messages').add(msgData);
-
+  
       if (isGroup) {
-          await db.collection('chats').doc(chatId).update({
-              lastChatTimestamp: timestamp,
-              lastMessagePreview: text.slice(0, 120)
-          });
+        await db.collection('chats').doc(chatId).update({ lastChatTimestamp: timestamp, lastMessagePreview: text.slice(0, 120) });
       } else {
-          // update friend previews for both sides
-          const parts = chatId.split('_');
-          const other = parts[0] === currentUser.uid ? parts[1] : parts[0];
-          await db.collection('friends').doc(currentUser.uid).collection('list').doc(other)
-              .set({ lastMessage: text.slice(0, 20), lastChatTimestamp: timestamp }, { merge: true });
-          await db.collection('friends').doc(other).collection('list').doc(currentUser.uid)
-              .set({ lastMessage: text.slice(0, 20), lastChatTimestamp: timestamp }, { merge: true });
+        // update friend previews for both sides
+        const parts = chatId.split('_');
+        const other = parts[0] === currentUser.uid ? parts[1] : parts[0];
+        await db.collection('friends').doc(currentUser.uid).collection('list').doc(other)
+          .set({ lastMessage: text.slice(0, 20), lastChatTimestamp: timestamp }, { merge: true });
+        await db.collection('friends').doc(other).collection('list').doc(currentUser.uid)
+          .set({ lastMessage: text.slice(0, 20), lastChatTimestamp: timestamp }, { merge: true });
       }
-
+  
       // reset input
       messageInput.value = '';
       charCounter.textContent = `0 / ${MAX_LENGTH}`;
-  } catch (err) {
+    } catch (err) {
       console.error('sendMessage error', err);
       alert('Failed to send message');
-  } finally {
+    } finally {
       sendBtn.disabled = false;
       messageInput.disabled = false;
       messageInput.focus();
+    }
   }
-}
-
-function disableMessageInput(disabled) {
-  messageInput.disabled = disabled;
-  messageInput.placeholder = disabled ? "You have been kicked" : "Enter message...";
-  sendBtn.disabled = disabled;
-}
-
-
   
   // -------------------- Input autosize / char counter / focus on typing --------------------
   messageInput.addEventListener('input', () => {
@@ -948,49 +923,35 @@ function openGroupChat(groupId) {
 
 // -------------------- Kick member --------------------
 async function kickMember(uidToKick) {
-  if (!selectedUser || !selectedUser.isGroup) return;
+    if (!selectedUser || !selectedUser.isGroup) return;
 
-  const chatRef = db.collection('chats').doc(selectedUser.chatId);
-  const chatDoc = await chatRef.get();
-  if (!chatDoc.exists) return alert('Group not found');
+    const chatRef = db.collection('chats').doc(selectedUser.chatId);
+    const chatDoc = await chatRef.get();
+    if (!chatDoc.exists) return alert('Group not found');
 
-  const data = chatDoc.data() || {};
-  if (data.createdBy !== currentUser.uid) return alert('Only the creator can kick.');
-  if (!confirm('Kick this member?')) return;
+    const data = chatDoc.data() || {};
+    if (data.createdBy !== currentUser.uid) return alert('Only the creator can kick.');
+    if (!confirm('Kick this member?')) return;
 
-  try {
-      // --- Firestore update ---
-      await chatRef.update({
-          members: firebase.firestore.FieldValue.arrayRemove(uidToKick),
-          kicked: firebase.firestore.FieldValue.arrayUnion(uidToKick)
-      });
+    try {
+        // Remove member from Firestore
+        await chatRef.update({
+            members: firebase.firestore.FieldValue.arrayRemove(uidToKick)
+        });
 
-      // --- 🔥 Instant local update for kicker ---
-      if (uidToKick !== currentUser.uid) {
-          // Remove from local state immediately
-          selectedUser.members = selectedUser.members.filter(u => u !== uidToKick);
-          if (groupChatsState[selectedUser.chatId]) {
-              groupChatsState[selectedUser.chatId].members = selectedUser.members;
-              if (!groupChatsState[selectedUser.chatId].kicked) {
-                  groupChatsState[selectedUser.chatId].kicked = [];
-              }
-              groupChatsState[selectedUser.chatId].kicked.push(uidToKick);
-          }
+        // Local update for the current client
+        selectedUser.members = selectedUser.members.filter(u => u !== uidToKick);
+        if (groupChatsState[selectedUser.chatId]) {
+            groupChatsState[selectedUser.chatId].members = selectedUser.members;
+        }
 
-          // Re-render instantly
-          renderGroupMembers({
-              members: selectedUser.members,
-              createdBy: data.createdBy
-          });
-
-          alert('Member kicked successfully!');
-      }
-  } catch (err) {
-      console.error('Kick failed', err);
-      alert('Failed to kick member.');
-  }
+        renderGroupMembers(selectedUser);
+        if (uidToKick !== currentUser.uid) alert('Member kicked successfully!');
+    } catch (err) {
+        console.error('Kick failed', err);
+        alert('Failed to kick member.');
+    }
 }
-
 
 // -------------------- Real-time member listener --------------------
 function listenToGroupMembers(chatId) {
@@ -1062,55 +1023,53 @@ groupRef.onSnapshot((doc) => {
 
 
 function openGroupChat(groupId) {
-  if (unsubscribeGroupListener) unsubscribeGroupListener();
+    // Unsubscribe previous listener
+    if (unsubscribeGroupListener) unsubscribeGroupListener();
 
-  const groupRef = db.collection('chats').doc(groupId);
+    const groupRef = db.collection('chats').doc(groupId);
 
-  unsubscribeGroupListener = groupRef.onSnapshot(doc => {
-      if (!doc.exists) return;
+    unsubscribeGroupListener = groupRef.onSnapshot(doc => {
+        try {
+            if (!doc.exists) return;
 
-      const data = doc.data();
-      const members = data.members || [];
-      const kicked = data.kicked || [];
+            const data = doc.data();
+            const members = data.members || [];
 
-      // If current user was kicked
-      if (kicked.includes(currentUser.uid)) {
-          // Always show frozen chat
-          chatMessages.innerHTML = '<p class="kicked-msg">You have been kicked from this group.</p>';
-          disableMessageInput(true);
-          return;
-      }
+            console.log('Group snapshot:', groupId, members);
 
-      // Normal group update
-      if (!selectedUser || selectedUser.chatId !== groupId) {
-          selectedUser = { chatId: groupId, isGroup: true };
-      }
-      selectedUser.members = members;
+            // If current user is removed
+            if (!members.includes(currentUser.uid)) {
+                closeGroupChatUI();
+                alert('You were removed from this group.');
+                return;
+            }
 
-      if (groupChatsState[groupId]) {
-          groupChatsState[groupId].members = members;
-      }
+            // If no selected user or different chat
+            if (!selectedUser || selectedUser.chatId !== groupId) {
+                console.log('Selected user not matching groupId, skipping render.');
+                return;
+            }
 
-      renderGroupMembers({
-          members,
-          createdBy: data.createdBy
-      });
+            // Update local state
+            selectedUser.members = members;
+            if (groupChatsState[groupId]) groupChatsState[groupId].members = members;
 
-      disableMessageInput(false);
-  });
+            // Render members
+            if (typeof renderGroupMembers === 'function') {
+                renderGroupMembers({
+                    members: members,
+                    createdBy: data.createdBy
+                });
+            } else {
+                console.error('renderGroupMembers is not a function or missing!');
+            }
+        } catch (err) {
+            console.error('Error in group chat listener:', err);
+        }
+    }, err => {
+        console.error('Firestore onSnapshot error:', err);
+    });
 }
-
-function disableMessageInput(disabled) {
-  if (messageInput) {
-      messageInput.disabled = disabled;
-      messageInput.placeholder = disabled 
-          ? "You have been kicked" 
-          : "Type a message...";
-  }
-  if (sendBtn) sendBtn.disabled = disabled;
-}
-
-
 
   
   // -------------------- Group sidebar UI --------------------
