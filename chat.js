@@ -917,7 +917,7 @@ function openGroupChat(groupId) {
     }, err => {
         console.error('Firestore onSnapshot error:', err);
     });
-}
+}// before
 
 
 
@@ -951,34 +951,44 @@ async function kickMember(uidToKick) {
         console.error('Kick failed', err);
         alert('Failed to kick member.');
     }
-}
+}// works
 
 // -------------------- Real-time member listener --------------------
 function listenToGroupMembers(chatId) {
-    const chatRef = db.collection('chats').doc(chatId);
-    chatRef.onSnapshot(doc => {
-        if (!doc.exists) return;
+  const chatRef = db.collection('chats').doc(chatId);
 
-        const data = doc.data();
-        const members = data.members || [];
+  const unsubscribe = chatRef.onSnapshot(doc => {
+      if (!doc.exists) return;
 
-        // Update local state
-        if (selectedUser && selectedUser.chatId === chatId) {
-            selectedUser.members = members;
-        }
-        if (groupChatsState[chatId]) {
-            groupChatsState[chatId].members = members;
-        }
+      const data = doc.data();
+      const members = data.members || [];
 
-        // Re-render the members list for everyone
-        renderGroupMembers(selectedUser);
+      // ✅ Update local state
+      if (selectedUser && selectedUser.chatId === chatId) {
+          selectedUser.members = members;
+      }
+      if (groupChatsState[chatId]) {
+          groupChatsState[chatId].members = members;
+      }
 
-        // Close chat if current user was kicked
-        if (!members.includes(currentUser.uid)) {
-            closeGroupChatUI();
-            alert('You were removed from the group!');
-        }
-    });
+      // ✅ Re-render members for everyone
+      if (typeof renderGroupMembers === 'function') {
+          renderGroupMembers(selectedUser);
+      }
+
+      // ✅ If current user was kicked, close UI and stop listening
+      if (!members.includes(currentUser.uid)) {
+          closeGroupChatUI();
+
+          // Unsubscribe from this snapshot so they don’t keep getting updates
+          unsubscribe();
+
+          alert('You were removed from the group!');
+      }
+  });
+
+  // Return unsubscribe so caller can stop it manually too
+  return unsubscribe;
 }
 
 // -------------------- Usage --------------------
