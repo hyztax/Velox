@@ -77,14 +77,20 @@ function ensureUserProfile(user) {
   const ref = db.collection('profiles').doc(user.uid);
   ref.get().then(doc => {
     if (!doc.exists) {
+      // Only use editorColor if it has a non-default value
+      const chosenColor = (editorColor && editorColor.value && editorColor.value !== '#00ff00')
+        ? editorColor.value
+        : getRandomColor();
+
       ref.set({
         displayName: user.displayName || user.email || 'User',
         bio: '',
-        profileColor: editorColor?.value || '#111211'
+        profileColor: chosenColor,
       });
     }
   }).catch(console.error);
 }
+
 
 // --- ONLINE USERS ---
 function listenUsersList() {
