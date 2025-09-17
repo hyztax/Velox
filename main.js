@@ -355,7 +355,7 @@ profileBtn.addEventListener('click', () => {
     const p = doc.data() || {};
     editorName.value = p.displayName || '';
     editorBio.value = p.bio || '';
-    editorColor.value = p.profileColor || '#00ff00';
+    editorColor.value = p.profileColor || '#111211';
     editorModal.classList.remove('hidden');
   });
 });
