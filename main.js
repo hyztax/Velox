@@ -80,7 +80,7 @@ function ensureUserProfile(user) {
       ref.set({
         displayName: user.displayName || user.email || 'User',
         bio: '',
-        profileColor: editorColor?.value || '#00ff00'
+        profileColor: editorColor?.value || '#111211'
       });
     }
   }).catch(console.error);
