@@ -174,40 +174,50 @@ body {
 
 
 
-
-
-.Velox_Shop {
-  position: fixed;               /* stay fixed on screen */
-  top: 20px;                     /* distance from top */
-  right: 20px;                   /* distance from right */
-  display: flex;                 /* horizontal layout */
-  align-items: center;           /* vertically center text with image */
-  gap: 10px;                     /* space between image and text */
-  padding: 10px;
-  background-color: #22222277;        /* dark background for visibility */
+.download-btn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  background: linear-gradient(135deg, #6785a7, #455b77);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
   border-radius: 8px;
-  text-decoration: none;         /* remove underline */
-  color: rgb(232, 226, 226);
-  z-index: 1000;      
-  transition: background 0.3s ease 0.1s;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  transition: all 0.25s cubic-bezier(0.25, 1, 0.5, 1);
+  cursor: pointer;
+  overflow: hidden;
 }
 
-.Velox_Shop:hover{
-  background-color: #07070782;    
+.download-btn::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: rgba(42, 50, 77, 0.404);
+  transform: rotate(45deg);
+  transition: all 0.5s ease;
 }
 
-.Velox_Shop span {
-  font-weight: bold;
-  font-size: 16px;
-  color: rgb(232, 226, 226);
-  text-shadow: 0 0 2px #fff, 0 0 4px #4b4848, 0 0 6px #0e0e0e; /* subtle glow */
+.download-btn:hover::before {
+  top: 0;
+  left: 0;
 }
 
-.Velox_Shop img {
-  width: 25px;
-  height: 25px;
-  object-fit: contain;
-  transition: box-shadow 0.3s;
+.download-btn:hover {
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.25);
 }
 
-
+.download-btn:active {
+  transform: translateY(1px) scale(0.98);
+  box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+}
