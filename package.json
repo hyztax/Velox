@@ -1,20 +1,37 @@
 {
   "name": "velox2",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Velox chat app",
   "main": "run.js",
   "scripts": {
     "start": "electron .",
-    "package": "electron-packager . Velox --platform=win32 --arch=x64 --overwrite --icon=icon.ico",
+    "dist": "electron-builder",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "Your Name",
+  "author": "Hyztax",
   "license": "MIT",
   "devDependencies": {
     "electron": "^25.9.8",
+    "electron-builder": "^26.0.12",
     "electron-packager": "^17.1.2"
   },
   "dependencies": {
     "electron-updater": "^6.6.2"
+  },
+  "build": {
+    "appId": "com.hyztax.velox",
+    "productName": "Velox",
+    "win": {
+      "target": "nsis",
+      "icon": "icon.ico",
+      "artifactName": "Velox-Setup.exe"
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "hyztax",
+        "repo": "Velox"
+      }
+    ]
   }
 }

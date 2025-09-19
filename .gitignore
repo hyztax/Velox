@@ -1,0 +1,15 @@
+# Ignore Node modules
+node_modules/
+
+# Ignore build/dist folders
+dist/
+out/
+
+# Ignore executable files
+*.exe
+*.zip
+*.7z
+
+# Ignore OS files
+.DS_Store
+Thumbs.db
