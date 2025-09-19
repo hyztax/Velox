@@ -1,4 +1,3 @@
-// --- Electron App Setup ---
 const { app, BrowserWindow, dialog } = require('electron');
 const path = require('path');
 const { autoUpdater } = require('electron-updater');
@@ -8,7 +7,7 @@ app.commandLine.appendSwitch('no-sandbox');
 app.commandLine.appendSwitch('disable-gpu');
 app.disableHardwareAcceleration();
 
-// Create the main application window
+// Create main window
 function createWindow() {
   const win = new BrowserWindow({
     width: 1200,
@@ -19,9 +18,7 @@ function createWindow() {
       nodeIntegration: false
     }
   });
-
-  win.loadFile('index.html'); // Load your Velox HTML
-  // win.webContents.openDevTools(); // Optional: enable for debugging
+  win.loadFile('index.html');
 }
 
 // Auto-update setup
@@ -45,13 +42,20 @@ autoUpdater.on('update-downloaded', () => {
   });
 });
 
-// Check for updates once app is ready
+// App ready
 app.whenReady().then(() => {
   createWindow();
+
+  // Dropbox feed URL MUST point to the YAML, not the EXE
+  autoUpdater.setFeedURL({
+    provider: 'generic',
+    url: 'https://www.dropbox.com/s/yourYamlFileID/latest.yml?dl=1'
+  });
+
   autoUpdater.checkForUpdatesAndNotify();
 });
 
-// App lifecycle events
+// App lifecycle
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit();
 });
