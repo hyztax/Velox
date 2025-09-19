@@ -223,79 +223,120 @@ const firebaseConfig = {
     chatMessages.appendChild(container);
     scrollChatToBottom();
   }
-  
   // context menu: Remove / Copy / Report (Copy disabled if deleted)
-  function showContextMenu(msgId, msg, container) {
-    // remove existing menus
-    document.querySelectorAll('.contextMenuPopup').forEach(el => el.remove());
-  
-    const menu = document.createElement('div');
-    menu.className = 'contextMenuPopup';
-    menu.style.position = 'absolute';
-    menu.style.background = '#222';
-    menu.style.color = '#fff';
-    menu.style.padding = '6px';
-    menu.style.borderRadius = '6px';
-    menu.style.zIndex = 30000;
-    menu.style.minWidth = '120px';
-  
-    const top = (window.lastMouseEvent && window.lastMouseEvent.pageY) || (container.getBoundingClientRect().top + window.scrollY);
-    const left = (window.lastMouseEvent && window.lastMouseEvent.pageX) || (container.getBoundingClientRect().left + window.scrollX);
-    menu.style.top = `${top}px`;
-    menu.style.left = `${left}px`;
-  
-    // Remove option: only for sender and not already deleted
-    if (msg.sender === currentUser.uid && !msg.deleted) {
-      const remove = document.createElement('div');
-      remove.textContent = 'Remove';
-      remove.style.cursor = 'pointer';
-      remove.style.padding = '4px 2px';
-      remove.onclick = async () => {
-        try {
-          // update UI right away
-          const el = chatMessages.querySelector(`[data-msg-id="${msgId}"]`);
-          if (el) {
-            const mDiv = el.querySelector('.message');
-            if (mDiv) {
-              mDiv.textContent = '*deleted message*';
-              mDiv.style.fontStyle = 'italic';
-              mDiv.style.color = '#aaa';
-            }
+function showContextMenu(msgId, msg, container) {
+  // remove existing menus
+  document.querySelectorAll('.contextMenuPopup').forEach(el => el.remove());
+
+  const menu = document.createElement('div');
+  menu.className = 'contextMenuPopup';
+  menu.style.position = 'absolute';
+  menu.style.background = '#222';
+  menu.style.color = '#fff';
+  menu.style.padding = '6px';
+  menu.style.borderRadius = '6px';
+  menu.style.zIndex = 30000;
+  menu.style.minWidth = '120px';
+
+  const top =
+    (window.lastMouseEvent && window.lastMouseEvent.pageY) ||
+    (container.getBoundingClientRect().top + window.scrollY);
+  const left =
+    (window.lastMouseEvent && window.lastMouseEvent.pageX) ||
+    (container.getBoundingClientRect().left + window.scrollX);
+  menu.style.top = `${top}px`;
+  menu.style.left = `${left}px`;
+
+  // --- REMOVE ---
+  if (msg.sender === currentUser.uid && !msg.deleted) {
+    const remove = document.createElement('div');
+    remove.textContent = 'Remove';
+    remove.style.cursor = 'pointer';
+    remove.style.padding = '4px 2px';
+    remove.onclick = async () => {
+      try {
+        // update UI immediately
+        const el = chatMessages.querySelector(`[data-msg-id="${msgId}"]`);
+        if (el) {
+          const mDiv = el.querySelector('.message');
+          if (mDiv) {
+            mDiv.textContent = '*deleted message*';
+            mDiv.style.fontStyle = 'italic';
+            mDiv.style.color = '#aaa';
           }
-          // mark as deleted in Firestore
-          await db.collection('chats').doc(chatId).collection('messages').doc(msgId).update({ deleted: true });
-          // update last-preview / friend summaries so deleted text isn't used
-          await updateLastPreviewForChat(chatId);
-        } catch (err) {
-          console.error('Remove failed', err);
-        } finally {
-          menu.remove();
         }
-      };
-      menu.appendChild(remove);
-    }
-  
-    // Copy (disabled if deleted)
-    if (!msg.deleted) {
-      const copy = document.createElement('div');
-      copy.textContent = 'Copy';
-      copy.style.cursor = 'pointer';
-      copy.style.padding = '4px 2px';
-      copy.onclick = () => { navigator.clipboard.writeText(msg.text || ''); menu.remove(); };
-      menu.appendChild(copy);
-    }
-  
-    // Report
-    const report = document.createElement('div');
-    report.textContent = 'Report';
-    report.style.cursor = 'pointer';
-    report.style.padding = '4px 2px';
-    report.onclick = () => { alert('Reported.'); menu.remove(); };
-    menu.appendChild(report);
-  
-    document.body.appendChild(menu);
-    setTimeout(() => document.addEventListener('click', () => menu.remove(), { once: true }), 10);
+
+        // update local msg object so copy/report reacts instantly
+        msg.deleted = true;
+
+        // mark as deleted in Firestore
+        await db
+          .collection('chats')
+          .doc(chatId)
+          .collection('messages')
+          .doc(msgId)
+          .update({ deleted: true });
+
+        // update last-preview / friend summaries so deleted text isn't used
+        await updateLastPreviewForChat(chatId);
+      } catch (err) {
+        console.error('Remove failed', err);
+      } finally {
+        menu.remove();
+      }
+    };
+    menu.appendChild(remove);
   }
+
+  // --- COPY (disabled if deleted) ---
+  if (!msg.deleted) {
+    const copy = document.createElement('div');
+    copy.textContent = 'Copy';
+    copy.style.cursor = 'pointer';
+    copy.style.padding = '4px 2px';
+    copy.onclick = () => {
+      navigator.clipboard.writeText(msg.text || '');
+      menu.remove();
+    };
+    menu.appendChild(copy);
+  }
+
+  // --- REPORT ---
+  const report = document.createElement('div');
+  report.textContent = 'Report';
+  report.style.cursor = 'pointer';
+  report.style.padding = '4px 2px';
+  report.onclick = async () => {
+    const reason = prompt('Please describe the issue with this message:');
+    if (reason) {
+      try {
+        // store in Firestore instead of email (safer, scalable)
+        await db.collection('reports').add({
+          chatId,
+          msgId,
+          reportedBy: currentUser.uid,
+          messageText: msg.text || '',
+          reason,
+          timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        alert('Thank you, your report has been submitted.');
+      } catch (err) {
+        console.error('Report failed', err);
+        alert('Failed to submit report.');
+      }
+    }
+    menu.remove();
+  };
+  menu.appendChild(report);
+
+  document.body.appendChild(menu);
+  setTimeout(
+    () => document.addEventListener('click', () => menu.remove(), { once: true }),
+    10
+  );
+}
+
   
   // -------------------- Friends & Groups listeners --------------------
   function listenToFriendsRealtime() {
@@ -603,7 +644,7 @@ const firebaseConfig = {
     });
   });
   
- // -------------------- Auth Handling & Restore --------------------
+
 // -------------------- Auth handling & restore --------------------
 auth.onAuthStateChanged(async (user) => {
   if (!user) return location.href = 'signin.html';
