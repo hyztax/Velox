@@ -545,3 +545,5 @@ async function showFriendProfile(friend) {
 
   profileModal.classList.remove('hidden');
 }
+
+
