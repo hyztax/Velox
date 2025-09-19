@@ -1,4 +1,3 @@
-// --- CONFIG + INIT ---
 const firebaseConfig = {
   apiKey: "AIzaSyBXb9OhOEOo4gXNIv2WcCNmXfnm1x7R2EM",
   authDomain: "velox-c39ad.firebaseapp.com",
@@ -77,20 +76,14 @@ function ensureUserProfile(user) {
   const ref = db.collection('profiles').doc(user.uid);
   ref.get().then(doc => {
     if (!doc.exists) {
-      // Only use editorColor if it has a non-default value
-      const chosenColor = (editorColor && editorColor.value && editorColor.value !== '#00ff00')
-        ? editorColor.value
-        : getRandomColor();
-
       ref.set({
         displayName: user.displayName || user.email || 'User',
         bio: '',
-        profileColor: chosenColor,
+        profileColor: editorColor?.value || '#111211'
       });
     }
   }).catch(console.error);
 }
-
 
 // --- ONLINE USERS ---
 function listenUsersList() {
@@ -545,5 +538,3 @@ async function showFriendProfile(friend) {
 
   profileModal.classList.remove('hidden');
 }
-
-
