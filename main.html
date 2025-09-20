@@ -118,7 +118,7 @@
   <!-- Friends List -->
   <section aria-label="Your Friends" style="flex: 1; min-width: 100px;">
     <h2>FRIENDS</h2>
-    <input type="text" id="searchFriends" placeholder="Search friends..." autocomplete="off" />
+    <input type="text" id="searchFriends" placeholder="Search for a friend" autocomplete="off" />
     <ul id="friendsList"></ul>
   </section>
 
@@ -138,7 +138,7 @@
   <!-- Incoming Friend Requests -->
   <section aria-label="Friend Requests" style="flex: 1; min-width: 100px; color: rgb(196, 196, 196);">
     <h2>REQUESTS</h2>
-    <input type="text" id="searchRequests" placeholder="Search requests..." autocomplete="off" />
+    <input type="text" id="searchRequests" placeholder="Search for a request" autocomplete="off" />
     <ul id="friendRequestsList"></ul>
   </section>
 
@@ -167,6 +167,83 @@ function claimAndRedirect(event) {
 </div>
 
 <canvas id="starfield"></canvas>
+
+<!-- Update Button -->
+<div id="updateContainer">
+  <button id="updateBtn">Check for Updates</button>
+</div>
+
+<!-- Update Button Container -->
+<div id="updateContainer" style="display:none;">
+  <button id="updateBtn">Check for Updates</button>
+</div>
+
+<style>
+  #updateContainer {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 99999;
+    display: flex;
+  }
+
+  #updateBtn {
+    background: linear-gradient(135deg, #1f0d3350, #3f547970);
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+    transition: transform 0.6s ease, box-shadow 0.8s ease, background 0.6s ease;
+    min-width: 160px;
+    min-height: 45px;
+  }
+
+  #updateBtn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(5, 5, 5, 0.671);
+    background: linear-gradient(135deg, #0c1f3f70, #390c6d50);
+  }
+
+  #updateBtn:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 10px rgba(238, 238, 238, 0.548);
+  }
+</style>
+
+<script>
+const btn = document.getElementById('updateBtn');
+const isElectron = typeof window !== 'undefined' && window.electronAPI;
+
+if (isElectron) {
+  btn.style.display = 'block';
+
+  btn.addEventListener('click', () => {
+    btn.innerText = "Checking...";
+    btn.disabled = true;
+    window.electronAPI.checkForUpdates();
+  });
+
+  window.electronAPI.onUpdateAvailable(() => {
+    btn.innerText = "Downloading...";
+  });
+
+  window.electronAPI.onUpdateDownloaded(() => {
+    btn.innerText = "Update Ready!";
+    setTimeout(() => {
+      btn.innerText = "Check for Updates";
+      btn.disabled = false;
+    }, 3000);
+  });
+} else {
+  btn.style.display = 'none';
+}
+
+</script>
+
 
 
 

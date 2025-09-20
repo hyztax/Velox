@@ -1,51 +1,56 @@
-const { app, BrowserWindow, dialog, ipcMain } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const path = require('path');
 const { autoUpdater } = require('electron-updater');
 
-app.commandLine.appendSwitch('no-sandbox');
+// GPU crash fix
 app.commandLine.appendSwitch('disable-gpu');
 app.disableHardwareAcceleration();
 
+// Disable sandbox to allow Node.js in renderer
+app.commandLine.appendSwitch('no-sandbox');
+
 let mainWindow;
+let splash;
 
 function createWindow() {
+  // Splash screen
+  splash = new BrowserWindow({
+    width: 400,
+    height: 300,
+    frame: false,
+    alwaysOnTop: true,
+    transparent: true
+  });
+  splash.loadFile('splash.html');
+
+  // Main window
   mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
     fullscreen: true,
+    show: false,
     autoHideMenuBar: true,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
-      nodeIntegration: false,
-      sandbox: false
+      nodeIntegration: false
     }
   });
 
-  const onlineURL = 'https://hyztax.github.io/Velox/';
-  mainWindow.loadURL(onlineURL).catch(() => mainWindow.loadFile('index.html'));
+  mainWindow.loadFile('main.html');
 
-  mainWindow.on('restore', () => mainWindow.reload());
-
-  // Hide the desktop download button in the app
-  mainWindow.webContents.on('did-finish-load', () => {
-    mainWindow.webContents.executeJavaScript(`
-      const btn = document.querySelector('.download-btn');
-      if (btn) btn.style.display = 'none';
-    `).catch(console.error);
+  mainWindow.once('ready-to-show', () => {
+    if (splash) splash.destroy();
+    mainWindow.show();
   });
 
-  // Disable DevTools (F12 / Ctrl+Shift+I)
   mainWindow.webContents.on('before-input-event', (event, input) => {
     if ((input.key === 'F12') || (input.control && input.shift && input.key.toLowerCase() === 'i')) {
       event.preventDefault();
     }
   });
 
-  // Suppress console messages from renderer
-  mainWindow.webContents.on('console-message', (event, level, message) => {
-    // Uncomment below to debug
-    // console.log('Renderer log:', level, message);
+  mainWindow.webContents.on('console-message', (event) => {
     event.preventDefault();
   });
 }
@@ -54,34 +59,39 @@ function createWindow() {
 autoUpdater.autoDownload = true;
 
 autoUpdater.on('update-available', () => {
-  dialog.showMessageBox({
-    type: 'info',
-    title: 'Update Available',
-    message: 'A new version of Velox is available. Downloading now...'
-  });
-  mainWindow.webContents.send('update-available');
+  if (mainWindow) mainWindow.webContents.send('update-available');
 });
 
 autoUpdater.on('update-downloaded', () => {
+  if (mainWindow) mainWindow.webContents.send('update-downloaded');
   dialog.showMessageBox({
     type: 'info',
     title: 'Update Ready',
     message: 'Update downloaded. The app will restart to install.'
-  }).then(() => autoUpdater.quitAndInstall(true, true));
-  mainWindow.webContents.send('update-downloaded');
+  }).then(() => {
+    autoUpdater.quitAndInstall(true, true);
+  });
 });
 
-// IPC: manual update check from renderer
+// IPC from renderer
 ipcMain.on('check-for-updates', () => {
   autoUpdater.checkForUpdatesAndNotify();
 });
 
-// App ready
+// Only check for updates if packaged
 app.whenReady().then(() => {
   createWindow();
-  autoUpdater.checkForUpdatesAndNotify();
+  if (!app.isPackaged) {
+    console.log("Dev mode: auto-updates skipped");
+  } else {
+    autoUpdater.checkForUpdatesAndNotify();
+  }
 });
 
-// App lifecycle
-app.on('window-all-closed', () => { if (process.platform !== 'darwin') app.quit(); });
-app.on('activate', () => { if (BrowserWindow.getAllWindows().length === 0) createWindow(); });
+app.on('window-all-closed', () => {
+  if (process.platform !== 'darwin') app.quit();
+});
+
+app.on('activate', () => {
+  if (BrowserWindow.getAllWindows().length === 0) createWindow();
+});

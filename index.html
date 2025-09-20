@@ -30,7 +30,7 @@
   
   <main class="welcome-screen">
   
-<a href="https://github.com/hyztax/Velox/releases/download/untagged-eaabde2882ca0cbf863e/Velox-Setup.exe"
+<a href="https://github.com/hyztax/Velox/releases/download/untagged-a1be2e0fee7f1ec3f248/Velox-Setup.exe"
    class="download-btn" rel="noopener noreferrer">
   <span>Download Desktop App</span>
 </a>
@@ -76,69 +76,6 @@
       </p>
     </footer>
   </main>
-
-<!-- Update Button Container -->
-<div id="updateContainer" style="position: fixed; top: 20px; right: 20px; z-index: 1000; display: none;">
-  <button id="updateBtn">Check for Updates</button>
-</div>
-
-<style>
-  #updateBtn {
-    background: linear-gradient(135deg, #6a11cb, #2575fc);
-    color: white;
-    font-size: 16px;
-    font-weight: bold;
-    padding: 12px 24px;
-    border: none;
-    border-radius: 12px;
-    cursor: pointer;
-    box-shadow: 0 6px 15px rgba(0,0,0,0.2);
-    transition: all 0.3s ease;
-  }
-
-  #updateBtn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-    background: linear-gradient(135deg, #2575fc, #6a11cb);
-  }
-
-  #updateBtn:active {
-    transform: translateY(0);
-    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-  }
-</style>
-
-<script>
-  // Better Electron detection
-  const isElectron = typeof window !== 'undefined' 
-                     && window.process 
-                     && window.process.type;
-
-  const container = document.getElementById('updateContainer');
-  const btn = document.getElementById('updateBtn');
-
-  if (isElectron && window.electronAPI) {
-    container.style.display = 'block'; // Show button
-
-    btn.addEventListener('click', () => {
-      window.electronAPI.checkForUpdates();
-      btn.innerText = "Checking...";
-      btn.disabled = true;
-    });
-
-    window.electronAPI.onUpdateAvailable(() => {
-      btn.innerText = "Downloading...";
-    });
-
-    window.electronAPI.onUpdateDownloaded(() => {
-      btn.innerText = "Update Ready!";
-      setTimeout(() => {
-        btn.innerText = "Check for Updates";
-        btn.disabled = false;
-      }, 3000);
-    });
-  }
-</script>
 
 
   <canvas id="starfield"></canvas>
