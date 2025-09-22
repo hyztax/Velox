@@ -9,32 +9,63 @@ document.addEventListener('DOMContentLoaded', () => {
     measurementId: "G-X8W755KRF6"
   };
 
-  const app = firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth(app);
+  // Initialize Firebase
+  if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+  }
+  const auth = firebase.auth();
 
+  // ===== Signin Form =====
   const signinForm = document.getElementById('signin-form');
-  if (!signinForm) return console.error('Signin form not found!');
+  if (signinForm) {
+    signinForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = signinForm.email.value.trim();
+      const password = signinForm.password.value.trim();
 
-  signinForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
+      if (!email || !password) {
+        alert('Please fill in all fields.');
+        return;
+      }
 
-    const email = e.target.email.value.trim();
-    const password = e.target.password.value.trim();
+      try {
+        const userCredential = await auth.signInWithEmailAndPassword(email, password);
+        const user = userCredential.user;
 
-    if (!email || !password) {
-      alert('Please fill in all fields.');
-      return;
-    }
+        if (user.emailVerified) {
+          window.location.href = 'index.html';
+        } else {
+          alert("⚠️ Please verify your email before logging in.");
+          await auth.signOut();
+        }
+      } catch (error) {
+        alert(`Error: ${error.message}`);
+        console.error(error);
+      }
+    });
+  }
 
-    try {
-      const userCredential = await auth.signInWithEmailAndPassword(email, password);
-     // alert(`Welcome back, ${userCredential.user.displayName || 'User'}! You are signed in.`);
-      window.location.href = 'index.html';  
-    } catch (error) {
-      alert(`Error: ${error.message}`);
-    }
-  });
+  // ===== Reset Password Form =====
+  const resetForm = document.getElementById('reset-form');
+  if (resetForm) {
+    resetForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const emailInput = document.getElementById('reset-email');
+      const email = emailInput.value.trim();
+
+      if (!email) {
+        alert("Please enter your email.");
+        return;
+      }
+
+      try {
+        await auth.sendPasswordResetEmail(email);
+        alert("✅ Password reset email sent! Check your inbox (or spam).");
+        resetForm.reset();
+      } catch (error) {
+        alert(`Error: ${error.message}`);
+        console.error(error);
+      }
+    });
+  }
 });
-
-
-// works 

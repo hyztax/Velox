@@ -59,12 +59,17 @@ document.addEventListener('DOMContentLoaded', () => {
       });
 
       // Create Firestore document
-      await db.collection('users').doc(userCredential.user.uid).set({
+         await db.collection('users').doc(userCredential.user.uid).set({
         displayName: username,
         bio: "",
         avatarUrl: null,
         email: email
       });
+
+      // Send verification email
+      await userCredential.user.sendEmailVerification();
+
+      alert("Signup successful! A verification email has been sent. Please verify your email before logging in.");
 
       // Redirect to sign-in
       window.location.href = 'signin.html';

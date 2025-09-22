@@ -31,15 +31,22 @@
       <p class="tagline">Welcome back! Please sign in.</p>
     </header>
 
-    <form id="signin-form" class="auth-form">
-      <label for="email">Email</label>
-      <input id="email" name="email" type="email" required placeholder="Enter your email" />
+  <form id="signin-form" class="auth-form">
+  <label for="email">Email</label>
+  <input id="email" name="email" type="email" required placeholder="Enter your email" />
 
-      <label for="password">Password</label>
-      <input id="password" name="password" type="password" required placeholder="Enter your password" />
+  <label for="password">Password</label>
+  <input id="password" name="password" type="password" required placeholder="Enter your password" />
 
-      <button type="submit" class="create-btn">Sign In</button>
-    </form>
+  <button type="submit" class="create-btn">Sign In</button>
+</form>
+
+<!-- Password Reset Form -->
+<form id="reset-form" class="auth-form reset-form">
+  <label for="reset-email">Forgot password?</label>
+  <input id="reset-email" name="reset-email" type="email" placeholder="Enter your email" required />
+  <button type="submit" class="create-btn small-btn">create new password</button>
+</form>
 
     <p class="signin-link">
       Don't have an account? <a href="signup.html">Sign Up</a>
@@ -83,6 +90,32 @@
       }
     });
   </script>
+
+<script>  // ===== Password Reset Form =====
+  const resetForm = document.getElementById('reset-form');
+  if (resetForm) {
+    resetForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const emailInput = document.getElementById('reset-email');
+      const email = emailInput.value.trim();
+
+      if (!email) {
+        alert("Please enter your email.");
+        return;
+      }
+
+      try {
+        await auth.sendPasswordResetEmail(email);
+        alert("✅ Password reset email sent! Check your inbox (or spam).");
+        resetForm.reset(); // clears the field
+      } catch (error) {
+        alert(`Error: ${error.message}`);
+        console.error(error);
+      }
+    });
+  }
+</script>
+  
 
 <canvas id="starfield"></canvas>
 <script src="stars.js"></script>
