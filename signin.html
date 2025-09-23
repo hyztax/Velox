@@ -31,43 +31,50 @@
       <p class="tagline">Welcome back! Please sign in.</p>
     </header>
 
-    <form id="signin-form" class="auth-form">
-      <label for="email">Email</label>
-      <input id="email" name="email" type="email" required placeholder="Enter your email" />
+  <form id="signin-form" class="auth-form">
+  <label for="email">Email</label>
+  <input id="email" name="email" type="email" required placeholder="Enter your email" />
 
-      <label for="password">Password</label>
-      <input id="password" name="password" type="password" required placeholder="Enter your password" />
+  <label for="password">Password</label>
+  <input id="password" name="password" type="password" required placeholder="Enter your password" />
 
-      <button type="submit" class="create-btn">Sign In</button>
-    </form>
+  <button type="submit" class="create-btn">Sign In</button>
+</form>
+
+<!-- Password Reset Form -->
+<form id="reset-form" class="auth-form reset-form">
+  <label for="reset-email">Forgot password?</label>
+  <input id="reset-email" name="reset-email" type="email" placeholder="Enter your email" required />
+  <button type="submit" class="create-btn small-btn">create new password</button>
+</form>
 
     <p class="signin-link">
       Don't have an account? <a href="signup.html">Sign Up</a>
     </p>
   </main>
 
-  <script>
-    // Your Firebase config
-    const firebaseConfig = {
-      apiKey: "AIzaSyBXb9OhOEOo4gXNIv2WcCNmXfnm1x7R2EM",
-      authDomain: "velox-c39ad.firebaseapp.com",
-      projectId: "velox-c39ad",
-      storageBucket: "velox-c39ad.appspot.com",
-      messagingSenderId: "404832661601",
-      appId: "1:404832661601:web:9ad221c8bfb459410bba20",
-      measurementId: "G-X8W755KRF6"
-    };
+<script>
+  // Your Firebase config
+  const firebaseConfig = {
+    apiKey: "AIzaSyBXb9OhOEOo4gXNIv2WcCNmXfnm1x7R2EM",
+    authDomain: "velox-c39ad.firebaseapp.com",
+    projectId: "velox-c39ad",
+    storageBucket: "velox-c39ad.appspot.com",
+    messagingSenderId: "404832661601",
+    appId: "1:404832661601:web:9ad221c8bfb459410bba20",
+    measurementId: "G-X8W755KRF6"
+  };
 
-    // Initialize Firebase
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
+  if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
 
-    // Sign In Form Submit
-    document.getElementById('signin-form').addEventListener('submit', async (e) => {
+  // ===== Sign In Form =====
+  const signinForm = document.getElementById('signin-form');
+  if (signinForm) {
+    signinForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-
-      const email = e.target.email.value.trim();
-      const password = e.target.password.value.trim();
+      const email = signinForm.email.value.trim();
+      const password = signinForm.password.value.trim();
 
       if (!email || !password) {
         alert('Please fill in all fields.');
@@ -76,13 +83,56 @@
 
       try {
         const userCredential = await auth.signInWithEmailAndPassword(email, password);
-      //  alert(`Welcome back, ${userCredential.user.displayName || 'User'}! You are signed in.`);
-        window.location.href = 'main.html';  // Redirect to main.html after login
+        const user = userCredential.user;
+
+        await user.reload(); // Ensure emailVerified is up-to-date
+
+        if (!user.emailVerified) {
+          await user.sendEmailVerification(); // Resend verification email
+          await auth.signOut();
+          alert("⚠️ Please verify your email before logging in. Verification email sent again.");
+          return;
+        }
+
+        // ✅ Verified → redirect reliably
+        window.location.replace('main.html'); // Use replace instead of href
+        console.log("✅ User signed in and verified:", user.email);
+
       } catch (error) {
         alert(`Error: ${error.message}`);
+        console.error(error);
       }
     });
-  </script>
+  }
+</script>
+
+
+
+<script>  // ===== Password Reset Form =====
+  const resetForm = document.getElementById('reset-form');
+  if (resetForm) {
+    resetForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const emailInput = document.getElementById('reset-email');
+      const email = emailInput.value.trim();
+
+      if (!email) {
+        alert("Please enter your email.");
+        return;
+      }
+
+      try {
+        await auth.sendPasswordResetEmail(email);
+        alert("✅ Password reset email sent! Check your inbox (or spam).");
+        resetForm.reset(); // clears the field
+      } catch (error) {
+        alert(`Error: ${error.message}`);
+        console.error(error);
+      }
+    });
+  }
+</script>
+  
 
 <canvas id="starfield"></canvas>
 <script src="stars.js"></script>

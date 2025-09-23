@@ -221,3 +221,42 @@ body {
   transform: translateY(1px) scale(0.98);
   box-shadow: 0 3px 8px rgba(0,0,0,0.2);
 }
+
+/* Reset form slightly smaller than original (14%) */
+.reset-form {
+  margin-top: 13px; /* originally 15px */
+  gap: 8.6px;       /* originally 10px */
+}
+
+.reset-form label {
+  font-size: 0.731rem; /* originally 0.85rem */
+  color: #999898;
+}
+
+.reset-form input {
+  padding: 8.6px 10.3px; /* originally 10px 12px */
+  font-size: 0.774rem;    /* originally 0.9rem */
+  border-radius: 10.3px;  /* originally 12px */
+  background-color: rgb(14, 13, 13);
+  color: rgb(238, 238, 238);
+}
+
+.reset-form .small-btn {
+  padding: 8.6px 12.9px; /* keeps 14% smaller */
+  font-size: 0.774rem;    
+  border-radius: 10px;  
+  background: #1b0707;
+  width: 100%;              /* half-width */
+  height: 25px;            /* fixed height */
+  text-align: center;      /* center the text */
+  display: flex;           /* flex centering */
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: rgb(160, 150, 150);
+}
+
+.reset-form .small-btn:hover {
+  background: #2e0303;
+   color: rgb(201, 197, 197);
+}

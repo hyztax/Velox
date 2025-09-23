@@ -13,7 +13,6 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 firebase.analytics();
 const auth = firebase.auth();
-const db = firebase.firestore();
 
 // Wait for DOM to load
 document.addEventListener('DOMContentLoaded', () => {
@@ -52,22 +51,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     try {
       const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+      const user = userCredential.user;
 
-      // Set display name
-      await userCredential.user.updateProfile({
-        displayName: username
-      });
+      await user.updateProfile({ displayName: username });
+      await user.sendEmailVerification(); // Send verification email
+      await auth.signOut(); // Force logout
 
-      // Create Firestore document
-      await db.collection('users').doc(userCredential.user.uid).set({
-        displayName: username,
-        bio: "",
-        avatarUrl: null,
-        email: email
-      });
-
-      // Redirect to sign-in
+      // Friendly alert
+      alert(`✅ Verification email sent to ${email}. Please check your inbox (or spam) to activate your account.`);
       window.location.href = 'signin.html';
+
     } catch (error) {
       alert(`Error: ${error.message}`);
     }
