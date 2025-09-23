@@ -1,6 +1,6 @@
 {
   "name": "velox2",
-  "version": "1.0.18",
+  "version": "1.0.19",
   "description": "Velox chat app",
   "main": "run.js",
   "scripts": {
