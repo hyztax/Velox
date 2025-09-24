@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, dialog } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, shell } = require('electron');
 const path = require('path');
 const { autoUpdater } = require('electron-updater');
 
@@ -24,18 +24,19 @@ function createWindow() {
   splash.loadFile('splash.html');
 
   // Main window
-  mainWindow = new BrowserWindow({
-    width: 1200,
-    height: 800,
-    fullscreen: true,
-    show: false,
-    autoHideMenuBar: true,
-    webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
-      contextIsolation: true,
-      nodeIntegration: false
-    }
-  });
+mainWindow = new BrowserWindow({
+  width: 1200,
+  height: 800,
+  fullscreen: true,
+  show: false,
+  autoHideMenuBar: true,
+  webPreferences: {
+    preload: path.join(__dirname, 'preload.js'),
+    contextIsolation: true,   // MUST be true
+    nodeIntegration: false    // MUST be false
+  }
+});
+
 
   mainWindow.loadFile('main.html');
 
@@ -76,6 +77,11 @@ autoUpdater.on('update-downloaded', () => {
 // IPC from renderer
 ipcMain.on('check-for-updates', () => {
   autoUpdater.checkForUpdatesAndNotify();
+});
+
+// Open links externally from renderer via IPC fallback
+ipcMain.on('open-external', (event, url) => {
+  if (url && typeof url === 'string') shell.openExternal(url);
 });
 
 // Only check for updates if packaged

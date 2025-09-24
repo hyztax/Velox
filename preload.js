@@ -1,7 +1,10 @@
-const { contextBridge, ipcRenderer } = require('electron');
+const { contextBridge, shell } = require('electron');
 
 contextBridge.exposeInMainWorld('electronAPI', {
-  checkForUpdates: () => ipcRenderer.send('check-for-updates'),
-  onUpdateAvailable: (callback) => ipcRenderer.on('update-available', callback),
-  onUpdateDownloaded: (callback) => ipcRenderer.on('update-downloaded', callback)
+  openExternal: (url) => {
+    if (url && typeof url === 'string') {
+      // Open link in the default system browser
+      shell.openExternal(url).catch(err => console.error('Failed to open link:', err));
+    }
+  }
 });
