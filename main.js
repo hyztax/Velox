@@ -488,16 +488,17 @@ async function showFriendProfile(friend) {
   } else {
     const areFriends = await areUsersFriends(currentUser.uid, friend.uid);
 
-    if (areFriends) {
-      // Message button
-      const msgBtn = document.createElement('button');
-      msgBtn.textContent = 'Message';
-      msgBtn.className = 'messageBtn';
-      msgBtn.onclick = () => {
-        localStorage.setItem('chatWith', friend.uid);
-        window.location.href = 'chat.html';
-      };
-      actionsContainer.appendChild(msgBtn);
+  if (areFriends) {
+  // Message button - redirects to chat.html
+  const msgBtn = document.createElement('button');
+  msgBtn.textContent = 'Message';
+  msgBtn.className = 'messageBtn';
+  msgBtn.onclick = () => {
+    const encodedName = encodeURIComponent(friend.displayName || 'Unknown');
+    window.location.href = `chat.html?uid=${friend.uid}&name=${encodedName}`;
+  };
+  actionsContainer.appendChild(msgBtn);
+
 
       // Remove button
       const removeBtn = document.createElement('button');
@@ -538,3 +539,33 @@ async function showFriendProfile(friend) {
 
   profileModal.classList.remove('hidden');
 }
+
+// Assume currentUser is already set after auth
+const urlParams = new URLSearchParams(window.location.search);
+const friendUid = urlParams.get('uid');
+const friendName = urlParams.get('name') || 'Unknown';
+
+if (friendUid) {
+  document.getElementById('chatHeader').textContent = friendName;
+  openChatWith(friendUid, friendName);
+}
+
+// Chat sending logic
+const sendBtn = document.getElementById('sendMessageBtn');
+const input = document.getElementById('messageInput');
+sendBtn.onclick = async () => {
+  if (!input.value.trim()) return;
+  const text = input.value.trim();
+  input.value = '';
+
+  const msgData = { text, from: currentUser.uid, sentAt: firebase.firestore.FieldValue.serverTimestamp() };
+
+  // Store message for both users
+  await db.collection('messages').doc(currentUser.uid).collection(friendUid).add(msgData);
+  await db.collection('messages').doc(friendUid).collection(currentUser.uid).add(msgData);
+};
+
+
+
+// also add notifcation on left side !!
+// works ig

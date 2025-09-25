@@ -528,6 +528,41 @@ mask-size: 100% 100%;
     text-align: right; /* aligns with bubble automatically */
 }
 
+.dateDivider {
+  text-align: center;
+  font-size: 12px;
+  color: #aaa;
+  margin: 12px 0;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dateDivider::before,
+.dateDivider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: #555; /* line color */
+  margin: 0 8px;     /* space between line and text */
+}
+
+/* Remove only the default focus ring color in Electron */
+input:focus,
+textarea:focus {
+    outline-color: transparent;   /* keeps focus but removes gold color */
+    outline-style: solid;         /* ensures outline exists for accessibility if needed */
+    outline-width: 1px;           /* or keep default */
+}
+
+/* Optional: keep subtle visual cue */
+input:focus-visible,
+textarea:focus-visible {
+    outline-color: #969799;       /* custom focus color if you want */
+}
+
+
 /* --- Date Separator --- */
 .messageDate {
     text-align: center;
@@ -889,3 +924,41 @@ mask-size: 100% 100%;
   background-color: #3d04048f;
 }
 
+
+
+#notificationContainer {
+    background: linear-gradient(135deg, #31293d, #0e0b0d); /* cool gradient */
+    color: #d8d3d3;
+    padding: 12px 18px;
+    border-radius: 15px; /* rounded square */
+    box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+    cursor: pointer;
+    max-width: 280px;
+    min-width: 0px;
+    word-wrap: break-word;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-weight: 500;
+    transition: transform 0.2s ease, box-shadow 0.4s ease;
+    opacity: 0;
+    transform: translateX(50px);
+    animation: slideIn 0.4s forwards;
+}
+
+#notificationContainer:empty {
+    display: none;
+}
+
+
+/* Slide-in animation */
+@keyframes slideIn {
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Hover effect */
+#notificationContainer:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.4);
+}

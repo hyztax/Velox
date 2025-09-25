@@ -51,6 +51,7 @@ const firebaseConfig = {
   }
   
   
+  
   // -------------------- State --------------------
   const MAX_LENGTH = 300;
   let currentUser = null;
@@ -159,73 +160,139 @@ const firebaseConfig = {
     return Array.from(new Set(arr || []));
   }
   
-// -------------------- Message rendering --------------------
+// -------------------- Helper --------------------
+function formatChatDate(d) {
+  const now = new Date();
+  const diffTime = now - d; // difference in ms
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+  const isSameDay = d.getDate() === now.getDate() &&
+                    d.getMonth() === now.getMonth() &&
+                    d.getFullYear() === now.getFullYear();
+
+  const yesterday = new Date(now);
+  yesterday.setDate(now.getDate() - 1);
+  const isYesterday = d.getDate() === yesterday.getDate() &&
+                      d.getMonth() === yesterday.getMonth() &&
+                      d.getFullYear() === yesterday.getFullYear();
+
+  if (isSameDay) {
+    return "Today";
+  } else if (isYesterday) {
+    return "Yesterday";
+  } else if (diffDays < 7) {
+    // within the last week
+    return d.toLocaleDateString([], { weekday: 'long' }); // "Monday"
+  } else if (d.getFullYear() === now.getFullYear()) {
+    return d.toLocaleDateString([], { month: 'short', day: 'numeric' }); // "Sep 23"
+  } else {
+    return d.toLocaleDateString([], { year: 'numeric', month: 'short', day: 'numeric' }); // "2024 May 12"
+  }
+}
+
+// -------------------- Main Message Rendering --------------------
 function renderMessage(msg, msgId = null) {
-  if (!chatMessages) return;
+    if (!chatMessages) return;
 
-  const container = document.createElement('div');
-  const isMe = msg.sender === currentUser.uid;
-  container.className = 'messageContainer ' + (isMe ? 'sent' : 'received');
-  container.dataset.msgId = msgId || '';
+    let d = new Date();
+    if (msg.timestamp) {
+        if (typeof msg.timestamp.toDate === 'function') {
+            d = msg.timestamp.toDate();
+        } else if (msg.timestamp.seconds) {
+            d = new Date(msg.timestamp.seconds * 1000);
+        } else {
+            d = new Date(msg.timestamp);
+        }
+    }
 
- // Message content
-const msgDiv = document.createElement('div');
-msgDiv.className = 'message';
+    const dateStr = formatChatDate(d);
+    if (lastRenderedDate !== dateStr) {
+        const divider = document.createElement('div');
+        divider.className = 'dateDivider';
+        divider.textContent = dateStr;
+        chatMessages.appendChild(divider);
+        lastRenderedDate = dateStr;
+    }
+
+    const container = document.createElement('div');
+    const isMe = msg.sender === currentUser.uid;
+    container.className = 'messageContainer ' + (isMe ? 'sent' : 'received');
+    container.dataset.msgId = msgId || '';
+
+    const msgDiv = document.createElement('div');
+    msgDiv.className = 'message';
+
+    // --- ADD SENDER NAME FOR GROUP CHATS ---
+    if (selectedUser?.isGroup && !isMe) {
+        const nameDiv = document.createElement('div');
+        nameDiv.className = 'messageSenderName';
+        // fallback to senderName field, else show UID
+        nameDiv.textContent = msg.senderName || msg.sender || 'Unknown';
+        nameDiv.style.fontWeight = '600';
+        nameDiv.style.fontSize = '0.85em';
+        nameDiv.style.marginBottom = '2px';
+        nameDiv.style.color = '#c38bd6';
+        container.appendChild(nameDiv);
+    }
 
 if (msg.deleted) {
-  msgDiv.textContent = '*deleted message*';
-  msgDiv.style.fontStyle = 'italic';
-  msgDiv.style.color = '#aaa';
+    msgDiv.textContent = '*deleted message*';
+    msgDiv.style.fontStyle = 'italic';
+    msgDiv.style.color = '#aaa';
 } else if (msg.text) {
-  msgDiv.textContent = ''; // clear for re-render
+    const parts = msg.text.split(/(https?:\/\/[^\s]+)/g);
 
-  // Split text by URLs
-  const parts = msg.text.split(/(https?:\/\/[^\s]+)/g);
-  parts.forEach(part => {
-    if (/^https?:\/\//.test(part)) {
-      const link = document.createElement('a');
-      link.textContent = part;
-      link.href = part; // Use real URL
-      link.style.color = '#4da6ff';
-      link.style.textDecoration = 'underline';
+    parts.forEach(part => {
+        if (/^https?:\/\//.test(part)) {
+            const link = document.createElement('a');
+            link.textContent = part;
+            link.style.color = '#4da6ff';
+            link.style.textDecoration = 'underline';
+            link.style.cursor = 'pointer'; // changes mouse pointer on hover
 
-     link.addEventListener('click', (e) => {
-  e.preventDefault();
-  if (window.electronAPI && typeof window.electronAPI.openExternal === 'function') {
-    window.electronAPI.openExternal(part); // opens in default browser
-  } else {
-    window.open(part, '_blank'); // fallback for browser version
-  }
-});
+            link.addEventListener('click', e => {
+                e.preventDefault();
+                const urlToOpen = part;
 
+                // Electron (preload API)
+                if (window.electronAPI?.openExternal) {
+                    window.electronAPI.openExternal(urlToOpen);
+                } 
+                // Electron (renderer with require)
+                else if (window.require) {
+                    const { shell } = require('electron');
+                    shell.openExternal(urlToOpen);
+                } 
+                // Browser fallback
+                else {
+                    window.open(urlToOpen, '_blank');
+                }
+            });
 
-      msgDiv.appendChild(link);
-    } else {
-      msgDiv.appendChild(document.createTextNode(part));
-    }
-  }); // <-- close parts.forEach
-} // <-- close else if (msg.text)
-
-container.appendChild(msgDiv);
-
-
-  // Timestamp
-  const timeDiv = document.createElement('div');
-  timeDiv.className = 'messageTime';
-  if (msg.timestamp) {
-    const d = msg.timestamp.toDate ? msg.timestamp.toDate() : new Date(msg.timestamp);
-    timeDiv.textContent = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  }
-  container.appendChild(timeDiv);
-
-  chatMessages.appendChild(container);
-
-  // Context menu
-  container.addEventListener('contextmenu', (e) => {
-    e.preventDefault();
-    showContextMenu(msgId, msg, container);
-  });
+            msgDiv.appendChild(link);
+        } else {
+            msgDiv.appendChild(document.createTextNode(part));
+        }
+    });
 }
+
+
+    container.appendChild(msgDiv);
+
+    const timeDiv = document.createElement('div');
+    timeDiv.className = 'messageTime';
+    timeDiv.textContent = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+    container.appendChild(timeDiv);
+
+    chatMessages.appendChild(container);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+
+    container.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        showContextMenu(msgId, msg, container);
+    });
+}
+
 
 
 
@@ -757,6 +824,7 @@ auth.onAuthStateChanged(async (user) => {
     );
   });
 });
+
 
 
   
@@ -1368,7 +1436,7 @@ async function renderGroupMembers(group) {
   }
   
   
-  // -------------------- End of script --------------------
+
   // Force hide any element with id "groupSidebar" on page load
 window.addEventListener('DOMContentLoaded', () => {
     const sidebar = document.getElementById('groupSidebar');
@@ -1386,3 +1454,6 @@ function linkify(text) {
 
 
  // FIXA REFRESH FOR KICKED USER!! 
+
+   // -------------------- End of script --------------------
+
