@@ -30,16 +30,16 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('lastNotified', JSON.stringify(lastNotified));
     }
 
-    function generateChatId(uid1, uid2) {
-        return [uid1, uid2].sort().join('_');
-    }
-
     function showNotification(msg) {
         if (!container || !msg.text) return;
 
-        // Avoid duplicate notifications
-        if (lastNotified[msg.sender] === msg.text) return;
-        lastNotified[msg.sender] = msg.text;
+        // Don't notify yourself
+        if (msg.sender === currentUser.uid) return;
+
+        // Avoid duplicates across refresh
+        const notifKey = msg.sender + ':' + msg.text;
+        if (lastNotified[notifKey]) return;
+        lastNotified[notifKey] = true;
         saveLastNotified();
 
         const notif = document.createElement('div');
@@ -53,11 +53,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         container.appendChild(notif);
 
-        // Play sound only if it's not the current user
-        if (msg.sender !== currentUser.uid) {
-            const audio = new Audio('notification.mp3');
-            audio.play().catch(() => {});
-        }
+        // Play sound
+        const audio = new Audio('notification.mp3');
+        audio.play().catch(() => {});
 
         // Auto-remove after 5 seconds
         setTimeout(() => notif.remove(), 5000);
@@ -65,33 +63,53 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function listenForFriendNotifications() {
         if (!currentUser) return;
-
+    
+        // Get all friend IDs
         const friendsRef = db.collection('friends').doc(currentUser.uid).collection('list');
         friendsRef.onSnapshot(async snapshot => {
-            for (const change of snapshot.docChanges()) {
-                const friendUid = change.doc.id;
-                const data = change.doc.data() || {};
-                const lastMessage = data.lastMessage || '';
-
-                // Cache friend profile
-                if (!friendsState[friendUid]) {
-                    const prof = await db.collection('profiles').doc(friendUid).get();
-                    friendsState[friendUid] = { data: prof.data() || {} };
-                }
-
-                friendsState[friendUid].latestMsg = lastMessage;
-
-                // Notify only if chat is not open and message is new
-                if (lastMessage && (!selectedUser || selectedUser.uid !== friendUid)) {
-                    showNotification({
-                        sender: friendUid,
-                        senderName: friendsState[friendUid].data.displayName || 'User',
-                        text: lastMessage
+            for (const doc of snapshot.docs) {
+                const friendUid = doc.id;
+                const chatId = [currentUser.uid, friendUid].sort().join('_');
+                const chatRef = db.collection('chats').doc(chatId).collection('messages');
+    
+                // 🔔 Listen to new messages in this chat
+                chatRef.orderBy('timestamp', 'desc').limit(1).onSnapshot(msgSnap => {
+                    msgSnap.docChanges().forEach(change => {
+                        if (change.type === 'added') {
+                            const msg = change.doc.data();
+    
+                            // 🚫 Ignore if you sent it
+                            if (msg.sender === currentUser.uid) return;
+    
+                            // 🚫 Ignore if chat is open
+                            if (selectedUser && selectedUser.uid === friendUid) return;
+    
+                            // Cache friend profile
+                            if (!friendsState[friendUid]) {
+                                db.collection('profiles').doc(friendUid).get().then(prof => {
+                                    friendsState[friendUid] = { data: prof.data() || {} };
+                                    const senderName = friendsState[friendUid].data.displayName || 'User';
+                                    showNotification({
+                                        sender: msg.sender,
+                                        senderName,
+                                        text: msg.text
+                                    });
+                                });
+                            } else {
+                                const senderName = friendsState[friendUid].data.displayName || 'User';
+                                showNotification({
+                                    sender: msg.sender,
+                                    senderName,
+                                    text: msg.text
+                                });
+                            }
+                        }
                     });
-                }
+                });
             }
         });
     }
+    
 
     // Open chat
     window.openChat = function(user) {
@@ -107,7 +125,35 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
 });
-// latest
+
+async function sendMessage(friendUid, messageText) {
+    if (!currentUser || !messageText.trim()) return;
+
+    const chatId = [currentUser.uid, friendUid].sort().join('_');
+    const chatRef = db.collection('chats').doc(chatId).collection('messages');
+
+    // Save the message in the chat collection
+    await chatRef.add({
+        sender: currentUser.uid,
+        text: messageText,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    // Update "lastMessage" + "lastSender" for both users’ friends lists
+    const updates = {
+        lastMessage: messageText,
+        lastSender: currentUser.uid,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    };
+
+    await Promise.all([
+        db.collection('friends').doc(currentUser.uid).collection('list').doc(friendUid).set(updates, { merge: true }),
+        db.collection('friends').doc(friendUid).collection('list').doc(currentUser.uid).set(updates, { merge: true })
+    ]);
+}
+
+
+
 
 
 
