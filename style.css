@@ -37,7 +37,7 @@ body {
 
 /* Card-style container */
 .card {
-  background: #2b2c34;
+  background: #03030363;
   padding: 30px 20px;
   border-radius: 20px;
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
@@ -47,29 +47,10 @@ body {
   font-size: 1.3rem;
   font-weight: 600;
   margin-bottom: 20px;
+  color: rgba(197, 195, 195, 0.774);
 }
 
-/* Create Account button */
-.create-btn {
-  background: #4f46e5;
-  color: white;
-  padding: 15px 20px;
-  font-size: 1rem;
-  border: none;
-  border-radius: 30px;
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  cursor: pointer;
-  transition: background 0.3s ease, transform 0.2s ease;
-}
 
-.create-btn:hover {
-  background: #6366f1;
-  transform: translateY(-2px);
-}
 
 .icon {
   width: 20px;
@@ -125,19 +106,28 @@ body {
   border: 2px solid #6366f1;
 }
 
+
+
+/* Create Account button */
 .create-btn {
-  background: #4f46e5;
+  background-color: #6365f160;
   color: white;
   padding: 15px 20px;
   font-size: 1rem;
   border: none;
-  border-radius: 30px;
+  border-radius: 15px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
   cursor: pointer;
-  transition: background 0.3s ease;
+  transition: background 0.3s ease, transform 0.2s ease;
 }
 
 .create-btn:hover {
-  background: #6366f1;
+  background: #3c3ea59f;
+  transform: translateY(-2px);
 }
 
 .signin-link {
@@ -263,4 +253,62 @@ body {
 .reset-form .small-btn:hover {
   background: #2e0303;
    color: rgb(201, 197, 197);
+}
+
+.header p {
+  font-size: 18px;
+  color: rgba(255, 255, 255, 0.678);
+}
+
+.header h1 {
+  background: linear-gradient(
+    90deg,
+    #4b6188,
+    #89bfff,
+    #89bfff,
+    #5571a0,
+    #89bfff
+  );
+  background-size: 300% 100%;  /* make the gradient larger than text */
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+
+  animation: moveGradient 5s linear infinite;
+}
+
+@keyframes moveGradient {
+  0% {
+    background-position: 0% 0%;
+  }
+  100% {
+    background-position: 100% 0%;
+  }
+}
+
+
+.tagline {
+  font-size: 18px;
+  color: #ffe0e0; /* soft cyan/white */
+  text-shadow: 
+    0 0 4px rgba(8, 10, 10, 0.6),
+    0 0 8px rgba(14, 17, 17, 0.4),
+    0 0 12px rgba(18, 20, 20, 0.2);
+  animation: glow 3s ease-in-out infinite;
+}
+
+@keyframes glow {
+  0%, 100% {
+    text-shadow: 
+      0 0 4px rgba(19, 26, 26, 0.6),
+      0 0 8px rgba(6, 7, 7, 0.4),
+      0 0 12px rgba(12, 14, 14, 0.2);
+  }
+  50% {
+    text-shadow: 
+      0 0 6px rgba(22, 27, 27, 0.8),
+      0 0 12px rgba(18, 20, 20, 0.6)
+      0 0 20px rgba(11, 12, 12, 0.4);
+  }
 }
