@@ -1,196 +1,194 @@
-document.addEventListener('DOMContentLoaded', () => {
+// document.addEventListener('DOMContentLoaded', () => {
 
-    const firebaseConfig = {
-        apiKey: "AIzaSyBXb9OhOEOo4gXNIv2WcCNmXfnm1x7R2EM",
-        authDomain: "velox-c39ad.firebaseapp.com",
-        projectId: "velox-c39ad",
-        storageBucket: "velox-c39ad.appspot.com",
-        messagingSenderId: "404832661601",
-        appId: "1:404832661601:web:9ad221c8bfb459410bba20",
-        measurementId: "G-X8W755KRF6"
-    };
+//     const firebaseConfig = {
+//         apiKey: "AIzaSyBXb9OhOEOo4gXNIv2WcCNmXfnm1x7R2EM",
+//         authDomain: "velox-c39ad.firebaseapp.com",
+//         projectId: "velox-c39ad",
+//         storageBucket: "velox-c39ad.appspot.com",
+//         messagingSenderId: "404832661601",
+//         appId: "1:404832661601:web:9ad221c8bfb459410bba20",
+//         measurementId: "G-X8W755KRF6"
+//     };
 
-    if (!firebase.apps.length) {
-        firebase.initializeApp(firebaseConfig);
-    }
+//     if (!firebase.apps.length) {
+//         firebase.initializeApp(firebaseConfig);
+//     }
 
-    const auth = firebase.auth();
-    const db = firebase.firestore();
+//     const auth = firebase.auth();
+//     const db = firebase.firestore();
 
-    let currentUser = null;
-    let selectedUser = null;
-    const friendsState = {};
+//     let currentUser = null;
+//     let selectedUser = null;
+//     const friendsState = {};
 
-    const container = document.getElementById('notificationContainer');
-    if (!container) console.error('Notification container not found!');
+//     const container = document.getElementById('notificationContainer');
+//     if (!container) console.error('Notification container not found!');
 
-    // LocalStorage to prevent duplicate notifications
-    const lastNotified = JSON.parse(localStorage.getItem('lastNotified') || '{}');
-    function saveLastNotified() {
-        localStorage.setItem('lastNotified', JSON.stringify(lastNotified));
-    }
+//     // LocalStorage to prevent duplicate notifications
+//     const lastNotified = JSON.parse(localStorage.getItem('lastNotified') || '{}');
+//     function saveLastNotified() {
+//         localStorage.setItem('lastNotified', JSON.stringify(lastNotified));
+//     }
 
-    function showNotification(msg) {
-        if (!container || !msg.text) return;
+//     function showNotification(msg) {
+//         if (!container || !msg.text) return;
     
-        // Don't notify yourself
-        if (msg.sender === currentUser.uid) return;
+//         // Don't notify yourself
+//         if (msg.sender === currentUser.uid) return;
     
-        // Avoid duplicates across refresh
-        const notifKey = msg.sender + ':' + msg.text;
-        if (lastNotified[notifKey]) return;
-        lastNotified[notifKey] = true;
-        saveLastNotified();
+//         // Avoid duplicates across refresh
+//         const notifKey = msg.sender + ':' + msg.text;
+//         if (lastNotified[notifKey]) return;
+//         lastNotified[notifKey] = true;
+//         saveLastNotified();
     
-        const notif = document.createElement('div');
-        notif.className = 'chatNotification';
-        notif.textContent = `${msg.senderName || 'User'}: ${msg.text.length > 50 ? msg.text.slice(0, 50) + '...' : msg.text}`;
+//         const notif = document.createElement('div');
+//         notif.className = 'chatNotification';
+//         notif.textContent = `${msg.senderName || 'User'}: ${msg.text.length > 50 ? msg.text.slice(0, 50) + '...' : msg.text}`;
     
-        notif.addEventListener('click', () => {
-            openChat({ uid: msg.sender });
+//         notif.addEventListener('click', () => {
+//             openChat({ uid: msg.sender });
             
-        });
+//         });
     
-        container.appendChild(notif);
+//         container.appendChild(notif);
     
-        // Play sound
-        const audio = new Audio('notification.mp3');
-        audio.play().catch(() => {});
+//         // Play sound
+//         const audio = new Audio('notification.mp3');
+//         audio.play().catch(() => {});
     
-        // Auto remove after 5 seconds 
-        setTimeout(() => notif.remove(), 5000);
-    }
+//         // Auto remove after 5 seconds 
+//         setTimeout(() => notif.remove(), 5000);
+//     }
     
 
-    function showNotification(msg) {
-        if (!container || !msg.text) return;
+//     function showNotification(msg) {
+//         if (!container || !msg.text) return;
     
-        // Don't notify yourself
-        if (msg.sender === currentUser.uid) return;
+//         // Don't notify yourself
+//         if (msg.sender === currentUser.uid) return;
     
-        // Avoid duplicates across refresh
-        const notifKey = msg.sender + ':' + msg.text;
-        if (lastNotified[notifKey]) return;
-        lastNotified[notifKey] = true;
-        saveLastNotified();
+//         // Avoid duplicates across refresh
+//         const notifKey = msg.sender + ':' + msg.text;
+//         if (lastNotified[notifKey]) return;
+//         lastNotified[notifKey] = true;
+//         saveLastNotified();
     
-        console.log("📩 New notification:", msg);
+//         console.log("📩 New notification:", msg);
     
-        const notif = document.createElement('div');
-        notif.className = 'chatNotification';
-        notif.textContent = `${msg.senderName || 'User'}: ${
-            msg.text.length > 50 ? msg.text.slice(0, 50) + '...' : msg.text
-        }`;
+//         const notif = document.createElement('div');
+//         notif.className = 'chatNotification';
+//         notif.textContent = `${msg.senderName || 'User'}: ${
+//             msg.text.length > 50 ? msg.text.slice(0, 50) + '...' : msg.text
+//         }`;
     
-        notif.addEventListener('click', () => {
-            console.log("🔗 Notification clicked for:", msg.sender);
-            openChat(msg.sender); // open chat
-        });
+//         notif.addEventListener('click', () => {
+//             console.log("🔗 Notification clicked for:", msg.sender);
+//             openChat(msg.sender); // open chat
+//         });
     
-        container.appendChild(notif);
+//         container.appendChild(notif);
     
-        // Play sound
-        const audio = new Audio('notification.mp3');
-        audio.play().catch(() => {});
+//         // Play sound
+//         const audio = new Audio('notification.mp3');
+//         audio.play().catch(() => {});
     
-        // Auto-remove after 5 seconds
-        setTimeout(() => notif.remove(), 5000);
-    }
+//         // Auto-remove after 5 seconds
+//         setTimeout(() => notif.remove(), 5000);
+//     }
     
-    async function listenForFriendNotifications() {
-        if (!currentUser) return;
+//     async function listenForFriendNotifications() {
+//         if (!currentUser) return;
     
-        const friendsRef = db.collection('friends').doc(currentUser.uid).collection('list');
-        friendsRef.onSnapshot(snapshot => {
-            snapshot.docs.forEach(doc => {
-                const friendUid = doc.id;
-                const chatId = [currentUser.uid, friendUid].sort().join('_');
-                const chatRef = db.collection('chats').doc(chatId).collection('messages');
+//         const friendsRef = db.collection('friends').doc(currentUser.uid).collection('list');
+//         friendsRef.onSnapshot(snapshot => {
+//             snapshot.docs.forEach(doc => {
+//                 const friendUid = doc.id;
+//                 const chatId = [currentUser.uid, friendUid].sort().join('_');
+//                 const chatRef = db.collection('chats').doc(chatId).collection('messages');
     
-                chatRef.orderBy('timestamp').onSnapshot(msgSnap => {
-                    msgSnap.docChanges().forEach(change => {
-                        if (change.type === 'added') {
-                            const msg = change.doc.data();
+//                 chatRef.orderBy('timestamp').onSnapshot(msgSnap => {
+//                     msgSnap.docChanges().forEach(change => {
+//                         if (change.type === 'added') {
+//                             const msg = change.doc.data();
     
                            
-                            if (msg.sender === currentUser.uid) return;
+//                             if (msg.sender === currentUser.uid) return;
     
                           
-                            if (selectedUser && selectedUser === friendUid) {
-                                console.log("(chat already open):", friendUid);
-                                return;
-                            }
+//                             if (selectedUser && selectedUser === friendUid) {
+//                                 console.log("(chat already open):", friendUid);
+//                                 return;
+//                             }
     
                            
-                            const handleNotification = (senderName) => {
-                                showNotification({
-                                    sender: msg.sender,
-                                    senderName,
-                                    text: msg.text
-                                });
-                            };
+//                             const handleNotification = (senderName) => {
+//                                 showNotification({
+//                                     sender: msg.sender,
+//                                     senderName,
+//                                     text: msg.text
+//                                 });
+//                             };
     
-                            if (!friendsState[friendUid]) {
-                                db.collection('profiles').doc(friendUid).get().then(prof => {
-                                    friendsState[friendUid] = { data: prof.data() || {} };
-                                    const senderName = friendsState[friendUid].data.displayName || 'User';
-                                    handleNotification(senderName);
-                                });
-                            } else {
-                                const senderName = friendsState[friendUid].data.displayName || 'User';
-                                handleNotification(senderName);
-                            }
-                        }
-                    });
-                });
-            });
-        });
-    }
+//                             if (!friendsState[friendUid]) {
+//                                 db.collection('profiles').doc(friendUid).get().then(prof => {
+//                                     friendsState[friendUid] = { data: prof.data() || {} };
+//                                     const senderName = friendsState[friendUid].data.displayName || 'User';
+//                                     handleNotification(senderName);
+//                                 });
+//                             } else {
+//                                 const senderName = friendsState[friendUid].data.displayName || 'User';
+//                                 handleNotification(senderName);
+//                             }
+//                         }
+//                     });
+//                 });
+//             });
+//         });
+//     }
     
     
 
-    // Open chat
-    window.openChat = function(user) {
-        selectedUser = user;
-        if (typeof startChat === 'function') startChat(user.uid);
-    };
+//     // Open chat
+//     window.openChat = function(user) {
+//         selectedUser = user;
+//         if (typeof startChat === 'function') startChat(user.uid);
+//     };
 
-    // Auth listener
-    auth.onAuthStateChanged(user => {
-        if (!user) return location.href = 'signin.html';
-        currentUser = user;
-        listenForFriendNotifications();
-    });
+//     // Auth listener
+//     auth.onAuthStateChanged(user => {
+//         if (!user) return location.href = 'signin.html';
+//         currentUser = user;
+//         listenForFriendNotifications();
+//     });
 
-});
+// });
 
-async function sendMessage(friendUid, messageText) {
-    if (!currentUser || !messageText.trim()) return;
+// async function sendMessage(friendUid, messageText) {
+//     if (!currentUser || !messageText.trim()) return;
 
-    const chatId = [currentUser.uid, friendUid].sort().join('_');
-    const chatRef = db.collection('chats').doc(chatId).collection('messages');
+//     const chatId = [currentUser.uid, friendUid].sort().join('_');
+//     const chatRef = db.collection('chats').doc(chatId).collection('messages');
 
-    // Save the message in the chat collection
-    await chatRef.add({
-        sender: currentUser.uid,
-        text: messageText,
-        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-    });
+//     // Save the message in the chat collection
+//     await chatRef.add({
+//         sender: currentUser.uid,
+//         text: messageText,
+//         timestamp: firebase.firestore.FieldValue.serverTimestamp()
+//     });
 
-    // Update "lastMessage"
-    const updates = {
-        lastMessage: messageText,
-        lastSender: currentUser.uid,
-        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-    };
+//     // Update "lastMessage"
+//     const updates = {
+//         lastMessage: messageText,
+//         lastSender: currentUser.uid,
+//         timestamp: firebase.firestore.FieldValue.serverTimestamp()
+//     };
 
-    await Promise.all([
-        db.collection('friends').doc(currentUser.uid).collection('list').doc(friendUid).set(updates, { merge: true }),
-        db.collection('friends').doc(friendUid).collection('list').doc(currentUser.uid).set(updates, { merge: true })
-    ]);
-}
-
-
+//     await Promise.all([
+//         db.collection('friends').doc(currentUser.uid).collection('list').doc(friendUid).set(updates, { merge: true }),
+//         db.collection('friends').doc(friendUid).collection('list').doc(currentUser.uid).set(updates, { merge: true })
+//     ]);
+// }
 
 
 
@@ -198,106 +196,108 @@ async function sendMessage(friendUid, messageText) {
 
 
 
-// // document.addEventListener('DOMContentLoaded', () => {
 
-// //     const firebaseConfig = {
-// //         apiKey: "AIzaSyBXb9OhOEOo4gXNIv2WcCNmXfnm1x7R2EM",
-// //         authDomain: "velox-c39ad.firebaseapp.com",
-// //         projectId: "velox-c39ad",
-// //         storageBucket: "velox-c39ad.appspot.com",
-// //         messagingSenderId: "404832661601",
-// //         appId: "1:404832661601:web:9ad221c8bfb459410bba20",
-// //         measurementId: "G-X8W755KRF6"
-// //     };
 
-// //     if (!firebase.apps.length) {
-// //         firebase.initializeApp(firebaseConfig);
-// //     }
+// // // document.addEventListener('DOMContentLoaded', () => {
 
-// //     const auth = firebase.auth();
-// //     const db = firebase.firestore();
+// // //     const firebaseConfig = {
+// // //         apiKey: "AIzaSyBXb9OhOEOo4gXNIv2WcCNmXfnm1x7R2EM",
+// // //         authDomain: "velox-c39ad.firebaseapp.com",
+// // //         projectId: "velox-c39ad",
+// // //         storageBucket: "velox-c39ad.appspot.com",
+// // //         messagingSenderId: "404832661601",
+// // //         appId: "1:404832661601:web:9ad221c8bfb459410bba20",
+// // //         measurementId: "G-X8W755KRF6"
+// // //     };
 
-// //     let currentUser = null;
-// //     let selectedUser = null;
-// //     const friendsState = {};
+// // //     if (!firebase.apps.length) {
+// // //         firebase.initializeApp(firebaseConfig);
+// // //     }
 
-// //     const container = document.getElementById('notificationContainer');
-// //     if (!container) console.error('Notification container not found!');
+// // //     const auth = firebase.auth();
+// // //     const db = firebase.firestore();
 
-// //     // Session-only duplicate check
-// //     const sessionNotified = {};
+// // //     let currentUser = null;
+// // //     let selectedUser = null;
+// // //     const friendsState = {};
 
-// //     function showNotification(msg) {
-// //         if (!container || !msg.text) return;
+// // //     const container = document.getElementById('notificationContainer');
+// // //     if (!container) console.error('Notification container not found!');
 
-// //         const key = msg.sender + '_' + msg.text;
-// //         if (sessionNotified[key]) return; // avoid duplicate in session
-// //         sessionNotified[key] = true;
+// // //     // Session-only duplicate check
+// // //     const sessionNotified = {};
 
-// //         const notif = document.createElement('div');
-// //         notif.className = 'chatNotification';
-// //         notif.textContent = `${msg.senderName || 'User'}: ${msg.text.length > 50 ? msg.text.slice(0, 50) + '...' : msg.text}`;
+// // //     function showNotification(msg) {
+// // //         if (!container || !msg.text) return;
 
-// //         notif.addEventListener('click', () => {
-// //             openChat({ uid: msg.sender });
-// //             notif.remove();
-// //         });
+// // //         const key = msg.sender + '_' + msg.text;
+// // //         if (sessionNotified[key]) return; // avoid duplicate in session
+// // //         sessionNotified[key] = true;
 
-// //         container.appendChild(notif);
+// // //         const notif = document.createElement('div');
+// // //         notif.className = 'chatNotification';
+// // //         notif.textContent = `${msg.senderName || 'User'}: ${msg.text.length > 50 ? msg.text.slice(0, 50) + '...' : msg.text}`;
 
-// //         if (msg.sender !== currentUser.uid) {
-// //             const audio = new Audio('notification.mp3');
-// //             audio.play().catch(() => {});
-// //         }
+// // //         notif.addEventListener('click', () => {
+// // //             openChat({ uid: msg.sender });
+// // //             notif.remove();
+// // //         });
 
-// //         setTimeout(() => notif.remove(), 5000);
-// //     }
+// // //         container.appendChild(notif);
 
-// //     async function listenForFriendNotifications() {
-// //         if (!currentUser) return;
+// // //         if (msg.sender !== currentUser.uid) {
+// // //             const audio = new Audio('notification.mp3');
+// // //             audio.play().catch(() => {});
+// // //         }
 
-// //         const friendsRef = db.collection('friends').doc(currentUser.uid).collection('list');
-// //         friendsRef.onSnapshot(async snapshot => {
-// //             for (const change of snapshot.docChanges()) {
-// //                 const friendUid = change.doc.id;
-// //                 const data = change.doc.data() || {};
-// //                 const lastMessage = data.lastMessage || '';
-// //                 const lastMessageSender = data.lastMessageSender;
+// // //         setTimeout(() => notif.remove(), 5000);
+// // //     }
 
-// //                 // Skip if sender is missing or it's you
-// //                 if (!lastMessageSender || lastMessageSender === currentUser.uid) continue;
+// // //     async function listenForFriendNotifications() {
+// // //         if (!currentUser) return;
 
-// //                 // Cache friend profile
-// //                 if (!friendsState[friendUid]) {
-// //                     const prof = await db.collection('profiles').doc(friendUid).get();
-// //                     friendsState[friendUid] = { data: prof.data() || {} };
-// //                 }
+// // //         const friendsRef = db.collection('friends').doc(currentUser.uid).collection('list');
+// // //         friendsRef.onSnapshot(async snapshot => {
+// // //             for (const change of snapshot.docChanges()) {
+// // //                 const friendUid = change.doc.id;
+// // //                 const data = change.doc.data() || {};
+// // //                 const lastMessage = data.lastMessage || '';
+// // //                 const lastMessageSender = data.lastMessageSender;
 
-// //                 friendsState[friendUid].latestMsg = lastMessage;
+// // //                 // Skip if sender is missing or it's you
+// // //                 if (!lastMessageSender || lastMessageSender === currentUser.uid) continue;
 
-// //                 // Notify if chat with this friend is not open
-// //                 if (lastMessage && (!selectedUser || selectedUser.uid !== friendUid)) {
-// //                     showNotification({
-// //                         sender: lastMessageSender,
-// //                         senderName: friendsState[friendUid].data.displayName || 'User',
-// //                         text: lastMessage
-// //                     });
-// //                 }
-// //             }
-// //         });
-// //     }
+// // //                 // Cache friend profile
+// // //                 if (!friendsState[friendUid]) {
+// // //                     const prof = await db.collection('profiles').doc(friendUid).get();
+// // //                     friendsState[friendUid] = { data: prof.data() || {} };
+// // //                 }
 
-// //     window.openChat = function(user) {
-// //         selectedUser = user;
-// //         if (typeof startChat === 'function') startChat(user.uid);
-// //     };
+// // //                 friendsState[friendUid].latestMsg = lastMessage;
 
-// //     auth.onAuthStateChanged(user => {
-// //         if (!user) return location.href = 'signin.html';
-// //         currentUser = user;
-// //         listenForFriendNotifications();
-// //     });
+// // //                 // Notify if chat with this friend is not open
+// // //                 if (lastMessage && (!selectedUser || selectedUser.uid !== friendUid)) {
+// // //                     showNotification({
+// // //                         sender: lastMessageSender,
+// // //                         senderName: friendsState[friendUid].data.displayName || 'User',
+// // //                         text: lastMessage
+// // //                     });
+// // //                 }
+// // //             }
+// // //         });
+// // //     }
 
-// // });
+// // //     window.openChat = function(user) {
+// // //         selectedUser = user;
+// // //         if (typeof startChat === 'function') startChat(user.uid);
+// // //     };
+
+// // //     auth.onAuthStateChanged(user => {
+// // //         if (!user) return location.href = 'signin.html';
+// // //         currentUser = user;
+// // //         listenForFriendNotifications();
+// // //     });
+
+// // // });
 
 
