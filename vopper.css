@@ -1,0 +1,177 @@
+body{
+    font-family: 'Source Sans Pro', sans-serif;
+    /* Gradient background for depth */
+    /* Optional animated gradient for extra flair */
+    background-size: 400% 400%;
+    animation: gradientBG 20s ease infinite;
+    height: 100vh;              /* hela skärmen */
+    display: flex;              /* flexbox */
+    justify-content: center;    /* centrerar horisontellt */
+    align-items: center;        /* centrerar vertikalt */
+    color: #ffffff;
+    min-height: 100vh;
+    overflow: hidden;
+    padding: 20px;
+    background: radial-gradient(circle at center, #111 0%, #000 100%);
+}
+
+body::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: transparent;
+    box-shadow:
+        50px 100px white,
+        150px 200px white,
+        300px 400px white,
+        500px 50px white,
+        700px 300px white,
+        900px 150px white,
+        1100px 500px white;
+    animation: twinkle 3s infinite alternate;
+}
+
+@keyframes twinkle {
+    0% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+
+
+#starfield {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1; /* Behind content */
+}
+
+
+  canvas {
+    background: linear-gradient(135deg, #0c0c0c, #222224, #020202);
+    box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.7);
+    border-radius: 10px;
+  }
+
+
+/* Animation for subtle background movement */
+@keyframes gradientBG {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+
+/* For webkit browsers */
+body::-webkit-scrollbar {
+    display: none;
+}
+
+/* Mobile: enable scrolling */
+@media (max-width: 768px) {
+    body {
+        overflow-y: auto;
+    }
+
+    body::-webkit-scrollbar {
+        display: block; /* Show scrollbar on mobile if needed */
+        width: 6px; /* Optional: thin scrollbar */
+    }
+
+    body::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 3px;
+    }
+}
+
+/* Optional gradient animation */
+@keyframes gradientBG {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+
+/* Animation for subtle background movement */
+@keyframes gradientBG {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+
+
+  /* 🔲 Glass box (no position change) */
+  .controls-box {
+    position: absolute;
+    left: 20%;
+    bottom: 65%;
+    transform: translateX(-50%);
+    padding: 30px 10px;
+    border-radius: 18px;
+    border: 1.5px solid rgba(233, 229, 229, 0.377);
+    background: linear-gradient(135deg, rgba(25, 25, 25, 0), rgba(0, 0, 0, 0.384));
+    box-shadow:
+    0 0 40px rgba(255, 255, 255, 0.2),
+    inset 0 0 30px rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(8px);
+    text-align: center;
+    transition: all 0.25s ease-in-out;
+    
+  }
+  
+  .controls-box:hover {
+    box-shadow:
+      0 0 40px rgba(255, 255, 255, 0.2),
+      inset 0 0 30px rgba(255, 255, 255, 0.1);
+   
+  }
+  
+  /* 🔠 Headings (exact same placement logic kept) */
+  .how h2 {
+    color: rgb(223, 223, 223);
+    position: relative;
+    font-family: 'Poppins', sans-serif;
+    font-size: 26px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    text-shadow:
+      0 0 8px rgba(216, 216, 216, 0.4),
+      0 0 12px rgba(255, 255, 255, 0.2);
+    margin: 0 0 10px;
+  }
+  
+  .how h1 {
+    color: rgb(223, 223, 223);
+    position: relative;
+    font-family: 'Poppins', sans-serif;
+    font-size: 38px;
+    font-weight: 700;
+    letter-spacing: 5px;
+    background: linear-gradient(90deg, #c4b764, #b17949, #924f4f63);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow:
+      0 0 12px rgba(255, 255, 255, 0.15),
+      0 0 20px rgba(255, 255, 255, 0.05);
+    margin: 0;
+  }
+  
+
+  .goBack {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: transparent;
+    box-shadow:
+        50px 100px white,
+        150px 200px white,
+        300px 400px white,
+        500px 50px white,
+        700px 300px white,
+        900px 150px white,
+        1100px 500px white;
+    animation: twinkle 3s infinite alternate;
+}

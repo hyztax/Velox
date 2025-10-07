@@ -1,0 +1,386 @@
+// -------------------- IMPORTS & AUTH --------------------
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { updateUserScore, liveLeaderboard } from "./score.js";
+
+const auth = getAuth();
+let authReady = false;
+
+// Listen for auth state
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    authReady = true;
+    liveLeaderboard(user.uid); // highlight logged-in user
+    loop(); // start the game loop only when auth ready
+  } else {
+    // If no user is logged in, redirect to signup
+    window.location.href = "signup.html";
+  }
+});
+
+
+// -------------------- CANVAS & GAME VARIABLES --------------------
+const canvas = document.getElementById("myCanvas");
+const pen = canvas.getContext("2d");
+
+// -------------------- PLAYER & GAME STATE --------------------
+let currentScreen = "menu";
+let currentLevel = 1;
+let gameRunning = false;
+let gameOver = false;
+let gameWon = false;
+let cameraOffsetY = 0;
+let fade = 0;
+
+const player = {
+  x: canvas.width / 2,
+  y: canvas.height - 60,
+  radius: 20,
+  color: "#ffffff",
+  vy: 0,
+  jumpPower: 18,
+  gravity: 0.6,
+  onGround: false,
+  jumpCount: 0,
+  maxJumps: 2
+};
+
+const moveSpeed = 5;
+
+
+// -------------------- INPUT --------------------
+const keys = {};
+window.addEventListener("keydown", (e) => {
+  const k = e.key.toLowerCase();
+  keys[k] = true;
+
+  if (currentScreen === "menu" && (k === " " || k === "enter")) {
+    currentScreen = "game";
+    startGame();
+  }
+
+  if (currentScreen === "game" && k === "r") {
+    if (gameOver || gameWon) startGame();
+  }
+
+  checkGameEnd();
+});
+window.addEventListener("keyup", (e) => (keys[e.key.toLowerCase()] = false));
+
+// -------------------- WORLD --------------------
+let platforms = [];
+let bricks = [];
+let brickTimer = 0;
+let brickInterval = 60;
+let door = { x: canvas.width / 2 - 25, y: -2000, w: 50, h: 80 };
+
+function clamp(v, min, max) {
+  return Math.max(min, Math.min(max, v));
+}
+
+// -------------------- GAME SETUP --------------------
+function startGame() {
+  gameRunning = true;
+  gameOver = false;
+  gameWon = false;
+
+  player.x = canvas.width / 2;
+  player.y = canvas.height - 60;
+  player.vy = 0;
+  player.onGround = false;
+  player.jumpCount = 0;
+  cameraOffsetY = 0;
+  platforms = [];
+  bricks = [];
+  brickTimer = 0;
+
+  platforms.push({
+    x: 0,
+    y: canvas.height - 30,
+    w: canvas.width,
+    h: 30,
+    color: "#7b4b2a"
+  });
+
+  const count = 35 + currentLevel * 5;
+  const baseGap = 120 + currentLevel * 10;
+  const gapVar = 20 + currentLevel * 5;
+  const platWidth = Math.max(60, 120 - currentLevel * 5);
+  const platHeight = 20;
+
+  let lastY = canvas.height - 120;
+  for (let i = 0; i < count; i++) {
+    const gap = baseGap + Math.random() * gapVar;
+    const y = lastY - gap;
+    const x = Math.random() * (canvas.width - platWidth);
+    platforms.push({ x, y, w: platWidth, h: platHeight, color: "#964B00" });
+    lastY = y;
+  }
+
+  const topPlat = platforms.reduce((min, p) => (p.y < min.y ? p : min), platforms[0]);
+  door.y = topPlat.y - 400;
+  door.x = clamp(topPlat.x + topPlat.w / 2 - door.w / 2, 20, canvas.width - door.w - 20);
+}
+
+// -------------------- COLLISION --------------------
+function circleRectCollision(cx, cy, r, rx, ry, rw, rh) {
+  const closestX = clamp(cx, rx, rx + rw);
+  const closestY = clamp(cy, ry, ry + rh);
+  const dx = cx - closestX;
+  const dy = cy - closestY;
+  return dx * dx + dy * dy < r * r;
+}
+
+// -------------------- UPDATE --------------------
+function update() {
+  if (keys["a"]) player.x -= moveSpeed;
+  if (keys["d"]) player.x += moveSpeed;
+  player.x = clamp(player.x, player.radius, canvas.width - player.radius);
+
+  if (keys[" "] && player.jumpCount < player.maxJumps) {
+    player.vy = -player.jumpPower;
+    player.jumpCount++;
+    keys[" "] = false;
+  }
+
+  player.vy += player.gravity;
+  player.y += player.vy;
+  cameraOffsetY = player.y - canvas.height / 2;
+
+  player.onGround = false;
+  for (const plat of platforms) {
+    const withinX = player.x + player.radius > plat.x && player.x - player.radius < plat.x + plat.w;
+    const comingDown = player.vy >= 0;
+    const topHit = player.y + player.radius > plat.y && player.y + player.radius < plat.y + plat.h;
+    if (withinX && comingDown && topHit) {
+      player.y = plat.y - player.radius;
+      player.vy = 0;
+      player.onGround = true;
+      player.jumpCount = 0;
+    }
+  }
+
+  brickTimer++;
+  const heightClimbed = Math.max(0, canvas.height - player.y);
+  brickInterval = Math.max(20, 60 - currentLevel * 2 - Math.floor(heightClimbed / 200));
+  if (brickTimer >= brickInterval) {
+    brickTimer = 0;
+    const size = 28 + Math.random() * 10;
+    const bx = Math.random() * (canvas.width - size);
+    const by = cameraOffsetY - 120;
+    const vy = 4 + currentLevel * 0.5 + Math.random() * 2;
+    bricks.push({ x: bx, y: by, w: size, h: size, vy });
+  }
+
+  for (let i = bricks.length - 1; i >= 0; i--) {
+    const b = bricks[i];
+    b.y += b.vy;
+    if (circleRectCollision(player.x, player.y, player.radius, b.x, b.y, b.w, b.h)) {
+      gameOver = true;
+      gameRunning = false;
+    }
+    if (b.y - cameraOffsetY > canvas.height + 120) bricks.splice(i, 1);
+  }
+
+  if (
+    player.x > door.x &&
+    player.x < door.x + door.w &&
+    player.y > door.y &&
+    player.y < door.y + door.h
+  ) {
+    gameWon = true;
+    gameRunning = false;
+    currentLevel++;
+  }
+}
+
+// -------------------- MENU --------------------
+let mouseY = 0;
+canvas.addEventListener("mousemove", (e) => {
+  const rect = canvas.getBoundingClientRect();
+  mouseY = e.clientY - rect.top;
+});
+
+function drawMenu() {
+  pen.clearRect(0, 0, canvas.width, canvas.height);
+  fade = Math.min(fade + 0.05, 1);
+  pen.globalAlpha = fade;
+
+  pen.fillStyle = "#111";
+  pen.fillRect(0, 0, canvas.width, canvas.height);
+
+  pen.fillStyle = "white";
+  pen.font = "bold 48px Arial";
+  pen.textAlign = "center";
+  pen.fillText("Vopper", canvas.width / 2, 200);
+
+  const buttons = [
+    { text: "Start Game", y: 350 },
+    { text: "Choose Level", y: 440 }
+  ];
+
+  buttons.forEach((btn) => {
+    const isHover = Math.abs(mouseY - btn.y) < 25;
+    pen.fillStyle = isHover ? "#FFD700" : "#FFFFFF";
+    pen.font = isHover ? "bold 32px Arial" : "28px Arial";
+    pen.fillText(btn.text, canvas.width / 2, btn.y);
+  });
+
+  pen.globalAlpha = 1;
+}
+
+function drawLevelSelect() {
+  pen.clearRect(0, 0, canvas.width, canvas.height);
+  fade = Math.min(fade + 0.05, 1);
+  pen.globalAlpha = fade;
+
+  pen.fillStyle = "#111";
+  pen.fillRect(0, 0, canvas.width, canvas.height);
+
+  pen.fillStyle = "white";
+  pen.font = "bold 36px Arial";
+  pen.textAlign = "center";
+  pen.fillText("Select Level", canvas.width / 2, 150);
+
+  for (let i = 1; i <= 5; i++) {
+    const y = 200 + i * 70;
+    const isHover = Math.abs(mouseY - y) < 25;
+    pen.fillStyle = isHover ? "#FFD700" : "#FFFFFF";
+    pen.font = isHover ? "bold 30px Arial" : "26px Arial";
+    pen.fillText("Level " + i, canvas.width / 2, y);
+  }
+
+  pen.fillStyle = "#ff6666";
+  pen.font = "24px Arial";
+  pen.fillText("⬅ Back", canvas.width / 2, 650);
+  pen.globalAlpha = 1;
+}
+
+// -------------------- RENDER GAME --------------------
+function renderGame() {
+  pen.clearRect(0, 0, canvas.width, canvas.height);
+  pen.fillStyle = "#111";
+  pen.fillRect(0, 0, canvas.width, canvas.height);
+
+  for (let i = 0; i < 40; i++) {
+    const sx = (i * 97) % canvas.width;
+    const sy = (i * 131 - Math.floor(cameraOffsetY * 0.2)) % (canvas.height + 50) - 50;
+    pen.fillStyle = "#222";
+    pen.fillRect(sx, sy, 2, 2);
+  }
+
+  pen.fillStyle = "#fff";
+  pen.fillRect(door.x, door.y - cameraOffsetY, door.w, door.h);
+  pen.strokeStyle = "#ccc";
+  pen.strokeRect(door.x, door.y - cameraOffsetY, door.w, door.h);
+
+  for (const plat of platforms) {
+    pen.fillStyle = plat.color;
+    pen.fillRect(plat.x, plat.y - cameraOffsetY, plat.w, plat.h);
+  }
+
+  pen.fillStyle = "#f00";
+  for (const b of bricks) pen.fillRect(b.x, b.y - cameraOffsetY, b.w, b.h);
+
+  pen.save();
+  pen.beginPath();
+  pen.arc(player.x, player.y - cameraOffsetY, player.radius, 0, Math.PI * 2);
+  pen.shadowColor = "#fff";
+  pen.shadowBlur = 20;
+  pen.fillStyle = player.color;
+  pen.fill();
+  pen.restore();
+
+  pen.fillStyle = "#fff";
+  pen.font = "16px Arial";
+  pen.textAlign = "left";
+  const progress = Math.max(0, Math.floor((canvas.height - player.y) / 10));
+  pen.fillText(`Height: ${progress} m`, 10, 24);
+  pen.fillText(`Level: ${currentLevel}`, 10, 44);
+
+  if (gameOver || gameWon) {
+    pen.fillStyle = "rgba(0,0,0,0.6)";
+    pen.fillRect(0, 0, canvas.width, canvas.height);
+    pen.fillStyle = "#fff";
+    pen.font = "40px Arial";
+    pen.textAlign = "center";
+    pen.fillText(gameWon ? "LEVEL COMPLETE!" : "GAME OVER", canvas.width / 2, canvas.height / 2 - 10);
+    pen.font = "20px Arial";
+    pen.fillText("Press R to restart", canvas.width / 2, canvas.height / 2 + 26);
+  }
+}
+
+// -------------------- CLICK HANDLING --------------------
+canvas.addEventListener("click", (e) => {
+  const rect = canvas.getBoundingClientRect();
+  const y = e.clientY - rect.top;
+
+  if (currentScreen === "menu") {
+    if (y > 320 && y < 370) {
+      currentLevel = 1;
+      currentScreen = "game";
+      fade = 0;
+      startGame();
+    } else if (y > 410 && y < 470) {
+      currentScreen = "level";
+      fade = 0;
+    }
+  } else if (currentScreen === "level") {
+    for (let i = 1; i <= 5; i++) {
+      const top = 200 + i * 70 - 25;
+      const bottom = 200 + i * 70 + 25;
+      if (y > top && y < bottom) {
+        currentLevel = i;
+        currentScreen = "game";
+        fade = 0;
+        startGame();
+      }
+    }
+    if (y > 630 && y < 670) {
+      currentScreen = "menu";
+      fade = 0;
+    }
+  }
+});
+
+// -------------------- LOOP --------------------
+function loop() {
+    switch (currentScreen) {
+      case "menu":
+        drawMenu();
+        break;
+      case "level":
+        drawLevelSelect();
+        break;
+      case "game":
+        // Only update game physics if auth is ready
+        if (authReady && gameRunning && !gameOver && !gameWon) update();
+        renderGame();
+        break;
+    }
+    requestAnimationFrame(loop);
+  }
+  
+  // Remove the previous loop() call; it will now start after authReady
+  // loop();
+  
+
+// -------------------- SAVE SCORE --------------------
+async function saveScoreIfBetter() {
+    const user = auth.currentUser;
+    if (!user) return;
+  
+    const progress = Math.max(0, Math.floor((canvas.height - player.y) / 10));
+    const name = user.displayName || `Player-${user.uid.slice(0, 4)}`;
+    const level = currentLevel;
+  
+    await updateUserScore(user.uid, name, progress, level);
+  
+    // Refresh leaderboard for current user
+    liveLeaderboard(user.uid);
+  }
+  
+  // -------------------- CHECK GAME END --------------------
+  function checkGameEnd() {
+    if (gameWon || gameOver) saveScoreIfBetter();
+  }
+  
