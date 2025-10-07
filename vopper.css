@@ -46,117 +46,126 @@ body::before {
     height: 100%;
     z-index: -1; /* Behind content */
 }
+/* Canvas styling */
+canvas {
+  display: block;
+  margin: 0 auto;
+  background: linear-gradient(135deg, #0c0c0c, #000000, #020202);
+  background-size: 300% 300%; /* Needed for animated gradient */
+  box-shadow: inset 0 0 60px rgba(20, 20, 20, 0.7), 0 0 30px rgba(255,255,255,0.05);
+  border-radius: 10px;
+  animation: gradientBG 20s ease infinite;
+}
 
-
-  canvas {
-    background: linear-gradient(135deg, #0c0c0c, #222224, #020202);
-    box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.7);
-    border-radius: 10px;
-  }
-
-
-/* Animation for subtle background movement */
+/* Animate the gradient */
 @keyframes gradientBG {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
 
-/* For webkit browsers */
+
+/* Hide scrollbar on desktop */
 body::-webkit-scrollbar {
-    display: none;
+  display: none;
 }
 
-/* Mobile: enable scrolling */
+/* Mobile: enable scrolling if needed */
 @media (max-width: 768px) {
-    body {
-        overflow-y: auto;
-    }
+  body {
+    overflow-y: auto;
+  }
 
-    body::-webkit-scrollbar {
-        display: block; /* Show scrollbar on mobile if needed */
-        width: 6px; /* Optional: thin scrollbar */
-    }
+  body::-webkit-scrollbar {
+    display: block;
+    width: 6px;
+  }
 
-    body::-webkit-scrollbar-thumb {
-        background: rgba(255, 255, 255, 0.3);
-        border-radius: 3px;
-    }
-}
-
-/* Optional gradient animation */
-@keyframes gradientBG {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-}
-
-
-/* Animation for subtle background movement */
-@keyframes gradientBG {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
+  body::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 3px;
+  }
 }
 
 
 
-  /* 🔲 Glass box (no position change) */
-  .controls-box {
-    position: absolute;
-    left: 20%;
-    bottom: 65%;
-    transform: translateX(-50%);
-    padding: 30px 10px;
-    border-radius: 18px;
-    border: 1.5px solid rgba(233, 229, 229, 0.377);
-    background: linear-gradient(135deg, rgba(25, 25, 25, 0), rgba(0, 0, 0, 0.384));
-    box-shadow:
-    0 0 40px rgba(255, 255, 255, 0.2),
-    inset 0 0 30px rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(8px);
-    text-align: center;
-    transition: all 0.25s ease-in-out;
-    
-  }
-  
-  .controls-box:hover {
-    box-shadow:
-      0 0 40px rgba(255, 255, 255, 0.2),
-      inset 0 0 30px rgba(255, 255, 255, 0.1);
-   
-  }
-  
-  /* 🔠 Headings (exact same placement logic kept) */
-  .how h2 {
-    color: rgb(223, 223, 223);
-    position: relative;
-    font-family: 'Poppins', sans-serif;
-    font-size: 26px;
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    text-shadow:
-      0 0 8px rgba(216, 216, 216, 0.4),
-      0 0 12px rgba(255, 255, 255, 0.2);
-    margin: 0 0 10px;
-  }
-  
-  .how h1 {
-    color: rgb(223, 223, 223);
-    position: relative;
-    font-family: 'Poppins', sans-serif;
-    font-size: 38px;
-    font-weight: 700;
-    letter-spacing: 5px;
-    background: linear-gradient(90deg, #c4b764, #b17949, #924f4f63);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    text-shadow:
-      0 0 12px rgba(255, 255, 255, 0.15),
-      0 0 20px rgba(255, 255, 255, 0.05);
-    margin: 0;
-  }
+/* 🔲 Glass box */
+.controls-box {
+  position: absolute;
+  left: 14.4%;
+  bottom: 74%;
+  transform: translateX(-50%);
+  padding: 28px 24px;
+  border-radius: 20px;
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
+  background: linear-gradient(135deg, rgba(25, 25, 25, 0.4), rgba(0, 0, 0, 0.7));
+  box-shadow:
+    0 8px 25px rgba(0, 0, 0, 0.6),
+    inset 0 0 30px rgba(255, 255, 255, 0.05),
+    0 0 25px rgba(200, 200, 200, 0.1);
+  backdrop-filter: blur(12px);
+  text-align: center;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.controls-box:hover {
+  transform: translateX(-50%) scale(1.05);
+  box-shadow:
+    0 12px 30px rgba(0, 0, 0, 0.7),
+    inset 0 0 35px rgba(255, 255, 255, 0.08),
+    0 0 40px rgba(211, 211, 210, 0.25);
+    cursor: pointer;
+}
+
+/* 🔠 Heading */
+.how h2 {
+  color: #eee;
+  font-family: 'Poppins', sans-serif;
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  text-shadow:
+    0 0 10px rgba(216, 216, 216, 0.4),
+    0 0 20px rgba(255, 255, 255, 0.2);
+  margin: 0 0 18px;
+}
+
+/* 🎮 Keys row */
+.controls {
+  display: flex;
+  justify-content: center;
+  gap: 35px;
+}
+
+.key {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: 'Poppins', sans-serif;
+}
+
+.key h1 {
+  font-size: 34px;
+  font-weight: 700;
+  margin: 0;
+  padding: 8px 20px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #fff;
+  text-shadow: 0 0 10px rgba(255,255,255,0.3);
+  box-shadow: inset 0 0 12px rgba(255,255,255,0.05);
+}
+
+.key p {
+  font-size: 14px;
+  margin-top: 6px;
+  color: #bbb;
+  letter-spacing: 1px;
+}
+
   
 
   .goBack {
@@ -174,4 +183,40 @@ body::-webkit-scrollbar {
         900px 150px white,
         1100px 500px white;
     animation: twinkle 3s infinite alternate;
+}
+
+.GoBack {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  width: 55px;
+  height: 55px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #1e1e1e, #2a2a2a);
+  box-shadow: 0 0 10px rgba(27, 27, 27, 0.3),
+              0 0 20px rgba(42, 43, 43, 0.2) inset;
+  border: 2px solid rgba(108, 110, 110, 0.5);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 1000; /* stays above other stuff */
+}
+
+/* Hover effect */
+.GoBack:hover {
+  transform: scale(1.1) rotate(-5deg);
+  box-shadow: 0 0 20px rgba(232, 235, 235, 0.6),
+              0 0 40px rgba(225, 228, 228, 0.4) inset;
+  border-color: rgba(221, 223, 223, 0.8);
+}
+
+/* Optional: add an arrow inside using CSS */
+.GoBack::before {
+  content: "←";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-48%, -50%); /* adjust X a little */
+  font-size: 28px;
+  color: rgb(235, 238, 238);
+  font-family: Arial, sans-serif;
 }

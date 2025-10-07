@@ -1,4 +1,4 @@
-// -------------------- IMPORTS & AUTH --------------------
+// -------------------- IMPORTS, AUTH --------------------
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { updateUserScore, liveLeaderboard } from "./score.js";
 
@@ -9,20 +9,20 @@ let authReady = false;
 onAuthStateChanged(auth, (user) => {
   if (user) {
     authReady = true;
-    liveLeaderboard(user.uid); // highlight logged-in user
-    loop(); // start the game loop only when auth ready
+    liveLeaderboard(user.uid); 
+    loop(); 
   } else {
-    // If no user is logged in, redirect to signup
+    
     window.location.href = "signup.html";
   }
 });
 
 
-// -------------------- CANVAS & GAME VARIABLES --------------------
+// -------------------- CANVAS, GAME VARIABLES --------------------
 const canvas = document.getElementById("myCanvas");
 const pen = canvas.getContext("2d");
 
-// -------------------- PLAYER & GAME STATE --------------------
+// -------------------- PLAYER, GAME STATE --------------------
 let currentScreen = "menu";
 let currentLevel = 1;
 let gameRunning = false;
@@ -98,7 +98,7 @@ function startGame() {
     y: canvas.height - 30,
     w: canvas.width,
     h: 30,
-    color: "#7b4b2a"
+    color: "#050505ff"
   });
 
   const count = 35 + currentLevel * 5;
@@ -112,7 +112,7 @@ function startGame() {
     const gap = baseGap + Math.random() * gapVar;
     const y = lastY - gap;
     const x = Math.random() * (canvas.width - platWidth);
-    platforms.push({ x, y, w: platWidth, h: platHeight, color: "#964B00" });
+    platforms.push({ x, y, w: platWidth, h: platHeight, color: "#3069b3ff" });
     lastY = y;
   }
 
@@ -131,9 +131,9 @@ function circleRectCollision(cx, cy, r, rx, ry, rw, rh) {
 }
 
 // -------------------- UPDATE --------------------
-function update() {
-  if (keys["a"]) player.x -= moveSpeed;
-  if (keys["d"]) player.x += moveSpeed;
+function update(delta) {
+  if (keys["a"]) player.x -= moveSpeed * delta;
+  if (keys["d"]) player.x += moveSpeed * delta;
   player.x = clamp(player.x, player.radius, canvas.width - player.radius);
 
   if (keys[" "] && player.jumpCount < player.maxJumps) {
@@ -142,10 +142,11 @@ function update() {
     keys[" "] = false;
   }
 
-  player.vy += player.gravity;
-  player.y += player.vy;
+  player.vy += player.gravity * delta;
+  player.y += player.vy * delta;
   cameraOffsetY = player.y - canvas.height / 2;
 
+  // --- collisions unchanged ---
   player.onGround = false;
   for (const plat of platforms) {
     const withinX = player.x + player.radius > plat.x && player.x - player.radius < plat.x + plat.w;
@@ -159,7 +160,8 @@ function update() {
     }
   }
 
-  brickTimer++;
+  // --- bricks ---
+  brickTimer += delta;
   const heightClimbed = Math.max(0, canvas.height - player.y);
   brickInterval = Math.max(20, 60 - currentLevel * 2 - Math.floor(heightClimbed / 200));
   if (brickTimer >= brickInterval) {
@@ -167,13 +169,13 @@ function update() {
     const size = 28 + Math.random() * 10;
     const bx = Math.random() * (canvas.width - size);
     const by = cameraOffsetY - 120;
-    const vy = 4 + currentLevel * 0.5 + Math.random() * 2;
+    const vy = (4 + currentLevel * 0.5 + Math.random() * 2);
     bricks.push({ x: bx, y: by, w: size, h: size, vy });
   }
 
   for (let i = bricks.length - 1; i >= 0; i--) {
     const b = bricks[i];
-    b.y += b.vy;
+    b.y += b.vy * delta;
     if (circleRectCollision(player.x, player.y, player.radius, b.x, b.y, b.w, b.h)) {
       gameOver = true;
       gameRunning = false;
@@ -193,6 +195,8 @@ function update() {
   }
 }
 
+
+
 // -------------------- MENU --------------------
 let mouseY = 0;
 canvas.addEventListener("mousemove", (e) => {
@@ -205,13 +209,17 @@ function drawMenu() {
   fade = Math.min(fade + 0.05, 1);
   pen.globalAlpha = fade;
 
-  pen.fillStyle = "#111";
+  pen.fillStyle = "#2e093021";
   pen.fillRect(0, 0, canvas.width, canvas.height);
 
   pen.fillStyle = "white";
   pen.font = "bold 48px Arial";
   pen.textAlign = "center";
-  pen.fillText("Vopper", canvas.width / 2, 200);
+ pen.fillStyle = "#49a8d4ff"; // bright blue
+pen.font = "bold 48px Arial";
+pen.textAlign = "center";
+pen.fillText("Vopper", canvas.width / 2, 200);
+
 
   const buttons = [
     { text: "Start Game", y: 350 },
@@ -220,7 +228,7 @@ function drawMenu() {
 
   buttons.forEach((btn) => {
     const isHover = Math.abs(mouseY - btn.y) < 25;
-    pen.fillStyle = isHover ? "#FFD700" : "#FFFFFF";
+    pen.fillStyle = isHover ? "#b6af4eff" : "#e7e7e7ff";
     pen.font = isHover ? "bold 32px Arial" : "28px Arial";
     pen.fillText(btn.text, canvas.width / 2, btn.y);
   });
@@ -278,7 +286,7 @@ function renderGame() {
     pen.fillRect(plat.x, plat.y - cameraOffsetY, plat.w, plat.h);
   }
 
-  pen.fillStyle = "#f00";
+  pen.fillStyle = "rgba(173, 11, 11, 1)";
   for (const b of bricks) pen.fillRect(b.x, b.y - cameraOffsetY, b.w, b.h);
 
   pen.save();
@@ -343,26 +351,29 @@ canvas.addEventListener("click", (e) => {
 });
 
 // -------------------- LOOP --------------------
-function loop() {
-    switch (currentScreen) {
-      case "menu":
-        drawMenu();
-        break;
-      case "level":
-        drawLevelSelect();
-        break;
-      case "game":
-        // Only update game physics if auth is ready
-        if (authReady && gameRunning && !gameOver && !gameWon) update();
-        renderGame();
-        break;
-    }
-    requestAnimationFrame(loop);
+let lastTime = performance.now();
+
+function loop(now = performance.now()) {
+  const delta = (now - lastTime) / 16.67; 
+  lastTime = now;
+
+  switch (currentScreen) {
+    case "menu":
+      drawMenu();
+      break;
+    case "level":
+      drawLevelSelect();
+      break;
+    case "game":
+      if (authReady && gameRunning && !gameOver && !gameWon) update(delta);
+      renderGame();
+      break;
   }
-  
-  // Remove the previous loop() call; it will now start after authReady
-  // loop();
-  
+
+  requestAnimationFrame(loop);
+}
+
+ 
 
 // -------------------- SAVE SCORE --------------------
 async function saveScoreIfBetter() {
@@ -379,7 +390,7 @@ async function saveScoreIfBetter() {
     liveLeaderboard(user.uid);
   }
   
-  // -------------------- CHECK GAME END --------------------
+  
   function checkGameEnd() {
     if (gameWon || gameOver) saveScoreIfBetter();
   }
