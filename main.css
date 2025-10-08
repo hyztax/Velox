@@ -30,6 +30,7 @@ body::-webkit-scrollbar {
 header {
   width: 100%;
   max-width: 480px;
+  height: 45px;
   padding: 15px 20px;
   display: flex;
   justify-content: center; /* Center content horizontally */

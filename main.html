@@ -27,9 +27,10 @@
 </head>
 <body>
 
-
 <header>
-  <span>Hello there <span id="usernameDisplay">...</span></span>
+  <div class="user-info">
+    <span id="greeting"></span><span id="usernameDisplay"></span>
+  </div>
 
   <button id="settingsBtn" aria-label="Menu" aria-expanded="false" aria-controls="settingsMenu">
     <span></span>
@@ -40,9 +41,53 @@
   <div id="settingsMenu" class="hidden" role="menu" aria-hidden="true">
     <button id="showProfileBtn" role="menuitem">Edit Profile</button>
     <button id="faqBtn" role="menuitem" onclick="window.location.href='faq.html'">FAQ</button>
-      <button id="logoutBtn" role="menuitem">Log Out</button>
+    <button id="logoutBtn" role="menuitem">Log Out</button>
   </div>
 </header>
+
+<style>
+  header {
+    display: flex;
+    align-items: center;       /* vertically centered */
+    justify-content: center;   /* horizontally centered */
+    gap: 15px;                 /* space between username and menu button */
+    padding: 8px 12px;
+  }
+
+  .user-info {
+    display: flex;
+    align-items: center;
+  }
+
+  #greeting {
+    margin-right: 3px; /* tiny space before username */
+  }
+
+  #settingsBtn {
+    cursor: pointer;
+  }
+</style>
+
+<script>
+  function getGreeting() {
+    const now = new Date();
+    const hour = now.getHours();
+
+    if (hour >= 5 && hour < 12) {
+      return "Good morning";
+    } else if (hour >= 12 && hour < 17) {
+      return "Good afternoon";
+    } else if (hour >= 17 && hour < 21) {
+      return "Good evening";
+    } else {
+      return "Good night";
+    }
+  }
+
+  document.getElementById("greeting").textContent = getGreeting();
+  document.getElementById("usernameDisplay").textContent = "";
+</script>
+
 
 
 <!-- <div id="notificationContainer"></div> -->
@@ -122,6 +167,31 @@
     <ul id="friendsList"></ul>
   </section>
 
+  <script>
+document.addEventListener("DOMContentLoaded", () => {
+  const searchInput = document.getElementById("searchFriends");
+  const friendsList = document.getElementById("friendsList");
+
+  // If elements aren't found, just skip
+  if (!searchInput || !friendsList) return;
+
+  searchInput.addEventListener("input", function() {
+    const query = this.value.toLowerCase();
+
+    // Always get the latest <li> elements
+    const friends = Array.from(friendsList.getElementsByTagName("li"));
+
+    friends.forEach(friend => {
+      const name = friend.textContent.toLowerCase();
+      friend.style.display = name.includes(query) ? "" : "none";
+    });
+  });
+});
+</script>
+
+
+  
+
 
   
 
@@ -141,6 +211,29 @@
     <input type="text" id="searchRequests" placeholder="Search for a request" autocomplete="off" />
     <ul id="friendRequestsList"></ul>
   </section>
+
+  <script>
+document.addEventListener("DOMContentLoaded", () => {
+  const searchRequestsInput = document.getElementById("searchRequests");
+  const friendRequestsList = document.getElementById("friendRequestsList");
+
+  // Make sure elements exist
+  if (!searchRequestsInput || !friendRequestsList) return;
+
+  searchRequestsInput.addEventListener("input", function() {
+    const query = this.value.toLowerCase();
+
+    // Grab current <li> items dynamically
+    const requests = Array.from(friendRequestsList.getElementsByTagName("li"));
+
+    requests.forEach(request => {
+      const name = request.textContent.toLowerCase();
+      request.style.display = name.includes(query) ? "" : "none";
+    });
+  });
+});
+</script>
+
 
   <a href="chat.html" class="Velox_Shop" rel="noopener noreferrer">
     <img src="velox.image/icon.png" alt="Shop Image" />

@@ -117,94 +117,138 @@ function listenUsersList() {
 }
 
 async function renderUsers(users) {
-  renderVersion++;
-  const version = renderVersion;
-  usersUl.innerHTML = ''; // clear immediately
+  try {
+    renderVersion++;
+    const version = renderVersion;
+    usersUl.innerHTML = ''; // clear immediately
 
-  if (!users || users.length === 0) {
-    usersUl.innerHTML = '<li>No users online</li>';
-    return;
-  }
-
-  const seenUids = new Set();
-  const usersToRender = [];
-
-  // Pre-fetch all profiles first
-  for (const user of users) {
-    if (seenUids.has(user.uid)) continue;
-    seenUids.add(user.uid);
-
-    let profileData = {};
-    try {
-      const doc = await db.collection('profiles').doc(user.uid).get();
-      profileData = doc.exists ? doc.data() : {};
-    } catch (err) { console.warn(err); }
-
-    usersToRender.push({
-      uid: user.uid,
-      displayName: profileData.displayName || user.displayName || 'Unknown',
-      profileColor: profileData.profileColor || user.profileColor || '#000000',
-      avatarUrl: profileData.avatarUrl || '',
-      bio: profileData.bio || '',
-      tag: profileData.tag || ''
-    });
-  }
-
-  // Render all rows
-  for (const user of usersToRender) {
-    if (version !== renderVersion) return; // cancel outdated render
-
-    const li = document.createElement('li');
-    li.style.display = 'flex';
-    li.style.alignItems = 'center';
-    li.style.justifyContent = 'center';
-    li.style.padding = '6px 0';
-
-    const userRow = document.createElement('div');
-    userRow.className = 'userRow';
-    userRow.dataset.uid = user.uid;
-    userRow.style.display = 'flex';
-    userRow.style.alignItems = 'center';
-    userRow.style.gap = '10px';
-    userRow.style.cursor = 'pointer';
-    userRow.style.width = '100%';
-    userRow.style.maxWidth = '420px';
-
-    const avatarDiv = document.createElement('div');
-    avatarDiv.className = 'avatar';
-    avatarDiv.style.width = '32px';
-    avatarDiv.style.height = '32px';
-    avatarDiv.style.borderRadius = '50%';
-    avatarDiv.style.display = 'flex';
-    avatarDiv.style.justifyContent = 'center';
-    avatarDiv.style.alignItems = 'center';
-    avatarDiv.style.background = user.avatarUrl ? 'none' : user.profileColor;
-    avatarDiv.style.color = '#fff';
-    avatarDiv.style.fontWeight = 'bold';
-    avatarDiv.style.flex = '0 0 32px';
-    avatarDiv.style.overflow = 'hidden';
-    if (user.avatarUrl) {
-      avatarDiv.innerHTML = `<img src="${user.avatarUrl}" alt="Avatar" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`;
-    } else {
-      avatarDiv.textContent = user.displayName.charAt(0).toUpperCase();
+    if (!users || users.length === 0) {
+      usersUl.innerHTML = '<li>No users online</li>';
+      return;
     }
 
-    const nameSpan = document.createElement('span');
-    nameSpan.textContent = (user.uid === currentUser.uid ? user.displayName + ' (You)' : user.displayName);
-    nameSpan.style.flex = '1';
+    const seenUids = new Set();
+    const usersToRender = [];
 
-    userRow.appendChild(avatarDiv);
-    userRow.appendChild(nameSpan);
-    li.appendChild(userRow);
-    usersUl.appendChild(li);
+    // Pre-fetch all profiles first
+    for (const user of users) {
+      if (seenUids.has(user.uid)) continue;
+      seenUids.add(user.uid);
 
-    // Click handler for showing profile
-    userRow.onclick = () => {
-      if (user.uid === currentUser.uid) return; // optional: don't show own profile
-      showFriendProfile(user);
+      let profileData = {};
+      try {
+        const doc = await db.collection('profiles').doc(user.uid).get();
+        profileData = doc.exists ? doc.data() : {};
+      } catch (err) {
+        console.warn('Error fetching profile for', user.uid, err);
+      }
+
+      usersToRender.push({
+        uid: user.uid,
+        displayName: profileData.displayName || user.displayName || 'Unknown',
+        profileColor: profileData.profileColor || user.profileColor || '#000000',
+        avatarUrl: profileData.avatarUrl || '',
+        bio: profileData.bio || '',
+        tag: profileData.tag || ''
+      });
+    }
+
+    // Map of special UIDs and their colors
+    const SPECIAL_USERS = {
+      "AS1sGNXa2HMfrOzsSxo1bj5zQaL2": "#dac44dff",  // hyztax
+      "40YE0iJtwKR0p5pk3GuoylBqPGh2": "#d64be2ff",  // adam
+      "OqnJbpZUuOhEfWZL6T5DuiN13lD2": "#ee92e2ff",  // A
     };
+
+    // Map of UIDs to emojis
+    const SPECIAL_EMOJIS = {
+      "AS1sGNXa2HMfrOzsSxo1bj5zQaL2": "👑",  // Hyztax
+      "40YE0iJtwKR0p5pk3GuoylBqPGh2": "😎", // Adam
+      "enter all user ID's for verified people here": "✅",  // Verified users
+      "OqnJbpZUuOhEfWZL6T5DuiN13lD2": "🩷", // A
+    };
+
+    // --- Render all rows ---
+    for (const user of usersToRender) {
+      if (version !== renderVersion) return; // cancel outdated render
+
+      const li = document.createElement('li');
+      li.style.display = 'flex';
+      li.style.alignItems = 'center';
+      li.style.justifyContent = 'center';
+      li.style.padding = '6px 0';
+
+      const userRow = document.createElement('div');
+      userRow.className = 'userRow';
+      userRow.dataset.uid = user.uid;
+      userRow.style.display = 'flex';
+      userRow.style.alignItems = 'center';
+      userRow.style.gap = '10px';
+      userRow.style.cursor = 'pointer';
+      userRow.style.width = '100%';
+      userRow.style.maxWidth = '420px';
+
+      // --- Avatar ---
+      const avatarDiv = document.createElement('div');
+      avatarDiv.className = 'avatar';
+      avatarDiv.style.width = '32px';
+      avatarDiv.style.height = '32px';
+      avatarDiv.style.borderRadius = '50%';
+      avatarDiv.style.display = 'flex';
+      avatarDiv.style.justifyContent = 'center';
+      avatarDiv.style.alignItems = 'center';
+      avatarDiv.style.background = user.avatarUrl ? 'none' : user.profileColor;
+      avatarDiv.style.color = '#fff';
+      avatarDiv.style.fontWeight = 'bold';
+      avatarDiv.style.flex = '0 0 32px';
+      avatarDiv.style.overflow = 'hidden';
+      if (user.avatarUrl) {
+        avatarDiv.innerHTML = `<img src="${user.avatarUrl}" alt="Avatar" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`;
+      } else {
+        avatarDiv.textContent = user.displayName.charAt(0).toUpperCase();
+      }
+
+      // --- Username + Emoji ---
+      const nameSpan = document.createElement('span');
+      let nameText = currentUser && user.uid === currentUser.uid
+        ? user.displayName + ' (You)'
+        : user.displayName;
+
+      // Append emoji if exists
+      if (SPECIAL_EMOJIS[user.uid]) {
+        nameText += ` ${SPECIAL_EMOJIS[user.uid]}`;
+      }
+
+      nameSpan.textContent = nameText;
+      nameSpan.style.flex = '1';
+
+      // Special color for special users
+      if (SPECIAL_USERS[user.uid]) {
+        nameSpan.style.color = SPECIAL_USERS[user.uid];
+        nameSpan.style.fontWeight = 'bold';
+      } else {
+        nameSpan.style.color = '#dbdbdbff'; // normal users
+      }
+
+      // --- Append elements ---
+      userRow.appendChild(avatarDiv);
+      userRow.appendChild(nameSpan);
+      li.appendChild(userRow);
+      usersUl.appendChild(li);
+
+      // Click handler for showing profile
+      userRow.onclick = () => {
+        if (!currentUser || user.uid === currentUser.uid) return;
+        showFriendProfile(user);
+      };
+    }
+
+  } catch (err) {
+    console.error('Error in renderUsers:', err);
   }
 }
+
+
 
 
 // --- USER ROW EVENTS ---
@@ -567,5 +611,3 @@ sendBtn.onclick = async () => {
 
 
 
-// also add notifcation on left side !!
-// works ig
