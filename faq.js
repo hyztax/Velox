@@ -1,21 +1,22 @@
-document.querySelectorAll('.faq-question').forEach(button => {
-  button.addEventListener('click', () => {
-    const expanded = button.getAttribute('aria-expanded') === 'true';
-    button.setAttribute('aria-expanded', !expanded);
+document.addEventListener("DOMContentLoaded", () => {
+  const faqQuestions = document.querySelectorAll(".faq-question");
 
-    const answerId = button.getAttribute('aria-controls');
-    const answer = document.getElementById(answerId);
-    if (!answer) return;
+  faqQuestions.forEach((question) => {
+    question.addEventListener("click", () => {
+      const answer = question.nextElementSibling;
 
-    if (expanded) {
-      answer.hidden = true;
-    } else {
-      answer.hidden = false;
-    }
+      // Toggle active state
+      question.classList.toggle("active");
+
+      if (answer.style.maxHeight) {
+        answer.style.maxHeight = null;
+        answer.style.paddingTop = "0";
+        answer.style.paddingBottom = "0";
+      } else {
+        answer.style.maxHeight = answer.scrollHeight + "px";
+        answer.style.paddingTop = "5px";
+        answer.style.paddingBottom = "15px";
+      }
+    });
   });
-});
-
-// Back button functionality
-document.getElementById('backBtn').addEventListener('click', () => {
-  window.location.href = 'main.html';
 });
