@@ -346,9 +346,9 @@ function renderGame() {
         pen.fillRect(plat.x, plat.y - cameraOffsetY, plat.w, plat.h);
     }
 
-    // -------------------- BRICKS WITH DEPTH --------------------
     // -------------------- BRICKS --------------------
 for (const b of bricks) {
+    pen.save(); // save context so fillStyle/shadow changes don't leak
     pen.fillStyle = `rgba(173,11,11,1)`; // comet color
     pen.fillRect(
         b.x,
@@ -356,37 +356,42 @@ for (const b of bricks) {
         b.w,
         b.h
     );
+    pen.restore(); // restore context
 }
 
-    // -------------------- PLAYER TRAIL --------------------
-    const trailLength = 15;
-    if (!player.trailPositions) player.trailPositions = [];
-    player.trailPositions.push({ x: player.x, y: player.y });
-    if (player.trailPositions.length > trailLength) player.trailPositions.shift();
+// -------------------- PLAYER TRAIL --------------------
+const trailLength = 15;
+if (!player.trailPositions) player.trailPositions = [];
+player.trailPositions.push({ x: player.x, y: player.y });
+if (player.trailPositions.length > trailLength) player.trailPositions.shift();
 
-    for (let i = 0; i < player.trailPositions.length; i++) {
-        const pos = player.trailPositions[i];
-        const alpha = ((i + 1) / player.trailPositions.length) * 0.5;
-        const scale = 0.6 + 0.4 * ((i + 1) / player.trailPositions.length);
-        pen.beginPath();
-        pen.arc(pos.x, pos.y - cameraOffsetY, player.radius * scale, 0, Math.PI * 2);
-        pen.fillStyle = hexToRGBA(player.trail, alpha);
-        pen.fill();
-    }
+for (let i = 0; i < player.trailPositions.length; i++) {
+    const pos = player.trailPositions[i];
+    const alpha = ((i + 1) / player.trailPositions.length) * 0.5;
+    const scale = 0.6 + 0.4 * ((i + 1) / player.trailPositions.length);
 
-    // -------------------- PLAYER BALL --------------------
-    pen.save();
+    pen.save(); // save context for trail
     pen.beginPath();
-    pen.arc(player.x, player.y - cameraOffsetY, player.radius, 0, Math.PI * 2);
-    if (player.glow) {
-        pen.shadowColor = player.color;
-        pen.shadowBlur = 20;
-    } else {
-        pen.shadowBlur = 0;
-    }
-    pen.fillStyle = player.color;
+    pen.arc(pos.x, pos.y - cameraOffsetY, player.radius * scale, 0, Math.PI * 2);
+    pen.fillStyle = hexToRGBA(player.trail, alpha); // always explicitly set color
     pen.fill();
-    pen.restore();
+    pen.restore(); // restore so bricks or player drawing won't affect next items
+}
+
+// -------------------- PLAYER BALL --------------------
+pen.save();
+pen.beginPath();
+pen.arc(player.x, player.y - cameraOffsetY, player.radius, 0, Math.PI * 2);
+if (player.glow) {
+    pen.shadowColor = player.color;
+    pen.shadowBlur = 20;
+} else {
+    pen.shadowBlur = 0;
+}
+pen.fillStyle = player.color; // explicitly set color
+pen.fill();
+pen.restore();
+
 
     // -------------------- HUD --------------------
     pen.fillStyle = "#fff";
@@ -575,3 +580,4 @@ canvas.addEventListener("click", (e) => {
   }
 });
 // ddd
+
