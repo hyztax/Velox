@@ -1,26 +1,23 @@
-// -------------------- IMPORTS, AUTH --------------------
+// -------------------- IMPORTS, AUTH, FIRESTORE --------------------
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import {
+  getFirestore,
+  doc,
+  getDoc,
+  setDoc,
+  updateDoc
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
 import { updateUserScore, liveLeaderboard } from "./score.js";
 
 const auth = getAuth();
+const db = getFirestore();
 let authReady = false;
 
-// Listen for auth state
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    authReady = true;
-    liveLeaderboard(user.uid);
-    loop();
-  } else {
-    window.location.href = "signup.html";
-  }
-});
-
-// -------------------- CANVAS, GAME VARIABLES --------------------
+// -------------------- GLOBALS --------------------
 const canvas = document.getElementById("myCanvas");
 const pen = canvas.getContext("2d");
 
-// -------------------- PLAYER, GAME STATE --------------------
 let currentScreen = "menu";
 let currentLevel = 1;
 let gameRunning = false;
@@ -29,8 +26,7 @@ let gameWon = false;
 let cameraOffsetY = 0;
 let fade = 0;
 
-// 🔒 LEVEL SYSTEM
-let unlockedLevels = parseInt(localStorage.getItem("unlockedLevels")) || 1;
+let unlockedLevels = 1; // will be fetched per-user from Firestore
 const totalLevels = 5;
 
 const player = {
@@ -48,6 +44,71 @@ const player = {
 
 const moveSpeed = 5;
 
+// -------------------- FIRESTORE HELPERS --------------------
+async function fetchUserUnlockedLevels(uid) {
+  try {
+    const ref = doc(db, "users", uid);
+    const snap = await getDoc(ref);
+    if (snap.exists()) {
+      const data = snap.data();
+      const val = parseInt(data.unlockedLevels, 10);
+      return Number.isFinite(val) && val >= 1 ? Math.min(val, totalLevels) : 1;
+    } else {
+      // initialize doc with unlockedLevels = 1
+      await setDoc(ref, { unlockedLevels: 1 }, { merge: true });
+      return 1;
+    }
+  } catch (err) {
+    console.error("fetchUserUnlockedLevels error:", err);
+    return 1; // fallback
+  }
+}
+
+async function setUserUnlockedLevels(uid, level) {
+  try {
+    const ref = doc(db, "users", uid);
+    // Use merge to preserve other fields
+    await setDoc(ref, { unlockedLevels: level }, { merge: true });
+  } catch (err) {
+    console.error("setUserUnlockedLevels error:", err);
+  }
+}
+
+// Atomic-ish update: only write higher value
+async function ensureUserUnlockedAtLeast(uid, level) {
+  try {
+    const ref = doc(db, "users", uid);
+    const snap = await getDoc(ref);
+    if (!snap.exists()) {
+      await setDoc(ref, { unlockedLevels: level }, { merge: true });
+      return level;
+    } else {
+      const current = parseInt(snap.data().unlockedLevels || 1, 10);
+      if (level > current) {
+        await updateDoc(ref, { unlockedLevels: level });
+        return level;
+      }
+      return current;
+    }
+  } catch (err) {
+    console.error("ensureUserUnlockedAtLeast error:", err);
+    return unlockedLevels; // fallback
+  }
+}
+
+// -------------------- AUTH STATE --------------------
+onAuthStateChanged(auth, async (user) => {
+  if (user) {
+    authReady = true;
+    // fetch unlocked levels for user from Firestore (synchronously before showing level screen)
+    unlockedLevels = await fetchUserUnlockedLevels(user.uid);
+    liveLeaderboard(user.uid);
+    loop(); // start loop after we have user + unlocked levels
+  } else {
+    window.location.href = "signup.html";
+  }
+});
+
 // -------------------- INPUT --------------------
 const keys = {};
 window.addEventListener("keydown", (e) => {
@@ -62,8 +123,6 @@ window.addEventListener("keydown", (e) => {
   if (currentScreen === "game" && k === "r") {
     if (gameOver || gameWon) startGame();
   }
-
-  checkGameEnd();
 });
 window.addEventListener("keyup", (e) => (keys[e.key.toLowerCase()] = false));
 
@@ -131,6 +190,48 @@ function circleRectCollision(cx, cy, r, rx, ry, rw, rh) {
   return dx * dx + dy * dy < r * r;
 }
 
+// -------------------- END-OF-GAME / SAVE LOGIC --------------------
+// Save score to firestore via your existing updateUserScore function
+// Accepts optional level param to ensure we save the exact completed level.
+async function saveScoreIfBetter(optionalLevel) {
+  const user = auth.currentUser;
+  if (!user) return;
+
+  const progress = Math.max(0, Math.floor((canvas.height - player.y) / 10));
+  const name = user.displayName || `Player-${user.uid.slice(0, 4)}`;
+  const levelToSave = typeof optionalLevel === "number" ? optionalLevel : currentLevel;
+
+  try {
+    await updateUserScore(user.uid, name, progress, levelToSave);
+    // refresh leaderboard after updating
+    liveLeaderboard(user.uid);
+  } catch (err) {
+    console.error("saveScoreIfBetter error:", err);
+  }
+}
+
+// Handle win asynchronously so the main update loop isn't blocked.
+// completedLevel is the level the player just finished.
+async function handleWin(completedLevel) {
+  const user = auth.currentUser;
+  if (user) {
+    // Ensure unlockedLevels in Firestore is at least completedLevel+1
+    if (completedLevel < totalLevels) {
+      const newUnlocked = Math.min(totalLevels, completedLevel + 1);
+      const result = await ensureUserUnlockedAtLeast(user.uid, newUnlocked);
+      unlockedLevels = result; // keep local copy in sync
+    }
+  }
+
+  // Save score for the completed level (important: pass completedLevel explicitly)
+  await saveScoreIfBetter(completedLevel);
+}
+
+// Handle game over as well (save score)
+async function handleGameOver() {
+  await saveScoreIfBetter();
+}
+
 // -------------------- UPDATE --------------------
 function update(delta) {
   if (keys["a"]) player.x -= moveSpeed * delta;
@@ -180,6 +281,8 @@ function update(delta) {
     if (circleRectCollision(player.x, player.y, player.radius, b.x, b.y, b.w, b.h)) {
       gameOver = true;
       gameRunning = false;
+      // call handler (fire & forget)
+      handleGameOver();
     }
     if (b.y - cameraOffsetY > canvas.height + 120) bricks.splice(i, 1);
   }
@@ -189,22 +292,30 @@ function update(delta) {
     player.x > door.x &&
     player.x < door.x + door.w &&
     player.y > door.y &&
-    player.y < door.y + door.h
+    player.y < door.y + door.h &&
+    !gameWon
   ) {
+    // Mark win immediately to avoid double triggers
     gameWon = true;
     gameRunning = false;
 
-    // Unlock next level
-    if (currentLevel < totalLevels && currentLevel >= unlockedLevels) {
-      unlockedLevels = currentLevel + 1;
-      localStorage.setItem("unlockedLevels", unlockedLevels);
-    }
+    // Save completed level before we mutate it
+    const completedLevel = currentLevel;
 
-    currentLevel++;
+    // Unlock next level in Firestore + local copy (handled async)
+    handleWin(completedLevel).catch((err) => console.error("handleWin error:", err));
+
+    // Move to next level locally (optional; keeps previous behavior)
+    if (currentLevel < totalLevels) {
+      currentLevel++;
+    } else {
+      // if last level, keep it at last level
+      currentLevel = totalLevels;
+    }
   }
 }
 
-// -------------------- MENU --------------------
+// -------------------- MENU / LEVEL SELECT DRAW --------------------
 let mouseY = 0;
 canvas.addEventListener("mousemove", (e) => {
   const rect = canvas.getBoundingClientRect();
@@ -386,22 +497,4 @@ function loop(now = performance.now()) {
   }
 
   requestAnimationFrame(loop);
-}
-
-// -------------------- SAVE SCORE --------------------
-async function saveScoreIfBetter() {
-  const user = auth.currentUser;
-  if (!user) return;
-
-  const progress = Math.max(0, Math.floor((canvas.height - player.y) / 10));
-  const name = user.displayName || `Player-${user.uid.slice(0, 4)}`;
-  const level = currentLevel;
-
-  await updateUserScore(user.uid, name, progress, level);
-
-  liveLeaderboard(user.uid);
-}
-
-function checkGameEnd() {
-  if (gameWon || gameOver) saveScoreIfBetter();
 }
