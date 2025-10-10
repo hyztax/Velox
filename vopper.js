@@ -9,14 +9,12 @@ let authReady = false;
 onAuthStateChanged(auth, (user) => {
   if (user) {
     authReady = true;
-    liveLeaderboard(user.uid); 
-    loop(); 
+    liveLeaderboard(user.uid);
+    loop();
   } else {
-    
     window.location.href = "signup.html";
   }
 });
-
 
 // -------------------- CANVAS, GAME VARIABLES --------------------
 const canvas = document.getElementById("myCanvas");
@@ -30,6 +28,10 @@ let gameOver = false;
 let gameWon = false;
 let cameraOffsetY = 0;
 let fade = 0;
+
+// 🔒 LEVEL SYSTEM
+let unlockedLevels = parseInt(localStorage.getItem("unlockedLevels")) || 1;
+const totalLevels = 5;
 
 const player = {
   x: canvas.width / 2,
@@ -45,7 +47,6 @@ const player = {
 };
 
 const moveSpeed = 5;
-
 
 // -------------------- INPUT --------------------
 const keys = {};
@@ -146,7 +147,7 @@ function update(delta) {
   player.y += player.vy * delta;
   cameraOffsetY = player.y - canvas.height / 2;
 
-  // --- collisions unchanged ---
+  // --- collisions ---
   player.onGround = false;
   for (const plat of platforms) {
     const withinX = player.x + player.radius > plat.x && player.x - player.radius < plat.x + plat.w;
@@ -169,7 +170,7 @@ function update(delta) {
     const size = 28 + Math.random() * 10;
     const bx = Math.random() * (canvas.width - size);
     const by = cameraOffsetY - 120;
-    const vy = (4 + currentLevel * 0.5 + Math.random() * 2);
+    const vy = 4 + currentLevel * 0.5 + Math.random() * 2;
     bricks.push({ x: bx, y: by, w: size, h: size, vy });
   }
 
@@ -183,6 +184,7 @@ function update(delta) {
     if (b.y - cameraOffsetY > canvas.height + 120) bricks.splice(i, 1);
   }
 
+  // --- door (level complete) ---
   if (
     player.x > door.x &&
     player.x < door.x + door.w &&
@@ -191,11 +193,16 @@ function update(delta) {
   ) {
     gameWon = true;
     gameRunning = false;
+
+    // Unlock next level
+    if (currentLevel < totalLevels && currentLevel >= unlockedLevels) {
+      unlockedLevels = currentLevel + 1;
+      localStorage.setItem("unlockedLevels", unlockedLevels);
+    }
+
     currentLevel++;
   }
 }
-
-
 
 // -------------------- MENU --------------------
 let mouseY = 0;
@@ -212,14 +219,10 @@ function drawMenu() {
   pen.fillStyle = "#2e093021";
   pen.fillRect(0, 0, canvas.width, canvas.height);
 
-  pen.fillStyle = "white";
+  pen.fillStyle = "#49a8d4ff";
   pen.font = "bold 48px Arial";
   pen.textAlign = "center";
- pen.fillStyle = "#49a8d4ff"; // bright blue
-pen.font = "bold 48px Arial";
-pen.textAlign = "center";
-pen.fillText("Vopper", canvas.width / 2, 200);
-
+  pen.fillText("Vopper", canvas.width / 2, 200);
 
   const buttons = [
     { text: "Start Game", y: 350 },
@@ -249,12 +252,20 @@ function drawLevelSelect() {
   pen.textAlign = "center";
   pen.fillText("Select Level", canvas.width / 2, 150);
 
-  for (let i = 1; i <= 5; i++) {
+  for (let i = 1; i <= totalLevels; i++) {
     const y = 200 + i * 70;
     const isHover = Math.abs(mouseY - y) < 25;
-    pen.fillStyle = isHover ? "#FFD700" : "#FFFFFF";
-    pen.font = isHover ? "bold 30px Arial" : "26px Arial";
-    pen.fillText("Level " + i, canvas.width / 2, y);
+    const isLocked = i > unlockedLevels;
+
+    if (isLocked) {
+      pen.fillStyle = "#777";
+      pen.font = "26px Arial";
+      pen.fillText("🔒 Level " + i, canvas.width / 2, y);
+    } else {
+      pen.fillStyle = isHover ? "#FFD700" : "#FFFFFF";
+      pen.font = isHover ? "bold 30px Arial" : "26px Arial";
+      pen.fillText("Level " + i, canvas.width / 2, y);
+    }
   }
 
   pen.fillStyle = "#ff6666";
@@ -333,14 +344,18 @@ canvas.addEventListener("click", (e) => {
       fade = 0;
     }
   } else if (currentScreen === "level") {
-    for (let i = 1; i <= 5; i++) {
+    for (let i = 1; i <= totalLevels; i++) {
       const top = 200 + i * 70 - 25;
       const bottom = 200 + i * 70 + 25;
       if (y > top && y < bottom) {
-        currentLevel = i;
-        currentScreen = "game";
-        fade = 0;
-        startGame();
+        if (i <= unlockedLevels) {
+          currentLevel = i;
+          currentScreen = "game";
+          fade = 0;
+          startGame();
+        } else {
+          console.log("Level locked!");
+        }
       }
     }
     if (y > 630 && y < 670) {
@@ -354,7 +369,7 @@ canvas.addEventListener("click", (e) => {
 let lastTime = performance.now();
 
 function loop(now = performance.now()) {
-  const delta = (now - lastTime) / 16.67; 
+  const delta = (now - lastTime) / 16.67;
   lastTime = now;
 
   switch (currentScreen) {
@@ -373,25 +388,20 @@ function loop(now = performance.now()) {
   requestAnimationFrame(loop);
 }
 
- 
-
 // -------------------- SAVE SCORE --------------------
 async function saveScoreIfBetter() {
-    const user = auth.currentUser;
-    if (!user) return;
-  
-    const progress = Math.max(0, Math.floor((canvas.height - player.y) / 10));
-    const name = user.displayName || `Player-${user.uid.slice(0, 4)}`;
-    const level = currentLevel;
-  
-    await updateUserScore(user.uid, name, progress, level);
-  
-    // Refresh leaderboard for current user
-    liveLeaderboard(user.uid);
-  }
-  
-  
-  function checkGameEnd() {
-    if (gameWon || gameOver) saveScoreIfBetter();
-  }
-  
+  const user = auth.currentUser;
+  if (!user) return;
+
+  const progress = Math.max(0, Math.floor((canvas.height - player.y) / 10));
+  const name = user.displayName || `Player-${user.uid.slice(0, 4)}`;
+  const level = currentLevel;
+
+  await updateUserScore(user.uid, name, progress, level);
+
+  liveLeaderboard(user.uid);
+}
+
+function checkGameEnd() {
+  if (gameWon || gameOver) saveScoreIfBetter();
+}
