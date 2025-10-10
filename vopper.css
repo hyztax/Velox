@@ -94,12 +94,12 @@ body::-webkit-scrollbar {
 .controls-box {
   position: absolute;
   left: 14.4%;
-  bottom: 74%;
+  bottom: 70%;
   transform: translateX(-50%);
   padding: 28px 24px;
   border-radius: 20px;
-  border: 1.5px solid rgba(255, 255, 255, 0.2);
-  background: linear-gradient(135deg, rgba(25, 25, 25, 0.4), rgba(0, 0, 0, 0.7));
+  border: 1.5px solid rgba(50, 11, 73, 0.137);
+  background: linear-gradient(135deg, rgba(20, 2, 26, 0.308), rgba(0, 0, 0, 0.7));
   box-shadow:
     0 8px 25px rgba(0, 0, 0, 0.6),
     inset 0 0 30px rgba(255, 255, 255, 0.05),
@@ -112,10 +112,19 @@ body::-webkit-scrollbar {
 .controls-box:hover {
   transform: translateX(-50%) scale(1.05);
   box-shadow:
-    0 12px 30px rgba(0, 0, 0, 0.7),
+    0 12px 30px rgba(90, 33, 117, 0.267),
     inset 0 0 35px rgba(255, 255, 255, 0.08),
-    0 0 40px rgba(211, 211, 210, 0.25);
+    0 0 40px rgba(87, 49, 119, 0.25);
     cursor: pointer;
+}
+
+.controls-box h2{
+  color: rgb(204, 201, 207);
+  font-size: xx-large;
+}
+
+.controls-box h3{
+  color: rgb(155, 88, 209);
 }
 
 /* 🔠 Heading */
@@ -219,4 +228,36 @@ body::-webkit-scrollbar {
   font-size: 28px;
   color: rgb(235, 238, 238);
   font-family: Arial, sans-serif;
+}
+
+/* new stuff */
+
+.change {
+    position: absolute;
+    top: 106%;
+    left:0%;
+    padding: 12px 140px;
+    background: rgba(43, 11, 46, 0.199); /* semi-transparent */
+    backdrop-filter: blur(10px);          /* blur behind the button */
+    color: #6b1f6b;
+    font-size: 16px;
+    font-weight: 600;
+    border: 2px solid rgba(75, 72, 72, 0.2);
+    border-radius: 14px;
+    cursor: pointer;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+        text-decoration: none; /* removes underline */
+    display: inline-block;
+    /* rest of your styles */
+}
+
+.change:hover {
+    background: rgba(95, 29, 104, 0.15);
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 12px 25px rgba(0,0,0,0.3);
+      border: 2px solid rgba(82, 23, 82, 0.363);
+
 }

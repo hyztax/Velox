@@ -1,88 +1,166 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vopper</title>
-    <link rel="stylesheet" href="vopper.css">
-    <script src="stars.js" defer></script> 
-    <link rel="icon" href="bild här" type="image/png">
-    <style>
 
-        #starfield {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-        }
-       
-        #myCanvas {
-            display: block;
-            margin: auto;
-            background: #0f0e0e00;
-            position: relative;
-            z-index: 1; 
-        }
-    </style>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vopper</title>
+  <link rel="stylesheet" href="vopper.css">
+  <script src="stars.js" defer></script>
+  <link rel="icon" href="bild här" type="image/png">
+  <style>
+    #starfield {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+    }
+
+    #myCanvas {
+      display: block;
+      margin: auto;
+      background: #0f0e0e00;
+      position: relative;
+      z-index: 1;
+    }
+  </style>
 </head>
+
 <body>
 
-    <canvas id="starfield"></canvas>
-    <canvas id="myCanvas" width="400" height="900"></canvas>
+  <canvas id="starfield"></canvas>
+  <canvas id="myCanvas" width="400" height="900"></canvas>
 
-<div class="how">
-  <div class="controls-box">
-    <h2>Game Controls</h2>
-    <div class="controls">
-      <div class="key">
-        <h1>A</h1>
-        <p>Left</p>
-      </div>
-      <div class="key">
-        <h1>D</h1>
-        <p>Right</p>
-      </div>
-      <div class="key">
-        <h1>SPACE</h1>
-        <p>Jump x2 : doubble jump</p>
-      </div>
+<div class="controls-box">
+  <h2>Game Controls</h2>
+  <h3>click to change keybind!</h3>
+  <div class="controls">
+    <div class="key" data-action="left">
+      <h1>A</h1>
+      <p>Left</p>
+    </div>
+    <div class="key" data-action="right">
+      <h1>D</h1>
+      <p>Right</p>
+    </div>
+    <div class="key" data-action="jump">
+      <h1>SPACE</h1>
+      <p>Jump / double jump</p>
     </div>
   </div>
+
+  <!-- Overlay button -->
+ <a href="vopperCUS.html" class="change">Customize Ball</a>
+
 </div>
 
+  <script>
+    // -------------------- CUSTOMIZABLE KEY MAPPING --------------------
+    const keyMap = {
+      left: "a",
+      right: "d",
+      jump: " "
+    };
 
-<div class="GoBack" onclick="window.location='main.html';"></div>
+    // Load saved keys from localStorage
+    const savedKeys = localStorage.getItem("vopperKeys");
+    if (savedKeys) Object.assign(keyMap, JSON.parse(savedKeys));
+
+    const keys = {}; // track pressed keys
+
+    // Update the controls UI based on keyMap
+    function updateControlUI() {
+      document.querySelectorAll(".key").forEach(keyDiv => {
+        const action = keyDiv.dataset.action;
+        let displayKey = keyMap[action].toUpperCase();
+        if (displayKey === " ") displayKey = "SPACE";
+        keyDiv.querySelector("h1").textContent = displayKey;
+      });
+    }
+
+    // Initial UI setup
+    updateControlUI();
+
+    // Make controls clickable to change keys
+    document.querySelectorAll(".key").forEach(keyDiv => {
+      keyDiv.addEventListener("click", () => {
+        const action = keyDiv.dataset.action;
+        keyDiv.querySelector("h1").textContent = "Press...";
+
+        const handler = (e) => {
+          e.preventDefault();
+          let newKey = e.key;
+          keyMap[action] = newKey.toLowerCase();
+
+          // Update display
+          let displayKey = newKey.toUpperCase();
+          if (displayKey === " ") displayKey = "SPACE";
+          keyDiv.querySelector("h1").textContent = displayKey;
+
+          // Save to localStorage
+          localStorage.setItem("vopperKeys", JSON.stringify(keyMap));
+
+          window.removeEventListener("keydown", handler);
+        };
+
+        window.addEventListener("keydown", handler);
+      });
+    });
+
+    // -------------------- GAME INPUT --------------------
+    window.addEventListener("keydown", e => keys[e.key.toLowerCase()] = true);
+    window.addEventListener("keyup", e => keys[e.key.toLowerCase()] = false);
+
+    // Example usage in your update loop:
+    function update(delta) {
+      if (keys[keyMap.left]) player.x -= moveSpeed * delta;
+      if (keys[keyMap.right]) player.x += moveSpeed * delta;
+
+      if (keys[keyMap.jump] && player.jumpCount < player.maxJumps) {
+        player.vy = -player.jumpPower;
+        player.jumpCount++;
+        keys[keyMap.jump] = false;
+        // play jump sound if desired
+      }
+
+      // ...rest of your update logic
+    }
+  </script>
+
+
+  <div class="GoBack" onclick="window.location='main.html';"></div>
 
 
   <!-- Right side leaderboard -->
-<div id="leaderboard" style="
-position: fixed;        /* stay in place */
-top: 50px;              /* distance from top */
-right: 20px;            /* distance from right */
-width: 250px;
-max-height: 90%;        /* allow scrolling if too tall */
-overflow-y: auto;
-background: rgba(20,20,20,0.8);
-border-radius: 12px;
-color: white;
-padding: 15px;
-font-family: 'Poppins', sans-serif;
-font-size: 16px;
-box-shadow: 0 8px 30px rgba(0,0,0,0.5);
-z-index: 9999;          /* stay above other elements */
-">
-<h3 style="text-align:center; margin-bottom:12px; font-size:20px;">🏆 Top Players</h3>
-<div id="scores-list" style="display:flex; flex-direction:column; gap:8px;">
-  Loading...
-</div>
-</div>
+          <div id="leaderboard" style="
+        position: fixed;        /* stay in place */
+        top: 50px;              /* distance from top */
+        right: 20px;            /* distance from right */
+        width: 250px;
+        max-height: 90%;        /* allow scrolling if too tall */
+        overflow-y: auto;
+        background: rgba(35, 4, 44, 0.233);
+        border-radius: 12px;
+        color: white;
+        padding: 15px;
+        font-family: 'Poppins', sans-serif;
+        font-size: 16px;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+        z-index: 9999;          /* stay above other elements */
+        ">
+            <h3 style="text-align:center; margin-bottom:12px; font-size:20px;">🏆 Top Players</h3>
+            <div id="scores-list" style="display:flex; flex-direction:column; gap:8px;">
+              Loading...
+            </div>
+          </div>
 
+         
 
-
-<script type="module" src="score.js"></script>      
-<script type="module" src="vopper.js"></script>
+  <script type="module" src="score.js"></script>
+  <script type="module" src="vopper.js"></script>
 
 </body>
+
 </html>

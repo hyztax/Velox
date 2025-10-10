@@ -96,7 +96,7 @@ export function liveLeaderboard(currentUid) {
       item.style.borderBottom = "1px solid rgba(255,255,255,0.1)";
       
       if (doc.id === currentUid) {
-        item.style.backgroundColor = "rgba(85, 185, 180, 0.2)"; // highlight current user
+        item.style.backgroundColor = "rgba(133, 139, 139, 0.2)"; // highlight current user
       }
 
       item.innerHTML = `
@@ -108,3 +108,4 @@ export function liveLeaderboard(currentUid) {
     });
   });
 }
+//d d
