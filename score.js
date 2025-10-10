@@ -32,37 +32,78 @@ export async function updateUserScore(uid, name, score, level) {
     const docRef = doc(db, "scores", uid);
     const docSnap = await getDoc(docRef);
 
-    if (!docSnap.exists() || docSnap.data().level < level) {
-      await setDoc(docRef, { 
-        name, 
-        best: score,
-        level // now we mainly use this for ranking
-      });
-      console.log(`💾 Saved new best level for ${name}: Level ${level} (${score}m)`);
+    let best = score;
+    let progress = level; // highest unlocked level
+
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+
+      // keep highest meters climbed
+      best = Math.max(score, data.best || 0);
+
+      // keep highest unlocked level (PB)
+      progress = Math.max(level, data.progress || 1);
     }
+
+    await setDoc(docRef, {
+      name,
+      best,      // best meters
+      level,     // current run level
+      progress,  // highest unlocked level
+      current: score // current run meters
+    });
+
+    console.log(
+      `💾 Saved ${name}: Run L${level} (${score}m) | PB L${progress} (${best}m)`
+    );
   } catch (error) {
     console.error("Error updating score:", error);
   }
 }
 
+// -------------------- LOAD UNLOCKED LEVELS --------------------
+export async function loadUnlockedLevels(uid) {
+  try {
+    const docRef = doc(db, "scores", uid);
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      return data.progress || 1;
+    } else {
+      return 1;
+    }
+  } catch (error) {
+    console.error("Error loading unlocked levels:", error);
+    return 1;
+  }
+}
+
 // -------------------- LIVE LEADERBOARD --------------------
-export function liveLeaderboard() {
+export function liveLeaderboard(currentUid) {
   const list = document.getElementById("scores-list");
   if (!list) return;
 
   const scoresRef = collection(db, "scores");
-  // 🔥 Sort by level instead of best (meters)
-  const topQuery = query(scoresRef, orderBy("level", "desc"), limit(10));
+  const topQuery = query(scoresRef, orderBy("progress", "desc"));
 
   onSnapshot(topQuery, (snapshot) => {
-    list.innerHTML = "";
+    list.innerHTML = ""; 
     snapshot.forEach((doc) => {
       const data = doc.data();
       const item = document.createElement("div");
       item.style.padding = "6px 0";
       item.style.borderBottom = "1px solid rgba(255,255,255,0.1)";
-      // show highest levels first
-      item.innerHTML = `<b>${data.name}</b> — Level ${data.level || 1} (${data.best || 0}m)`;
+      
+      if (doc.id === currentUid) {
+        item.style.backgroundColor = "rgba(85, 185, 180, 0.2)"; // highlight current user
+      }
+
+      item.innerHTML = `
+        <b>${data.name}</b><br>
+        PB: LVL ${data.progress || 1} : ${data.best || 0}m<br>
+        Current: LVL ${data.level || 1} : ${data.current || 0}m
+      `;
       list.appendChild(item);
     });
   });
