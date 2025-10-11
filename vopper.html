@@ -8,6 +8,7 @@
   <title>Velox | vopper</title>
   <link rel="stylesheet" href="vopper.css">
   <script src="stars.js" defer></script>
+  
   <style>
     #starfield {
       position: fixed;
@@ -26,6 +27,38 @@
       z-index: 1;
     }
   </style>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  // --- Firebase Config ---
+  const firebaseConfig = {
+    apiKey: "AIzaSyBXb9OhOEOo4gXNIv2WcCNmXfnm1x7R2EM",
+    authDomain: "velox-c39ad.firebaseapp.com",
+    projectId: "velox-c39ad",
+    storageBucket: "velox-c39ad.appspot.com",
+    messagingSenderId: "404832661601",
+    appId: "1:404832661601:web:9ad221c8bfb459410bba20",
+    measurementId: "G-X8W755KRF6"
+  };
+
+  // --- Initialize Firebase ---
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  // --- Make global for other scripts ---
+  window.firebaseApp = app;
+  window.firebaseAuth = auth;
+  window.firebaseDB = db;
+
+  // --- Import your modules only AFTER Firebase is ready ---
+  import "./vopper.js";
+  import "./score.js";
+</script>
+
 </head>
 
 <body>
@@ -157,9 +190,6 @@
           </div>
 
          
-
-  <script type="module" src="score.js"></script>
-  <script type="module" src="vopper.js"></script>
 
 </body>
 

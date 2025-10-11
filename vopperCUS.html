@@ -181,49 +181,65 @@
     <canvas id="myCanvas" width="600" height="200"></canvas>
 
     <script type="module">
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+     // vopper.js — add the initializeApp call
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import {
+  getFirestore,
+  doc,
+  getDoc,
+  setDoc,
+  updateDoc
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-        // -------------------- FIREBASE CONFIG --------------------
-        const firebaseConfig = {
-            apiKey: "AIzaSyBXb9OhOEOo4gXNIv2WcCNmXfnm1x7R2EM",
-            authDomain: "velox-c39ad.firebaseapp.com",
-            projectId: "velox-c39ad",
-            storageBucket: "velox-c39ad.appspot.com",
-            messagingSenderId: "404832661601",
-            appId: "1:404832661601:web:9ad221c8bfb459410bba20",
-            measurementId: "G-X8W755KRF6"
-        };
+// same config you use on the other page:
+const firebaseConfig = {
+  apiKey: "AIzaSyBXb9OhOEOo4gXNIv2WcCNmXfnm1x7R2EM",
+  authDomain: "velox-c39ad.firebaseapp.com",
+  projectId: "velox-c39ad",
+  storageBucket: "velox-c39ad.appspot.com",
+  messagingSenderId: "404832661601",
+  appId: "1:404832661601:web:9ad221c8bfb459410bba20",
+  measurementId: "G-X8W755KRF6"
+};
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth();
+// initialize app BEFORE calling getAuth() / getFirestore()
+initializeApp(firebaseConfig);
+
+const auth = getAuth();
+const db = getFirestore();
+
 
         let currentUser = null;
 
       // -------------------- LOAD CUSTOMIZATION --------------------
 async function loadCustomization(uid) {
+    // fast local fallback first (helps when network is slow)
+    const local = localStorage.getItem("customization");
+    if (local) {
+       try { return JSON.parse(local); } catch (e) { console.warn("bad local customization", e); }
+    }
+
     if (uid) {
         try {
             const docRef = doc(db, "scores", uid);
             const docSnap = await getDoc(docRef);
             if (docSnap.exists() && docSnap.data().customization) {
+                // store locally so next load is instant
+                localStorage.setItem("customization", JSON.stringify(docSnap.data().customization));
                 return docSnap.data().customization;
             }
         } catch (err) {
-            console.error("Error loading customization:", err);
+            console.error("Error loading customization from Firestore:", err);
         }
     }
-    // fallback to localStorage
-    const local = localStorage.getItem("customization");
-    if (local) return JSON.parse(local);
 
-    // fallback to default values
+    // final fallback defaults
     return { color: "#ffffff", glow: true, trail: "#00f" };
 }
 
-// -------------------- SAVE CUSTOMIZATION --------------------
+
+// SAVE CUSTOMIZATION
 async function saveCustomization(uid, customization) {
     try {
         if (uid) {
@@ -234,16 +250,25 @@ async function saveCustomization(uid, customization) {
 
             // merge new customization into existing data
             await setDoc(docRef, { ...existing, customization }, { merge: true });
+
+            // also keep a local copy so the app can fall back quickly
+            localStorage.setItem("customization", JSON.stringify(customization));
         } else {
-            // fallback to localStorage
+            // fallback to localStorage for anonymous users
             localStorage.setItem("customization", JSON.stringify(customization));
         }
-        // Reload AFTER a small delay to ensure Firestore has saved
-        setTimeout(() => location.reload(), 100);
+
+        console.log("Customization saved.");
+
+        // refresh the page after save
+        setTimeout(() => location.reload(), 100); // small delay ensures everything is stored first
     } catch (err) {
         console.error("Error saving customization:", err);
+        // still store locally so refresh won't lose it
+        localStorage.setItem("customization", JSON.stringify(customization));
     }
 }
+
 
 // -------------------- INIT --------------------
 onAuthStateChanged(auth, async (user) => {
@@ -410,9 +435,23 @@ document.getElementById("saveBtn").addEventListener("click", () => {
 
             requestAnimationFrame(loop);
         }
-
-        
+ 
     </script>
+
+
+<script>    // Save selected color
+document.getElementById("color").addEventListener("input", () => {
+  localStorage.setItem("vopperBallColor", document.getElementById("color").value);
+  console.log("Saved color:", document.getElementById("color").value);
+});
+
+// Save selected trail
+document.getElementById("trail").addEventListener("input", () => {
+  localStorage.setItem("vopperBallTrail", document.getElementById("trail").value);
+  console.log("Saved trail:", document.getElementById("trail").value);
+});</script>
+
+
 
 
 

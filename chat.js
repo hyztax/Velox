@@ -50,8 +50,6 @@ const firebaseConfig = {
     if (messageInput && messageInput.parentNode) messageInput.parentNode.appendChild(charCounter);
   }
   
-  
-  
   // -------------------- State --------------------
   const MAX_LENGTH = 300;
   let currentUser = null;
@@ -205,6 +203,8 @@ function renderMessage(msg, msgId = null) {
         }
     }
 
+    
+
     const dateStr = formatChatDate(d);
     if (lastRenderedDate !== dateStr) {
         const divider = document.createElement('div');
@@ -273,6 +273,8 @@ if (msg.deleted) {
         } else {
             msgDiv.appendChild(document.createTextNode(part));
         }
+
+        
     });
 }
 
@@ -467,6 +469,7 @@ function showContextMenu(msgId, msg, container) {
           };
         }
         renderCombinedList();
+        
       });
   }
   
@@ -783,37 +786,46 @@ auth.onAuthStateChanged(async (user) => {
     { merge: true }
   );
 
-  const lastChatUid = localStorage.getItem('lastChatUid');
-  const lastGroupId = localStorage.getItem('lastGroupChatId');
+  const lastChatUid = localStorage.getItem('lastChatUid'); // friend UID
+  const lastGroupId = localStorage.getItem('lastGroupChatId'); // group chat ID
 
-  // check last private chat
-  if (lastChatUid) {
-    const chatRef = db.collection('privateChats').doc(lastChatUid);
-    const chatDoc = await chatRef.get();
-    if (chatDoc.exists) {
-      const participants = chatDoc.data().participants || [];
-      if (participants.includes(currentUser.uid)) {
-        startChat(lastChatUid, false);
+  // -------------------- Restore last private chat --------------------
+  if (lastChatUid && lastChatUid !== currentUser.uid) {
+    try {
+      const friendDoc = await db.collection('friends')
+        .doc(currentUser.uid)
+        .collection('list')
+        .doc(lastChatUid)
+        .get();
+
+      if (friendDoc.exists) {
+        // Open chat with friend UID
+        startChat(lastChatUid, false); // false = do not overwrite localStorage
       } else {
-        localStorage.removeItem('lastChatUid'); // kicked, clear local storage
+        localStorage.removeItem('lastChatUid'); // no longer a friend
       }
-    } else {
-      localStorage.removeItem('lastChatUid'); // chat deleted
+    } catch (err) {
+      console.error('Failed to restore last private chat:', err);
+      localStorage.removeItem('lastChatUid');
     }
-  } 
-  // check last group chat
+  }
+  // -------------------- Restore last group chat --------------------
   else if (lastGroupId) {
-    const groupRef = db.collection('groupChats').doc(lastGroupId);
-    const groupDoc = await groupRef.get();
-    if (groupDoc.exists) {
-      const members = groupDoc.data().members || [];
-      if (members.includes(currentUser.uid)) {
-        startGroupChat(lastGroupId);
+    try {
+      const groupDoc = await db.collection('chats').doc(lastGroupId).get();
+      if (groupDoc.exists) {
+        const members = groupDoc.data().members || [];
+        if (members.includes(currentUser.uid)) {
+          startGroupChat(lastGroupId, false); // false = do not overwrite localStorage
+        } else {
+          localStorage.removeItem('lastGroupChatId'); // kicked
+        }
       } else {
-        localStorage.removeItem('lastGroupChatId'); // kicked, clear local storage
+        localStorage.removeItem('lastGroupChatId'); // deleted
       }
-    } else {
-      localStorage.removeItem('lastGroupChatId'); // group deleted
+    } catch (err) {
+      console.error('Failed to restore last group chat:', err);
+      localStorage.removeItem('lastGroupChatId');
     }
   }
 
@@ -1256,6 +1268,8 @@ function openGroupChat(groupId) {
         console.error('Firestore onSnapshot error:', err);
     });
 }
+
+
 
   
   // -------------------- Group sidebar UI --------------------

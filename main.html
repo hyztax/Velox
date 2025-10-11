@@ -68,6 +68,23 @@
   }
 </style>
 
+
+ <div class="spotify-container">
+  <iframe 
+    src="https://open.spotify.com/embed/playlist/7p9ALjNzssa5ePbcIaWGH2?utm_source=generator&theme=0" 
+    frameborder="0" 
+    allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" 
+    allowfullscreen>
+  </iframe>
+</div> 
+
+
+
+
+
+
+
+
 <script>
   function getGreeting() {
     const now = new Date();
@@ -190,10 +207,7 @@ document.addEventListener("DOMContentLoaded", () => {
 </script>
 
 
-  
 
-
-  
 
   <!-- ska fixa senare (kanske) -->
 <!-- <div id="allUsersList" aria-label="List of all users with accounts" style="margin-top: 40px;">
@@ -205,8 +219,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
+
   <!-- Incoming Friend Requests -->
-  <section aria-label="Friend Requests" style="flex: 1; min-width: 100px; color: rgb(196, 196, 196);">
+  <section aria-label="Friend Requests" style="flex: 1; min-width: 100px; color: rgb(178, 179, 180);">
     <h2>REQUESTS</h2>
     <input type="text" id="searchRequests" placeholder="Search for a request" autocomplete="off" />
     <ul id="friendRequestsList"></ul>
@@ -355,16 +370,27 @@ document.addEventListener("DOMContentLoaded", () => {
   const popup = document.getElementById("popup");
   const closeBtn = document.querySelector(".close-btn");
 
-  // Show popup on load
-  popup.style.display = "flex";
+  // Detect if the device is a laptop/PC
+  const isDesktop = () => {
+    const ua = navigator.userAgent;
+    const isMobile = /Mobi|Android|iPhone|iPad|iPod|Tablet/i.test(ua);
+    return !isMobile;
+  }
 
-  // Close on click
-  closeBtn.addEventListener("click", () => {
+  if (isDesktop()) {
+    // Show popup on desktop only
+    popup.style.display = "flex";
+
+    // Close on click
+    closeBtn.addEventListener("click", () => {
+      popup.style.display = "none";
+    });
+  } else {
+    // Hide popup on mobile/tablet
     popup.style.display = "none";
-  });
+  }
 });
 </script>
-
 
 
 

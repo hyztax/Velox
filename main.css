@@ -19,12 +19,16 @@ body {
   position: relative;
   user-select: none;
   /* Hide scrollbar but keep scroll */
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;     /* Firefox */
+  -ms-overflow-style: none;
+  /* IE and Edge */
+  scrollbar-width: none;
+  /* Firefox */
   /* overflow: hidden;  */
 }
+
 body::-webkit-scrollbar {
-  display: none;             /* Chrome, Safari, Opera */
+  display: none;
+  /* Chrome, Safari, Opera */
 }
 
 header {
@@ -33,7 +37,8 @@ header {
   height: 45px;
   padding: 15px 20px;
   display: flex;
-  justify-content: center; /* Center content horizontally */
+  justify-content: center;
+  /* Center content horizontally */
   align-items: center;
   position: fixed;
   top: env(safe-area-inset-top, 0);
@@ -49,11 +54,12 @@ header {
   font-weight: 600;
   font-size: 14px;
   user-select: none;
-  position: relative; /* Needed for positioning hamburger */
+  position: relative;
+  /* Needed for positioning hamburger */
 }
 
 /* Style for the "Logged in as" text and username span */
-header > span,
+header>span,
 #usernameDisplay {
   margin-left: 5px;
   color: #eee;
@@ -64,23 +70,33 @@ header > span,
 #settingsBtn {
   display: flex;
   flex-direction: column;
-  justify-content: center; /* Vertically centers the spans */
-  align-items: center;     /* Horizontally centers the spans */
-  gap: 6px;                /* Space between each span */
-  width: 30px;             /* Optional: button size */
+  justify-content: center;
+  /* Vertically centers the spans */
+  align-items: center;
+  /* Horizontally centers the spans */
+  gap: 6px;
+  /* Space between each span */
+  width: 30px;
+  /* Optional: button size */
   height: 30px;
-  background: transparent; /* If you want no background */
-  border: none;            /* Remove default button border */
-  cursor: pointer;         /* Pointer cursor on hover */
+  background: transparent;
+  /* If you want no background */
+  border: none;
+  /* Remove default button border */
+  cursor: pointer;
+  /* Pointer cursor on hover */
   position: fixed;
   right: 45px;
 }
 
 #settingsBtn span {
   display: block;
-  height: 3px;             /* Line thickness */
-  width: 24px;             /* Line length */
-  background: #eee;        /* Line color */
+  height: 3px;
+  /* Line thickness */
+  width: 24px;
+  /* Line length */
+  background: #eee;
+  /* Line color */
   border-radius: 2px;
   transition: background 0.3s ease;
   pointer-events: none;
@@ -93,7 +109,8 @@ header > span,
   font-size: large;
   position: absolute;
   margin-right: 3px;
-  display: block; /* or inline-block if needed */
+  display: block;
+  /* or inline-block if needed */
   /* box-sizing: border-box;
   outline: 1px solid rgb(232, 232, 240); */
   color: white;
@@ -114,10 +131,11 @@ header > span,
     width: 35px;
     height: 25px;
   }
+
   #settingsBtn span {
     height: 3px;
     width: 100%;
-  
+
   }
 }
 
@@ -134,10 +152,11 @@ header > span,
   background: rgba(20, 20, 20, 0.911);
   backdrop-filter: saturate(180%) blur(10px);
   border-radius: 10px;
-  box-shadow: 0 0 15px rgba(0,0,0,0.7);
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.7);
   display: flex;
   flex-direction: column;
-  align-items: center; /* Keep buttons centered */
+  align-items: center;
+  /* Keep buttons centered */
   width: 120px;
   overflow: hidden;
   z-index: 1150;
@@ -148,8 +167,10 @@ header > span,
 }
 
 #settingsMenu button {
-  padding: 10px 20px;                     /* padding for button "block" look */
-  margin: 5px 0;                          /* spacing between buttons */
+  padding: 10px 20px;
+  /* padding for button "block" look */
+  margin: 5px 0;
+  /* spacing between buttons */
   background: transparent;
   color: white;
   border: none;
@@ -160,7 +181,8 @@ header > span,
 }
 
 #settingsMenu button:hover {
-  background: rgba(255, 255, 255, 0.1);   /* soft hover effect only around button */
+  background: rgba(255, 255, 255, 0.1);
+  /* soft hover effect only around button */
 }
 
 
@@ -218,7 +240,7 @@ main {
   background: rgba(30 30 30 / 0.6);
   border-radius: 15px;
   padding: 15px 20px;
-  box-shadow: 0 0 30px rgba(0,0,0,0.7);
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.7);
   text-align: center;
   backdrop-filter: saturate(200%) blur(10px);
 
@@ -226,6 +248,7 @@ main {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
 #usersList::-webkit-scrollbar,
 #usersList ul::-webkit-scrollbar {
   display: none;
@@ -240,7 +263,8 @@ main {
 
 #usersList ul {
   list-style: none;
-  max-height: 220px; /* Allow a bit more height for scroll */
+  max-height: 220px;
+  /* Allow a bit more height for scroll */
   overflow-y: auto;
   padding-left: 0;
 
@@ -267,7 +291,8 @@ main {
     border-radius: 12px;
 
     /* Move up on mobile */
-    margin-top: -30px; /* adjust this to move higher or lower */
+    margin-top: -30px;
+    /* adjust this to move higher or lower */
   }
 
   #usersList h2 {
@@ -276,7 +301,8 @@ main {
   }
 
   #usersList ul {
-    max-height: 180px; /* smaller height on very small phones */
+    max-height: 180px;
+    /* smaller height on very small phones */
   }
 
   #usersList ul li {
@@ -300,15 +326,20 @@ main {
 /* Profile modal buttons container */
 #profileActions {
   display: flex;
-  gap: 10px;        /* space between buttons */
-  margin-top: 4px;  /* move buttons closer to bio */
-  padding: 3px;     /* padding inside container */
-  flex-wrap: wrap;  /* wrap buttons if too many */
+  gap: 10px;
+  /* space between buttons */
+  margin-top: 4px;
+  /* move buttons closer to bio */
+  padding: 3px;
+  /* padding inside container */
+  flex-wrap: wrap;
+  /* wrap buttons if too many */
 }
 
 /* Common button style */
 #profileActions button {
-  padding: 8px 16px;      /* top-bottom, left-right */
+  padding: 8px 16px;
+  /* top-bottom, left-right */
   border: none;
   border-radius: 6px;
   cursor: pointer;
@@ -318,27 +349,33 @@ main {
 
 /* Add Friend button */
 #profileActions .addFriendBtn {
-  background-color: #191a19; /* green */
+  background-color: #191a19;
+  /* green */
   color: white;
 }
+
 #profileActions .addFriendBtn:hover {
   background-color: #202020;
 }
 
 /* Remove Friend button */
 #profileActions .removeFriendBtn {
-  background-color: #5c0e09; /* red */
+  background-color: #5c0e09;
+  /* red */
   color: white;
 }
+
 #profileActions .removeFriendBtn:hover {
   background-color: #460b0b;
 }
 
 /* Message button */
 #profileActions .messageBtn {
-  background-color: #dddedf; /* blue */
+  background-color: #dddedf;
+  /* blue */
   color: rgb(51, 50, 50);
 }
+
 #profileActions .messageBtn:hover {
   background-color: #686969;
 }
@@ -364,14 +401,16 @@ main {
   user-select: none;
   max-width: 300px;
   width: 100%;
-  height: 40px; /* Adjusted for normal button height */
+  height: 40px;
+  /* Adjusted for normal button height */
   z-index: 1000;
 }
 
 /* For larger screens (PC) move it higher up */
 @media (min-width: 768px) {
   #inviteBtn {
-    bottom: 10px; /* moves button 80px from bottom instead of 20px */
+    bottom: 10px;
+    /* moves button 80px from bottom instead of 20px */
     max-width: 300px;
     width: auto;
     padding: 10px 30px;
@@ -421,35 +460,35 @@ main {
   width: 100%;
   max-width: 480px;
   text-align: center;
-  color: #d4dad3; /* a soft greenish color */
+  color: #d4dad3;
+  /* a soft greenish color */
   font-weight: 800;
   user-select: none;
-  text-shadow: 0 0 8px rgba(102, 100, 100, 0.6); /* green glow */
+  text-shadow: 0 0 8px rgba(102, 100, 100, 0.6);
+  /* green glow */
   font-size: 28px;
   letter-spacing: 2px;
-  
+
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 @media (max-width: 400px) {
   .welcome-title {
     font-size: 20px;
-    margin-top: 90px; /* slightly less margin for smaller screens */
+    margin-top: 90px;
+    /* slightly less margin for smaller screens */
     letter-spacing: 1.5px;
   }
 }
 
 .velox-green {
-  font-size:70px;
-background: linear-gradient(
-    90deg,
-    #4b6188,
-    #89bfff,
-    #89bfff,
-    #5571a0,
-    #89bfff 
-   
-  );
+  font-size: 70px;
+  background: linear-gradient(90deg,
+      #4b6188,
+      #89bfff,
+      #89bfff,
+      #5571a0,
+      #89bfff);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-size: 300% 100%;
@@ -460,6 +499,7 @@ background: linear-gradient(
   0% {
     background-position: 0% 0;
   }
+
   100% {
     background-position: 300% 0;
   }
@@ -512,27 +552,33 @@ background: linear-gradient(
 #usersList h2 {
   margin-bottom: 12px;
   font-size: 1.5rem;
-  color: #e7ebe7; /* velox-green vibe */
+  color: #e7ebe7;
+  /* velox-green vibe */
   text-align: center;
   letter-spacing: 1px;
 }
 
 #usersUl li {
   display: flex;
-  justify-content: center; /* centers horizontally */
-  align-items: center;     /* centers vertically */
+  justify-content: center;
+  /* centers horizontally */
+  align-items: center;
+  /* centers vertically */
   padding: 10px 5px;
   border-bottom: 1px solid #333;
   cursor: default;
   transition: background-color 0.3s;
-  gap: 10px; /* space between username and toggle */
+  gap: 10px;
+  /* space between username and toggle */
 }
 
 #usersUl .username {
   font-weight: 600;
   color: #a5d6a7;
-  text-align: center; /* center text */
-  min-width: 100px;   /* optional: ensure a min width */
+  text-align: center;
+  /* center text */
+  min-width: 100px;
+  /* optional: ensure a min width */
 }
 
 
@@ -542,7 +588,8 @@ background: linear-gradient(
 
 #usersUl .username {
   font-weight: 600;
-  color: #a5d6a7; /* lighter green */
+  color: #a5d6a7;
+  /* lighter green */
 }
 
 .toggleProfile {
@@ -585,26 +632,36 @@ background: linear-gradient(
 }
 
 #usernameDisplay {
-  margin-left: 0px; /* small space, adjust as you want */
+  margin-left: 0px;
+  /* small space, adjust as you want */
   font-weight: bold;
   display: inline;
 }
 
 /* Style for profile action buttons */
 .profileActions button {
-  background-color: #0c0c0c;       /* Dark background */
-  color: #eee;                  /* Light text */
-  border: none;                 /* No border */
-  padding: 6px 12px;            /* Some padding */
-  margin: 4px 6px 0 0;          /* Small margin to separate buttons */
-  border-radius: 6px;           /* Rounded corners */
-  cursor: pointer;              /* Pointer cursor on hover */
-  font-weight: 600;             /* Semi-bold text */
+  background-color: #0c0c0c;
+  /* Dark background */
+  color: #eee;
+  /* Light text */
+  border: none;
+  /* No border */
+  padding: 6px 12px;
+  /* Some padding */
+  margin: 4px 6px 0 0;
+  /* Small margin to separate buttons */
+  border-radius: 6px;
+  /* Rounded corners */
+  cursor: pointer;
+  /* Pointer cursor on hover */
+  font-weight: 600;
+  /* Semi-bold text */
   transition: background-color 0.3s ease;
 }
 
 .profileActions button:hover {
-  background-color: #020202;       /* Slightly lighter on hover */
+  background-color: #020202;
+  /* Slightly lighter on hover */
   color: rgb(37, 35, 35);
 }
 
@@ -621,7 +678,8 @@ background: linear-gradient(
   width: 100vw;
   height: 100vh;
   background: rgba(0, 0, 0, 0.5);
-  display: none; /* hidden by default */
+  display: none;
+  /* hidden by default */
   justify-content: center;
   align-items: center;
   z-index: 1000;
@@ -639,7 +697,7 @@ background: linear-gradient(
   width: 90%;
   max-width: 400px;
   padding: 20px 25px;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.25);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
   display: flex;
   flex-direction: column;
   gap: 15px;
@@ -737,7 +795,7 @@ background: linear-gradient(
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(0,0,0,0.6);
+  background: rgba(0, 0, 0, 0.6);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -755,7 +813,7 @@ background: linear-gradient(
   border-radius: 10px;
   padding: 30px 40px;
   width: 320px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.8);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8);
   color: #dcddde;
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   text-align: center;
@@ -768,7 +826,8 @@ background: linear-gradient(
   height: 100px;
   margin: 0 auto 15px;
   border-radius: 50%;
-  background: #5865f2; /* Discord blurple */
+  background: #5865f2;
+  /* Discord blurple */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -844,10 +903,13 @@ background: linear-gradient(
   display: flex;
   gap: 20px;
   max-width: 1100px;
-  margin: 40px auto 40px auto; /* top and bottom spacing with auto sides */
+  margin: 40px auto 40px auto;
+  /* top and bottom spacing with auto sides */
   padding: 0 20px;
-  flex-wrap: wrap; /* allows wrapping on smaller screens */
-  justify-content: center; /* center sections if wrapped */
+  flex-wrap: wrap;
+  /* allows wrapping on smaller screens */
+  justify-content: center;
+  /* center sections if wrapped */
 }
 
 section {
@@ -855,12 +917,16 @@ section {
   padding: 15px;
   max-height: 350px;
   border-radius: 8px;
-  flex: 1 1 320px; /* grow, shrink, basis min width */
+  flex: 1 1 320px;
+  /* grow, shrink, basis min width */
   display: flex;
   flex-direction: column;
-  min-width: 280px; /* avoid shrinking too small */
-  max-width: 360px; /* limit max width */
-  box-shadow: 0 0 10px rgba(234, 238, 234, 0.1); /* subtle green glow */
+  min-width: 280px;
+  /* avoid shrinking too small */
+  max-width: 360px;
+  /* limit max width */
+  box-shadow: 0 0 10px rgba(234, 238, 234, 0.1);
+  /* subtle green glow */
 }
 
 section h2 {
@@ -918,7 +984,8 @@ li {
   align-items: center;
   margin-bottom: 10px;
   padding: 8px 10px;
-  background: #0a0a0a44;  /* User list Color */
+  background: #0a0a0a44;
+  /* User list Color */
   border-radius: 6px;
   font-size: 14px;
   transition: background-color 0.3s ease;
@@ -955,7 +1022,7 @@ li button:hover:not(:disabled) {
     align-items: center;
     padding: 20px 10px;
   }
-  
+
   section {
     max-width: 100%;
     width: 100%;
@@ -969,12 +1036,14 @@ li button:hover:not(:disabled) {
 .modal-content {
   display: flex;
   flex-direction: column;
-  align-items: center; /* center horizontally */
+  align-items: center;
+  /* center horizontally */
 }
 
 /* Style and position the message button */
 #sendMessageBtn {
-  margin-bottom: 15px;  /* space below to separate from close button */
+  margin-bottom: 15px;
+  /* space below to separate from close button */
   padding: 10px 25px;
   background-color: #070707;
   color: white;
@@ -1015,7 +1084,7 @@ li button:hover:not(:disabled) {
   background: #1e1e1e;
   padding: 20px;
   border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.7);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
   color: #ddd;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
@@ -1023,7 +1092,8 @@ li button:hover:not(:disabled) {
 #allUsersList h2 {
   font-size: 1.8rem;
   margin-bottom: 15px;
-  color: #93d8ac; /* Velox green-ish */
+  color: #93d8ac;
+  /* Velox green-ish */
   text-align: center;
 }
 
@@ -1055,7 +1125,8 @@ li button:hover:not(:disabled) {
   list-style: none;
   padding: 0;
   margin: 0;
-  max-height: 350px; /* Scroll if too many */
+  max-height: 350px;
+  /* Scroll if too many */
   overflow-y: auto;
   border-top: 1px solid #444;
 }
@@ -1077,34 +1148,50 @@ li button:hover:not(:disabled) {
 
 
 .Velox_Shop {
-  position: fixed;               /* stay fixed on screen */
-  top: 20px;                     /* distance from top */
-  right: 20px;                   /* distance from right */
-  display: flex;                 /* horizontal layout */
-  align-items: center;           /* vertically center text with image */
-  gap: 10px;                     /* space between image and text */
+  position: fixed;
+  /* stay fixed on screen */
+  top: 20px;
+  /* distance from top */
+  right: 20px;
+  /* distance from right */
+  display: flex;
+  /* horizontal layout */
+  align-items: center;
+  /* vertically center text with image */
+  gap: 10px;
+  /* space between image and text */
   padding: 10px;
-  background-color: #22222277;        /* dark background for visibility */
+  background-color: #22222277;
+  /* dark background for visibility */
   border-radius: 8px;
-  text-decoration: none;         /* remove underline */
+  text-decoration: none;
+  /* remove underline */
   color: rgb(232, 226, 226);
-  z-index: 1000;      
+  z-index: 1000;
   transition: background 0.3s ease 0.1s;
 }
 
 .Velox_Connect {
-  position: fixed;               /* stay fixed on screen */
-  top: 80px;                     /* distance from top */
-  right: 20px;                   /* distance from right */
-  display: flex;                 /* horizontal layout */
-  align-items: center;           /* vertically center text with image */
-  gap: 10px;                     /* space between image and text */
+  position: fixed;
+  /* stay fixed on screen */
+  top: 80px;
+  /* distance from top */
+  right: 20px;
+  /* distance from right */
+  display: flex;
+  /* horizontal layout */
+  align-items: center;
+  /* vertically center text with image */
+  gap: 10px;
+  /* space between image and text */
   padding: 10px;
-  background-color: #22222277;        /* dark background for visibility */
+  background-color: #22222277;
+  /* dark background for visibility */
   border-radius: 8px;
-  text-decoration: none;         /* remove underline */
+  text-decoration: none;
+  /* remove underline */
   color: rgb(232, 226, 226);
-  z-index: 1000;      
+  z-index: 1000;
   transition: background 0.3s ease 0.1s;
 }
 
@@ -1116,30 +1203,36 @@ li button:hover:not(:disabled) {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   animation: shine 2s linear infinite;
-    text-shadow:
+  text-shadow:
     0 0 5px #b30000,
     0 0 40px #802424;
 }
 
-.Velox_Connect:hover{
- background-color: #07070782;   
+.Velox_Connect:hover {
+  background-color: #07070782;
 }
 
 
 @keyframes shine {
-  0% { background-position: 0% 50%; }
-  100% { background-position: 100% 50%; }
+  0% {
+    background-position: 0% 50%;
+  }
+
+  100% {
+    background-position: 100% 50%;
+  }
 }
 
-.Velox_Shop:hover{
-  background-color: #07070782;    
+.Velox_Shop:hover {
+  background-color: #07070782;
 }
 
 .Velox_Shop span {
   font-weight: bold;
   font-size: 16px;
   color: rgb(232, 226, 226);
-  text-shadow: 0 0 2px #fff, 0 0 4px #4b4848, 0 0 6px #0e0e0e; /* subtle glow */
+  text-shadow: 0 0 2px #fff, 0 0 4px #4b4848, 0 0 6px #0e0e0e;
+  /* subtle glow */
 }
 
 .Velox_Shop img {
@@ -1151,7 +1244,7 @@ li button:hover:not(:disabled) {
 
 .GAME {
   position: fixed;
-  top: 50%;
+  top: 20%;
   right: 30px;
   transform: translateY(-50%);
   z-index: 9999;
@@ -1249,8 +1342,40 @@ li button:hover:not(:disabled) {
     opacity: 0;
     transform: translateX(120px) rotateY(15deg);
   }
+
   to {
     opacity: 1;
     transform: translateX(0) rotateY(0);
   }
 }
+
+.spotify-container {
+  aspect-ratio: 6/8;
+  border-radius: 20px;
+  overflow: hidden;
+  position: fixed;
+  left: 7%;
+  top: 45%;
+  transform: translateY(-50%);
+  z-index: 999;
+  background: #0c0c0c00;
+}
+
+.spotify-container iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 500px) {
+  .spotify-container {
+    width: 90vw;             /* almost full width on small screens */
+    height: auto;
+    aspect-ratio: auto;       /* let iframe define height */
+    left: 50%;
+    top: 15%;
+    transform: translate(-50%, -50%); /* center perfectly */
+    border-radius: 12px;
+  }
+  }

@@ -50,7 +50,6 @@ const moveSpeed = 5;
 
 
 
-
 // -------------------- FIRESTORE HELPERS --------------------
 async function fetchUserUnlockedLevels(uid) {
   try {
@@ -126,20 +125,27 @@ onAuthStateChanged(auth, async (user) => {
   unlockedLevels = await fetchUserUnlockedLevels(user.uid);
   liveLeaderboard(user.uid);
 
-  // Wait for customization to load from Firestore
+  // Load Firestore customization
   const customization = await loadUserCustomization(user.uid);
   player.color = customization.color;
   player.glow = customization.glow;
   player.trail = customization.trail;
 
+  // Override with localStorage if available
+  const savedColor = localStorage.getItem("vopperBallColor");
+  if (savedColor) player.color = savedColor;
+
+  const savedTrail = localStorage.getItem("vopperBallTrail");
+  if (savedTrail) player.trail = savedTrail;
+
   // CLEAR OLD TRAIL POSITIONS SO THE COLOR MATCHES
   player.trailPositions = [];
 
-  // Mark both ready flags true
+  // Mark ready flags
   authReady = true;
   playerCustomizationReady = true;
 
-  // Start the game loop only after everything is loaded
+  // Start the game loop
   loop();
 });
 
@@ -579,5 +585,4 @@ canvas.addEventListener("click", (e) => {
     }
   }
 });
-// ddd
-
+//ddd
