@@ -7,6 +7,7 @@
   <title>Velox</title>
   <link rel="stylesheet" href="main.css" />
   <!-- <script src="notifications.js"></script> -->
+  <link rel="stylesheet" href="global.css" />
 
   <style>
 
@@ -26,6 +27,11 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
 </head>
 <body>
+
+  <div id="messagesContainer"></div>
+
+
+
 
 <header>
   <div class="user-info">
@@ -68,18 +74,30 @@
   }
 </style>
 
-
- <div class="spotify-container">
+<div class="spotify-container" id="spotifyBox">
   <iframe 
     src="https://open.spotify.com/embed/playlist/7p9ALjNzssa5ePbcIaWGH2?utm_source=generator&theme=0" 
     frameborder="0" 
     allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" 
     allowfullscreen>
   </iframe>
-</div> 
+  <div id="spotifyBox">
+    <!-- your Spotify embed here -->
+  </div>
+  
+  <div class="hideSpotify" onclick="hideSpotify()">Close Spotify</div>
+  
+</div>
 
 
-
+<script>
+  function hideSpotify() {
+    const spotifyBox = document.getElementById("spotifyBox");
+    const closeButton = document.querySelector(".hideSpotify");
+    if (spotifyBox) spotifyBox.remove();
+    if (closeButton) closeButton.remove();
+  }
+</script>
 
 
 
@@ -349,51 +367,89 @@ if (isElectron) {
 } else {
   btn.style.display = 'none';
 }
-
 </script>
-
-
-<!-- POPUP -->
+<!-- VOPPER -->
 <div class="GAME" id="popup">
   <div class="popup-content">
-    <span class="close-btn">&times;</span>
+    <span class="close-btn" style="cursor:pointer; position:absolute; top:10px; right:15px; font-size:24px;">&times;</span>
     <h2>Try Vopper now ! 🎮</h2>
     <p>Check out my new game! 🚀 Give it a try and see how far you can get!</p>
-    
     <a href="vopper.html" class="popup-btn">Play Now</a>
   </div>
 </div>
 
-
 <script>
 document.addEventListener("DOMContentLoaded", () => {
   const popup = document.getElementById("popup");
-  const closeBtn = document.querySelector(".close-btn");
+  const closeBtn = popup.querySelector(".close-btn");
 
-  // Detect if the device is a laptop/PC
-  const isDesktop = () => {
-    const ua = navigator.userAgent;
-    const isMobile = /Mobi|Android|iPhone|iPad|iPod|Tablet/i.test(ua);
-    return !isMobile;
-  }
-
-  if (isDesktop()) {
-    // Show popup on desktop only
-    popup.style.display = "flex";
-
-    // Close on click
-    closeBtn.addEventListener("click", () => {
-      popup.style.display = "none";
-    });
-  } else {
-    // Hide popup on mobile/tablet
+  // Close button functionality
+  closeBtn.addEventListener("click", () => {
     popup.style.display = "none";
-  }
+  });
+
+  // Hide popup on mobile/tablet automatically
+  const checkDevice = () => {
+    if (window.innerWidth <= 1024) { // mobile + tablet
+      popup.style.display = "none";
+    } else {
+      popup.style.display = "block";
+    }
+  };
+
+  checkDevice();
+  window.addEventListener("resize", checkDevice);
 });
 </script>
 
 
 
+<!-- Admin Enter Popup (only visible for admin) -->
+<div class="EnterGlobal" id="admin" style="display:none;">
+  <img src="velox.image/admin.png" id="enterImg" alt="Enter Admin" style="cursor:pointer;" />  
+</div>
+
+<script type="module">
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+  // Your Firebase config
+  const firebaseConfig = {
+    apiKey: "AIzaSyBXb9OhOEOo4gXNIv2WcCNmXfnm1x7R2EM",
+    authDomain: "velox-c39ad.firebaseapp.com",
+    projectId: "velox-c39ad",
+    storageBucket: "velox-c39ad.appspot.com",
+    messagingSenderId: "404832661601",
+    appId: "1:404832661601:web:9ad221c8bfb459410bba20",
+    measurementId: "G-X8W755KRF6"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+
+  const adminUID = "AS1sGNXa2HMfrOzsSxo1bj5zQaL2"; // the admin user id
+  const adminDiv = document.getElementById("admin");
+
+  // Show only for the specific admin
+  onAuthStateChanged(auth, (user) => {
+    if (user && user.uid === adminUID) {
+      adminDiv.style.display = "block";
+    } else {
+      adminDiv.style.display = "none";
+    }
+  });
+
+  // Redirect on click
+  adminDiv.addEventListener("click", () => {
+    window.location.href = "global.html";
+  });
+</script>
+
+
+
+
+
+<script type="module" src="global.js"></script>
 
 <script src="main.js"></script>
 <script src="stars.js"></script>

@@ -12,7 +12,7 @@ import {
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 
-// -------------------- FIREBASE CONFIG --------------------
+
 const firebaseConfig = {
   apiKey: "AIzaSyBXb9OhOEOo4gXNIv2WcCNmXfnm1x7R2EM",
   authDomain: "velox-c39ad.firebaseapp.com",
@@ -26,31 +26,30 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
 
-// -------------------- SAVE SCORE --------------------
 export async function updateUserScore(uid, name, score, level) {
   try {
     const docRef = doc(db, "scores", uid);
     const docSnap = await getDoc(docRef);
 
     let best = score;
-    let progress = level; // highest unlocked level
+    let progress = level; 
 
     if (docSnap.exists()) {
       const data = docSnap.data();
 
-      // keep highest meters climbed
+      
       best = Math.max(score, data.best || 0);
 
-      // keep highest unlocked level (PB)
+      
       progress = Math.max(level, data.progress || 1);
     }
 
     await setDoc(docRef, {
       name,
-      best,      // best meters
-      level,     // current run level
-      progress,  // highest unlocked level
-      current: score // current run meters
+      best,    
+      level,    
+      progress,  
+      current: score 
     });
 
     console.log(
@@ -61,7 +60,7 @@ export async function updateUserScore(uid, name, score, level) {
   }
 }
 
-// -------------------- LOAD UNLOCKED LEVELS --------------------
+
 export async function loadUnlockedLevels(uid) {
   try {
     const docRef = doc(db, "scores", uid);
@@ -79,7 +78,7 @@ export async function loadUnlockedLevels(uid) {
   }
 }
 
-// -------------------- LIVE LEADERBOARD --------------------
+
 export function liveLeaderboard(currentUid) {
   const list = document.getElementById("scores-list");
   if (!list) return;
@@ -96,7 +95,7 @@ export function liveLeaderboard(currentUid) {
       item.style.borderBottom = "1px solid rgba(255,255,255,0.1)";
       
       if (doc.id === currentUid) {
-        item.style.backgroundColor = "rgba(133, 139, 139, 0.2)"; // highlight current user
+        item.style.backgroundColor = "rgba(133, 139, 139, 0.2)"; 
       }
 
       item.innerHTML = `
@@ -108,4 +107,5 @@ export function liveLeaderboard(currentUid) {
     });
   });
 }
-//d d
+
+

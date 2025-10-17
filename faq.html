@@ -6,6 +6,7 @@
   <link rel="icon" href="velox.image/Velox_logo.png" />
   <title>Velox | FAQ</title>
   <link rel="stylesheet" href="faq.css" />
+  <link rel="stylesheet" href="global.css" />
 
   <style>
     #starfield {
@@ -20,6 +21,8 @@
 
 </head>
 <body>
+  <div id="messagesContainer"></div>
+
  <button id="backBtn" aria-label="Back to main page" title="Back to main page" type="button">← Back</button>
  <script>document.getElementById("backBtn").addEventListener("click", () => {
   window.location.href = "main.html";
@@ -55,7 +58,7 @@
   </section>
   
 
-
+  <script type="module" src="global.js"></script>
   <canvas id="starfield"></canvas>
   <script src="stars.js"></script>
   <script src="faq.js"></script>

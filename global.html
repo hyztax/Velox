@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Velox | Admin</title>
+  <link rel="icon" href="velox.image/Velox_logo.png" />
+  <link rel="stylesheet" href="global.css" />
+</head>
+<body>
+
+
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <title>Velox | Admin</title>
+      <link rel="icon" href="velox.image/Velox_logo.png" />
+      <link rel="stylesheet" href="global.css" />
+    </head>
+    <body>
+    
+    
+        <div id="adminPanel">
+            <h2>Global message!</h2>
+            <input id="messageInput" placeholder="Type your message" />
+            <button id="sendButton">Send</button>
+        </div>
+        
+        
+      <!-- Global Messages Display -->
+      <div id="messagesContainer"></div>
+    
+      <!-- Starfield Canvas -->
+      <canvas id="starfield"></canvas>
+      <script src="stars.js"></script>
+    
+      <!-- Firebase JS -->
+      <script type="module" src="global.js"></script>
+    </body>
+    </html>
+    
+    <div class="GoBack" onclick="window.location='main.html';"></div>
+<style>
+    .goBack {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: transparent;
+      box-shadow:
+          50px 100px white,
+          150px 200px white,
+          300px 400px white,
+          500px 50px white,
+          700px 300px white,
+          900px 150px white,
+          1100px 500px white;
+      animation: twinkle 3s infinite alternate;
+  }
+  
+  .GoBack {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    width: 55px;
+    height: 55px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #1e1e1e, #2a2a2a);
+    box-shadow: 0 0 10px rgba(27, 27, 27, 0.3),
+                0 0 20px rgba(42, 43, 43, 0.2) inset;
+    border: 2px solid rgba(108, 110, 110, 0.5);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 1000; /* stays above other stuff */
+  }
+  
+  /* Hover effect */
+  .GoBack:hover {
+    transform: scale(1.1) rotate(-5deg);
+    box-shadow: 0 0 20px rgba(232, 235, 235, 0.6),
+                0 0 40px rgba(225, 228, 228, 0.4) inset;
+    border-color: rgba(221, 223, 223, 0.8);
+  }
+  
+  /* Optional: add an arrow inside using CSS */
+  .GoBack::before {
+    content: "←";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-48%, -50%); /* adjust X a little */
+    font-size: 28px;
+    color: rgb(235, 238, 238);
+    font-family: Arial, sans-serif;
+  }
+  </style>
+
+    
+  <!-- Global Messages Display -->
+  <div id="messagesContainer"></div>
+
+  <!-- Starfield Canvas -->
+  <canvas id="starfield"></canvas>
+  <script src="stars.js"></script>
+
+  <!-- Firebase JS -->
+  <script type="module" src="global.js"></script>
+</body>
+</html>

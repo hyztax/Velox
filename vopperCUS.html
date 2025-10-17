@@ -6,10 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="velox.image/Velox_logo.png">
     <title>Velox | Customization</title>
-
+    <link rel="stylesheet" href="global.css" />
 
 <style>
-    /* --- Starfield Background --- */
+   
     #starfield {
         position: fixed;
         top: 0;
@@ -22,7 +22,7 @@
         background: radial-gradient(ellipse at center, #0d0d0d 0%, #000 100%);
     }
 
-    /* --- Body --- */
+   
     body {
         background: transparent;
         color: #f0f0f0;
@@ -37,7 +37,7 @@
         overflow: hidden;
     }
 
-    /* --- Header --- */
+  
     h1 {
         margin-bottom: 40px;
         font-size: 2.5rem;
@@ -46,7 +46,7 @@
         text-align: center;
     }
 
-    /* --- Labels --- */
+    
     label {
         display: block;
         margin: 15px 0 5px;
@@ -55,7 +55,7 @@
         
     }
 
-    /* --- Text inputs and selects --- */
+   
     input[type="text"],
     select {
         display: block;
@@ -78,7 +78,7 @@
         
     }
 
-    /* --- Color pickers --- */
+   
     input[type="color"] {
         margin-bottom: 25px;
         padding: 0;
@@ -95,7 +95,7 @@
         box-shadow: 0 0 12px rgba(73, 168, 212, 0.6);
     }
 
-    /* --- Checkbox --- */
+    
     input[type="checkbox"] {
         width: 22px;
         height: 22px;
@@ -104,7 +104,7 @@
         margin-top: 5px;
     }
 
-    /* --- Button --- */
+    
     button {
         padding: 12px 30px;
         background: linear-gradient(145deg, #262727, #000000);
@@ -138,7 +138,7 @@
         box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
     }
 
-    /* --- Responsive --- */
+    
     @media (max-width: 700px) {
         h1 {
             font-size: 2rem;
@@ -165,6 +165,7 @@
 </head>
 
 <body>
+    <div id="messagesContainer"></div>
     <h1>Customize Your Ball</h1>
 
     <label for="color">Ball Color:</label>
@@ -192,7 +193,7 @@ import {
   updateDoc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-// same config you use on the other page:
+
 const firebaseConfig = {
   apiKey: "AIzaSyBXb9OhOEOo4gXNIv2WcCNmXfnm1x7R2EM",
   authDomain: "velox-c39ad.firebaseapp.com",
@@ -203,7 +204,7 @@ const firebaseConfig = {
   measurementId: "G-X8W755KRF6"
 };
 
-// initialize app BEFORE calling getAuth() / getFirestore()
+
 initializeApp(firebaseConfig);
 
 const auth = getAuth();
@@ -212,9 +213,9 @@ const db = getFirestore();
 
         let currentUser = null;
 
-      // -------------------- LOAD CUSTOMIZATION --------------------
+      
 async function loadCustomization(uid) {
-    // fast local fallback first (helps when network is slow)
+   
     const local = localStorage.getItem("customization");
     if (local) {
        try { return JSON.parse(local); } catch (e) { console.warn("bad local customization", e); }
@@ -225,7 +226,7 @@ async function loadCustomization(uid) {
             const docRef = doc(db, "scores", uid);
             const docSnap = await getDoc(docRef);
             if (docSnap.exists() && docSnap.data().customization) {
-                // store locally so next load is instant
+               
                 localStorage.setItem("customization", JSON.stringify(docSnap.data().customization));
                 return docSnap.data().customization;
             }
@@ -234,12 +235,12 @@ async function loadCustomization(uid) {
         }
     }
 
-    // final fallback defaults
+    
     return { color: "#ffffff", glow: true, trail: "#00f" };
 }
 
 
-// SAVE CUSTOMIZATION
+
 async function saveCustomization(uid, customization) {
     try {
         if (uid) {
@@ -248,35 +249,35 @@ async function saveCustomization(uid, customization) {
             let existing = {};
             if (docSnap.exists()) existing = docSnap.data();
 
-            // merge new customization into existing data
+            
             await setDoc(docRef, { ...existing, customization }, { merge: true });
 
-            // also keep a local copy so the app can fall back quickly
+           
             localStorage.setItem("customization", JSON.stringify(customization));
         } else {
-            // fallback to localStorage for anonymous users
+          
             localStorage.setItem("customization", JSON.stringify(customization));
         }
 
         console.log("Customization saved.");
 
-        // refresh the page after save
-        setTimeout(() => location.reload(), 100); // small delay ensures everything is stored first
+     
+        setTimeout(() => location.reload(), 100); 
     } catch (err) {
         console.error("Error saving customization:", err);
-        // still store locally so refresh won't lose it
+   
         localStorage.setItem("customization", JSON.stringify(customization));
     }
 }
 
 
-// -------------------- INIT --------------------
+
 onAuthStateChanged(auth, async (user) => {
     currentUser = user;
 
     const customization = await loadCustomization(user ? user.uid : null);
 
-    // Apply saved customization to UI
+    
     document.getElementById("color").value = customization.color || "#ffffff";
     document.getElementById("glow").checked = customization.glow ?? true;
     document.getElementById("trail").value = customization.trail || "#00f";
@@ -284,7 +285,7 @@ onAuthStateChanged(auth, async (user) => {
     initGame(customization);
 });
 
-// -------------------- SAVE BUTTON --------------------
+
 document.getElementById("saveBtn").addEventListener("click", () => {
     const customization = {
         color: document.getElementById("color").value,
@@ -295,7 +296,7 @@ document.getElementById("saveBtn").addEventListener("click", () => {
 });
 
 
-        // -------------------- GAME SETUP --------------------
+      
         const canvas = document.getElementById("myCanvas");
         const pen = canvas.getContext("2d");
 
@@ -324,19 +325,19 @@ document.getElementById("saveBtn").addEventListener("click", () => {
         let platforms = [];
         let door = { x: canvas.width / 2 - 25, y: -2000, w: 50, h: 80 };
 
-        // -------------------- INIT GAME --------------------
+       
         function initGame(customization) {
             player.color = customization.color || "#ffffff";
             player.glow = customization.glow ?? true;
             player.trail = customization.trail || "#00f";
 
-            // simple ground platform
+            
             platforms = [{ x: 0, y: canvas.height - 30, w: canvas.width, h: 30, color: "#050505" }];
 
             loop();
         }
 
-        // -------------------- HELPER --------------------
+        
         function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
 
         function hexToRGBA(hex, alpha) {
@@ -346,28 +347,28 @@ document.getElementById("saveBtn").addEventListener("click", () => {
             return `rgba(${r},${g},${b},${alpha})`;
         }
 
-        // -------------------- UPDATE --------------------
+        
         function update(delta) {
-            // basic left/right
+            
             if (keys["a"]) player.x -= moveSpeed * delta;
             if (keys["d"]) player.x += moveSpeed * delta;
             player.x = clamp(player.x, player.radius, canvas.width - player.radius);
 
-            // jump
+           
             if (keys[" "] && player.jumpCount < player.maxJumps) {
                 player.vy = -player.jumpPower;
                 player.jumpCount++;
                 keys[" "] = false;
             }
 
-            // gravity
+          
             player.vy += player.gravity * delta;
             player.y += player.vy * delta;
 
-            // camera follow
+            
             cameraOffsetY = player.y - canvas.height / 2;
 
-            // ground collision
+          
             player.onGround = false;
             for (const plat of platforms) {
                 const withinX = player.x + player.radius > plat.x && player.x - player.radius < plat.x + plat.w;
@@ -381,21 +382,21 @@ document.getElementById("saveBtn").addEventListener("click", () => {
                 }
             }
 
-            // record trail positions
+          
             const trailLength = 20;
             player.trailPositions.push({ x: player.x, y: player.y });
             if (player.trailPositions.length > trailLength) player.trailPositions.shift();
         }
 
-        // -------------------- RENDER --------------------
+      
         function render() {
             pen.clearRect(0, 0, canvas.width, canvas.height);
 
-            // background
+            
             pen.fillStyle = "#111";
             pen.fillRect(0, 0, canvas.width, canvas.height);
 
-            // trail
+           
             for (let i = 0; i < player.trailPositions.length; i++) {
                 const pos = player.trailPositions[i];
                 const alpha = (i + 1) / player.trailPositions.length / 2; // fade
@@ -406,7 +407,7 @@ document.getElementById("saveBtn").addEventListener("click", () => {
                 pen.fill();
             }
 
-            // player
+            // dhär är player
             pen.save();
             pen.beginPath();
             pen.arc(player.x, player.y - cameraOffsetY, player.radius, 0, Math.PI * 2);
@@ -419,12 +420,12 @@ document.getElementById("saveBtn").addEventListener("click", () => {
             pen.restore();
         }
 
-        // -------------------- INPUT --------------------
+        
         const keys = {};
         window.addEventListener("keydown", e => keys[e.key.toLowerCase()] = true);
         window.addEventListener("keyup", e => keys[e.key.toLowerCase()] = false);
 
-        // -------------------- LOOP --------------------
+        
         let lastTime = performance.now();
         function loop(now = performance.now()) {
             const delta = (now - lastTime) / 16.67;
@@ -439,13 +440,13 @@ document.getElementById("saveBtn").addEventListener("click", () => {
     </script>
 
 
-<script>    // Save selected color
+<script>
 document.getElementById("color").addEventListener("input", () => {
   localStorage.setItem("vopperBallColor", document.getElementById("color").value);
   console.log("Saved color:", document.getElementById("color").value);
 });
 
-// Save selected trail
+
 document.getElementById("trail").addEventListener("input", () => {
   localStorage.setItem("vopperBallTrail", document.getElementById("trail").value);
   console.log("Saved trail:", document.getElementById("trail").value);
@@ -486,10 +487,10 @@ document.getElementById("trail").addEventListener("input", () => {
   border: 2px solid rgba(108, 110, 110, 0.5);
   cursor: pointer;
   transition: all 0.3s ease;
-  z-index: 1000; /* stays above other stuff */
+  z-index: 1000; 
 }
 
-/* Hover effect */
+
 .GoBack:hover {
   transform: scale(1.1) rotate(-5deg);
   box-shadow: 0 0 20px rgba(232, 235, 235, 0.6),
@@ -497,13 +498,13 @@ document.getElementById("trail").addEventListener("input", () => {
   border-color: rgba(221, 223, 223, 0.8);
 }
 
-/* Optional: add an arrow inside using CSS */
+
 .GoBack::before {
   content: "←";
   position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-48%, -50%); /* adjust X a little */
+  transform: translate(-48%, -50%); 
   font-size: 28px;
   color: rgb(235, 238, 238);
   font-family: Arial, sans-serif;
@@ -514,7 +515,7 @@ document.getElementById("trail").addEventListener("input", () => {
 
 
 
-
+<script type="module" src="global.js"></script>
     <script src="stars.js"></script>
     <canvas id="starfield"></canvas>
 </body>

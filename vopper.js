@@ -1,4 +1,3 @@
-// -------------------- IMPORTS, AUTH, FIRESTORE --------------------
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
   getFirestore,
@@ -16,7 +15,7 @@ const db = getFirestore();
 
 
 
-// -------------------- GLOBALS --------------------
+
 const canvas = document.getElementById("myCanvas");
 const pen = canvas.getContext("2d");
 
@@ -50,7 +49,7 @@ const moveSpeed = 5;
 
 
 
-// -------------------- FIRESTORE HELPERS --------------------
+
 async function fetchUserUnlockedLevels(uid) {
   try {
     const ref = doc(db, "users", uid);
@@ -90,7 +89,7 @@ async function ensureUserUnlockedAtLeast(uid, level) {
 }
 
 
-// -------------------- CUSTOMIZATION HELPERS --------------------
+
 async function loadUserCustomization(uid) {
   try {
     const ref = doc(db, "scores", uid);
@@ -110,57 +109,53 @@ async function loadUserCustomization(uid) {
 }
 
 
-// -------------------- AUTH FLAGS --------------------
+
 let authReady = false;
 let playerCustomizationReady = false;
 
-// -------------------- AUTH STATE --------------------
+
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
     window.location.href = "signup.html";
     return;
   }
 
-  // User is logged in
+  
   unlockedLevels = await fetchUserUnlockedLevels(user.uid);
   liveLeaderboard(user.uid);
 
-  // Load Firestore customization
+  
   const customization = await loadUserCustomization(user.uid);
   player.color = customization.color;
   player.glow = customization.glow;
   player.trail = customization.trail;
 
-  // Override with localStorage if available
+  
   const savedColor = localStorage.getItem("vopperBallColor");
   if (savedColor) player.color = savedColor;
 
   const savedTrail = localStorage.getItem("vopperBallTrail");
   if (savedTrail) player.trail = savedTrail;
 
-  // CLEAR OLD TRAIL POSITIONS SO THE COLOR MATCHES
+  
   player.trailPositions = [];
 
-  // Mark ready flags
+  
   authReady = true;
   playerCustomizationReady = true;
 
-  // Start the game loop
+  
   loop();
 });
 
 
 
-// -------------------- INPUT --------------------
+
 const keys = {};
 window.addEventListener("keydown", (e) => {
   const k = e.key.toLowerCase();
   keys[k] = true;
 
-  // if (currentScreen === "menu" && (k === " " || k === "enter")) {
-  //   currentScreen = "game";
-  //   startGame();
-  // }
 
   if (currentScreen === "game" && k === "r") {
     if (gameOver || gameWon) startGame();
@@ -168,7 +163,7 @@ window.addEventListener("keydown", (e) => {
 });
 window.addEventListener("keyup", (e) => (keys[e.key.toLowerCase()] = false));
 
-// -------------------- WORLD --------------------
+
 let platforms = [];
 let bricks = [];
 let brickTimer = 0;
@@ -177,7 +172,7 @@ let door = { x: canvas.width / 2 - 25, y: -2000, w: 50, h: 80 };
 
 function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
 
-// -------------------- GAME SETUP --------------------
+
 function startGame() {
   gameRunning = true;
   gameOver = false;
@@ -215,7 +210,7 @@ function startGame() {
   door.x = clamp(topPlat.x + topPlat.w / 2 - door.w / 2, 20, canvas.width - door.w - 20);
 }
 
-// -------------------- COLLISION --------------------
+
 function circleRectCollision(cx, cy, r, rx, ry, rw, rh) {
   const closestX = clamp(cx, rx, rx + rw);
   const closestY = clamp(cy, ry, ry + rh);
@@ -224,7 +219,7 @@ function circleRectCollision(cx, cy, r, rx, ry, rw, rh) {
   return dx * dx + dy * dy < r * r;
 }
 
-// -------------------- END-OF-GAME / SAVE LOGIC --------------------
+
 async function saveScoreIfBetter(optionalLevel) {
   const user = auth.currentUser;
   if (!user) return;
@@ -257,7 +252,7 @@ async function handleGameOver() {
   await saveScoreIfBetter();
 }
 
-// -------------------- UPDATE --------------------
+
 function update(delta) {
   // movement using customizable keys
   if (keys[keyMap.left]) player.x -= moveSpeed * delta;
@@ -270,7 +265,7 @@ function update(delta) {
     keys[keyMap.jump] = false;
   }
 
-  // gravity & collision logic stays the same
+  
   player.vy += player.gravity * delta;
   player.y += player.vy * delta;
   cameraOffsetY = player.y - canvas.height / 2;
@@ -288,10 +283,7 @@ function update(delta) {
     }
   }
 
-  // bricks, collision, door logic stays the same...
-
-
-
+ 
   brickTimer += delta;
   const heightClimbed = Math.max(0, canvas.height - player.y);
   brickInterval = Math.max(20, 60 - currentLevel * 2 - Math.floor(heightClimbed / 200));
@@ -328,11 +320,11 @@ function update(delta) {
 function renderGame() {
     pen.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Background
+    
     pen.fillStyle = "#111";
     pen.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Star-like background dots
+    
     for (let i = 0; i < 40; i++) {
         const sx = (i * 97) % canvas.width;
         const sy = (i * 131 - Math.floor(cameraOffsetY * 0.2)) % (canvas.height + 50) - 50;
@@ -340,32 +332,32 @@ function renderGame() {
         pen.fillRect(sx, sy, 2, 2);
     }
 
-    // Door
+  
     pen.fillStyle = "#fff";
     pen.fillRect(door.x, door.y - cameraOffsetY, door.w, door.h);
     pen.strokeStyle = "#ccc";
     pen.strokeRect(door.x, door.y - cameraOffsetY, door.w, door.h);
 
-    // Platforms
+    
     for (const plat of platforms) {
         pen.fillStyle = plat.color;
         pen.fillRect(plat.x, plat.y - cameraOffsetY, plat.w, plat.h);
     }
 
-    // -------------------- BRICKS --------------------
+    
 for (const b of bricks) {
-    pen.save(); // save context so fillStyle/shadow changes don't leak
-    pen.fillStyle = `rgba(173,11,11,1)`; // comet color
+    pen.save(); 
+    pen.fillStyle = `rgba(173,11,11,1)`; 
     pen.fillRect(
         b.x,
         b.y - cameraOffsetY,
         b.w,
         b.h
     );
-    pen.restore(); // restore context
+    pen.restore(); 
 }
 
-// -------------------- PLAYER TRAIL --------------------
+
 const trailLength = 15;
 if (!player.trailPositions) player.trailPositions = [];
 player.trailPositions.push({ x: player.x, y: player.y });
@@ -376,15 +368,15 @@ for (let i = 0; i < player.trailPositions.length; i++) {
     const alpha = ((i + 1) / player.trailPositions.length) * 0.5;
     const scale = 0.6 + 0.4 * ((i + 1) / player.trailPositions.length);
 
-    pen.save(); // save context for trail
+    pen.save(); 
     pen.beginPath();
     pen.arc(pos.x, pos.y - cameraOffsetY, player.radius * scale, 0, Math.PI * 2);
-    pen.fillStyle = hexToRGBA(player.trail, alpha); // always explicitly set color
+    pen.fillStyle = hexToRGBA(player.trail, alpha); 
     pen.fill();
-    pen.restore(); // restore so bricks or player drawing won't affect next items
+    pen.restore(); 
 }
 
-// -------------------- PLAYER BALL --------------------
+
 pen.save();
 pen.beginPath();
 pen.arc(player.x, player.y - cameraOffsetY, player.radius, 0, Math.PI * 2);
@@ -394,12 +386,11 @@ if (player.glow) {
 } else {
     pen.shadowBlur = 0;
 }
-pen.fillStyle = player.color; // explicitly set color
+pen.fillStyle = player.color; 
 pen.fill();
 pen.restore();
 
 
-    // -------------------- HUD --------------------
     pen.fillStyle = "#fff";
     pen.font = "16px Arial";
     pen.textAlign = "left";
@@ -407,7 +398,7 @@ pen.restore();
     pen.fillText(`Height: ${progress} m`, 10, 24);
     pen.fillText(`Level: ${currentLevel}`, 10, 44);
 
-    // -------------------- GAME OVER / WIN SCREEN --------------------
+    
     if (gameOver || gameWon) {
         pen.fillStyle = "rgba(0,0,0,0.6)";
         pen.fillRect(0, 0, canvas.width, canvas.height);
@@ -420,7 +411,7 @@ pen.restore();
     }
 }
 
-// -------------------- HEX TO RGBA UTILITY --------------------
+
 function hexToRGBA(hex, alpha) {
     const r = parseInt(hex.slice(1, 3), 16);
     const g = parseInt(hex.slice(3, 5), 16);
@@ -428,7 +419,7 @@ function hexToRGBA(hex, alpha) {
     return `rgba(${r},${g},${b},${alpha})`;
 }
 
-// -------------------- PLAYER BALL --------------------
+
 pen.save();
 pen.beginPath();
 pen.arc(player.x, player.y - cameraOffsetY, player.radius, 0, Math.PI * 2);
@@ -462,7 +453,7 @@ pen.restore();
   }
 
 
-// -------------------- LOOP --------------------
+
 let lastTime = performance.now();
 function loop(now = performance.now()) {
   const delta = (now - lastTime) / 16.67;
@@ -484,7 +475,7 @@ function loop(now = performance.now()) {
   requestAnimationFrame(loop);
 }
 
-// -------------------- MENU / LEVEL SELECT DRAW --------------------
+
 let mouseY = 0;
 canvas.addEventListener("mousemove", e => {
   const rect = canvas.getBoundingClientRect();
@@ -551,7 +542,7 @@ function drawLevelSelect() {
   pen.globalAlpha = 1;
 }
 
-// -------------------- CLICK HANDLING --------------------
+
 canvas.addEventListener("click", (e) => {
   const rect = canvas.getBoundingClientRect();
   const y = e.clientY - rect.top;
@@ -585,4 +576,4 @@ canvas.addEventListener("click", (e) => {
     }
   }
 });
-//ddd
+

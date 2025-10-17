@@ -382,57 +382,86 @@ main {
 
 
 
-
 #inviteBtn {
   position: fixed;
   bottom: env(safe-area-inset-bottom, 20px);
   left: 50%;
   transform: translateX(-50%);
-  background: rgba(22, 22, 22, 0.15);
-  border: none;
-  color: #eee;
-  padding: 8px 28px;
-  font-size: 16px;
-  border-radius: 10px;
-  cursor: pointer;
-  box-shadow: 0 8px 32px rgba(255 255 255 / 0.3);
-  backdrop-filter: saturate(180%) blur(12px);
-  transition: background 0.3s ease, box-shadow 0.3s ease;
-  user-select: none;
-  max-width: 300px;
-  width: 100%;
-  height: 40px;
-  /* Adjusted for normal button height */
   z-index: 1000;
+  /* Button core */
+  background: linear-gradient(135deg, rgba(40, 40, 40, 0.6), rgba(20, 20, 20, 0.3));
+  color: #fff;
+  font-weight: 600;
+  font-family: 'Poppins', sans-serif;
+  letter-spacing: 0.6px;
+  border: 1px solid rgba(194, 193, 193, 0.1);
+  border-radius: 12px;
+  padding: 10px 30px;
+  height: 45px;
+  cursor: pointer;
+  user-select: none;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4), 0 0 10px rgba(26, 24, 24, 0.05);
+  backdrop-filter: blur(12px) saturate(180%);
+  transition: all 0.3s ease;
 }
 
-/* For larger screens (PC) move it higher up */
-@media (min-width: 768px) {
-  #inviteBtn {
-    bottom: 10px;
-    /* moves button 80px from bottom instead of 20px */
-    max-width: 300px;
-    width: auto;
-    padding: 10px 30px;
-    font-size: 18px;
-    height: 45px;
+/* Add a subtle animated glow */
+#inviteBtn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(120deg, rgba(107, 112, 109, 0.3), rgba(255,255,255,0.1), rgba(92, 97, 94, 0.3));
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+
+/* Hover Effects */
+#inviteBtn:hover {
+  transform: translateX(-50%) scale(1.05);
+  background: linear-gradient(135deg, rgba(55, 58, 56, 0.35), rgba(18,18,18,0.4));
+  box-shadow: 0 0 25px rgba(199, 204, 201, 0.5);
+  border-color: rgba(70, 71, 71, 0.4);
+}
+
+#inviteBtn:hover::before {
+  opacity: 1;
+  animation: pulseGlow 1.5s infinite alternate;
+}
+
+/* Subtle "pulse" glow animation */
+@keyframes pulseGlow {
+  from {
+    box-shadow: 0 0 10px rgba(78, 80, 79, 0.2);
+  }
+  to {
+    box-shadow: 0 0 30px rgba(51, 53, 52, 0.5);
   }
 }
 
+/* Click effect */
+#inviteBtn:active {
+  transform: translateX(-50%) scale(0.95);
+  box-shadow: 0 0 15px rgba(49, 53, 50, 0.3);
+}
 
-/* General small screen tweak */
+/* Responsive tweaks */
+@media (min-width: 768px) {
+  #inviteBtn {
+    bottom: 10px;
+    padding: 12px 36px;
+    font-size: 18px;
+  }
+}
+
 @media (max-width: 400px) {
   #inviteBtn {
-    padding: 7px 24px;
+    padding: 8px 24px;
     font-size: 15px;
   }
 }
 
-
-#inviteBtn:hover {
-  background: rgba(121, 119, 119, 0.733);
-  box-shadow: 0 10px 48px rgba(32, 10, 10, 0.5);
-}
 
 /* Responsive font sizes */
 @media (max-width: 400px) {
@@ -1379,3 +1408,87 @@ li button:hover:not(:disabled) {
     border-radius: 12px;
   }
   }
+
+  .hideSpotify {
+    position: fixed;
+    left: 47.5%;
+    top: 5%;
+    transform: translateY(-50%);
+    z-index: 999;
+  
+    border: none;
+    border-radius: 10px;
+    overflow: hidden;
+    padding: 12px 24px;
+  
+    background: linear-gradient(135deg, #3b0a21, #18162e);
+    box-shadow: 0 0 20px rgba(35, 36, 35, 0.3);
+    color: white;
+    font-weight: 600;
+    font-family: 'Poppins', sans-serif;
+    letter-spacing: 0.5px;
+  
+    transition: all 0.3s ease;
+    cursor: pointer;
+  }
+  
+  /* Subtle shine effect */
+  .hideSpotify::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      120deg,
+      rgba(255, 255, 255, 0.2) 0%,
+      rgba(255, 255, 255, 0.4) 50%,
+      rgba(255, 255, 255, 0.2) 100%
+    );
+    transition: all 0.5s ease;
+  }
+  
+  /* Hover animation */
+  .hideSpotify:hover {
+    transform: translateY(-50%) scale(1.07);
+    box-shadow: 0 0 25px rgba(25, 26, 25, 0.6);
+  }
+  
+  /* Shine slides across on hover */
+  .hideSpotify:hover::before {
+    left: 100%;
+  }
+  
+  /* Optional click effect */
+  .hideSpotify:active {
+    transform: translateY(-50%) scale(0.97);
+    box-shadow: 0 0 10px rgba(158, 160, 159, 0.3);
+  }
+  
+  /* --- Admin Enter Button Styles --- */
+  .EnterGlobal {
+    position: fixed;
+    bottom: 20px;  /* visible from bottom */
+    right: 20px;   /* distance from right edge */
+    z-index: 9999;
+  }
+  
+
+.EnterGlobal img {
+  width: 100px;
+  height: 80px;
+  cursor: pointer;
+
+}
+
+.EnterGlobal,
+.enter-btn {
+  background: transparent !important;
+  box-shadow: none !important;
+  border-radius: 0;       /* fix invalid value */
+  outline: none;          /* remove focus outline */
+  border: none;           /* remove any default button border */
+}
+
+
