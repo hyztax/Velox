@@ -77,7 +77,8 @@
 <!-- Add this somewhere in main.html -->
 <div id="reportModal" class="modal" style="display:none;">
   <div class="modal-content">
-    <h3>Report Message</h3>
+    <h3 style="margin: 0; padding: 0; line-height: 1;">Report Message</h3>
+    <h4 style="margin: 0; padding: 0; line-height: 1; font-weight: 300;">[any false reports can / will result in a account ban]</h4>
     <textarea id="reportReason" placeholder="Describe the issue..."></textarea>
     <button id="submitReport">Submit</button>
     <button id="cancelReport">Cancel</button>
@@ -108,9 +109,9 @@
     <div style="display: flex; align-items: flex-end;">
       <textarea 
         id="messageInput" 
-        placeholder="Enter message..." 
+        placeholder="Enter message.." 
         rows="1" 
-        style="flex: 1; resize: none; overflow-y: hidden; max-height: 90px;">
+        style="flex: 1; resize: none; overflow-y: hidden; max-height: 90px; margin-bottom: -6px;">
       </textarea>
 
       <button id="sendBtn" type="submit" disabled style="margin-left: 10px;">↑</button>

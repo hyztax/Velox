@@ -644,6 +644,7 @@ textarea:focus-visible {
   color: #eee;
 }
 
+
 #sendBtn {
   padding: auto;          
   height: 34px;    
@@ -924,6 +925,10 @@ textarea:focus-visible {
   background-color: #3d04048f;
 }
 
+#reportReason::placeholder {
+  color: rgb(240, 240, 240);
+  opacity: 1; 
+}
 
 
 #notificationContainer {
