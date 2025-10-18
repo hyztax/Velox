@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Happy Halloween 🎃</title>
+<link href="https://fonts.googleapis.com/css2?family=Creepster&family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(circle at top, #1a001a, #000);
+    color: #fff;
+    font-family: 'Montserrat', sans-serif;
+    text-align: center;
+    overflow: hidden;
+  }
+
+  h1 {
+    font-family: 'Creepster', cursive;
+    font-size: clamp(2.5em, 5vw, 4em);
+    color: orange;
+    text-shadow: 0 0 20px #ff7b00, 0 0 40px #ff5500;
+    margin-bottom: 0.2em;
+    animation: flicker 2s infinite;
+  }
+
+  p {
+    font-size: clamp(1em, 2vw, 1.3em);
+    color: #f0d5b6;
+    margin-bottom: 1em;
+    padding: 0 10px;
+  }
+
+  .pumpkin {
+    width: clamp(120px, 20vw, 180px);
+    height: clamp(100px, 16vw, 140px);
+    background: linear-gradient(180deg, #ff7518, #cc5500);
+    border-radius: 50% / 60%;
+    position: relative;
+    box-shadow: 0 0 30px rgba(255, 140, 0, 0.4);
+    animation: float 3s ease-in-out infinite;
+  }
+
+  /* Pumpkin stem */
+  .pumpkin::before {
+    content: '';
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%) rotate(-10deg);
+    width: 20px;
+    height: 30px;
+    background: #3b2a0f;
+    border-radius: 5px;
+  }
+
+  /* Eyes: round, spooky */
+  .eye, .eye.right {
+    position: absolute;
+    top: 30%;
+    width: 20%;
+    height: 25%;
+    background: black;
+    border-radius: 50%;
+  }
+  .eye { left: 25%; }
+  .eye.right { right: 25%; }
+
+  /* Mouth: curved smile with teeth */
+  .mouth {
+    position: absolute;
+    bottom: 20%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60%;
+    height: 25%;
+    background: black;
+    border-radius: 0 0 50% 50% / 0 0 100% 100%;
+  }
+  .mouth::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 10%;
+    width: 10%;
+    height: 50%;
+    background: #ff7518;
+    transform: rotate(20deg);
+    border-radius: 2px;
+  }
+  .mouth::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 35%;
+    width: 10%;
+    height: 50%;
+    background: #ff7518;
+    transform: rotate(-15deg);
+    border-radius: 2px;
+  }
+
+  .controls {
+    margin-top: 20px;
+  }
+
+  .controls button {
+    background: #000000;
+    border: 2px solid orange;
+    border-radius: 10px;
+    padding: 10px 20px;
+    margin: 10px;
+    color: #fff;
+    font-weight: 700;
+    font-size: 1em;
+    cursor: pointer;
+    transition: 0.3s;
+    box-shadow: 0 0 10px orange;
+  }
+
+  .controls button:hover {
+    background: orange;
+    color: black;
+    transform: translateY(-3px);
+  }
+
+  footer {
+    position: absolute;
+    bottom: 20px;
+    font-size: 1em;
+    color: #ffa64d;
+    text-shadow: 0 0 5px #ff5500;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+
+  @keyframes flicker {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+  }
+</style>
+</head>
+<body>
+  <h1>🎃 Happy Halloween 🎃</h1>
+  <p>Get ready for a spooky night full of fun, candy, and ghostly surprises!</p>
+
+  <div class="pumpkin">
+    <div class="eye"></div>
+    <div class="eye right"></div>
+    <div class="mouth"></div>
+  </div>
+
+  <div class="controls">
+    <button id="trick">Trick</button>
+    <button id="treat">Treat</button>
+  </div>
+
+  <footer>Have a Spooktacular Halloween!</footer>
+
+  <script>
+    const trickBtn = document.getElementById('trick');
+    const treatBtn = document.getElementById('treat');
+    const pumpkin = document.querySelector('.pumpkin');
+
+    trickBtn.addEventListener('click', () => {
+      pumpkin.style.background = 'linear-gradient(180deg, #8b0000, #ff0000)';
+      pumpkin.style.boxShadow = '0 0 40px red';
+      document.body.style.background = 'radial-gradient(circle, #330000, #000)';
+      setTimeout(() => {
+        pumpkin.style.background = 'linear-gradient(180deg, #ff7518, #cc5500)';
+        pumpkin.style.boxShadow = '0 0 30px rgba(255, 140, 0, 0.4)';
+        document.body.style.background = 'radial-gradient(circle at top, #1a001a, #000)';
+      }, 1000);
+    });
+
+    treatBtn.addEventListener('click', () => {
+      pumpkin.style.background = 'linear-gradient(180deg, #ffb347, #ffcc33)';
+      pumpkin.style.boxShadow = '0 0 50px gold';
+      document.body.style.background = 'radial-gradient(circle, #2a0040, #000)';
+      setTimeout(() => {
+        pumpkin.style.background = 'linear-gradient(180deg, #ff7518, #cc5500)';
+        pumpkin.style.boxShadow = '0 0 30px rgba(255, 140, 0, 0.4)';
+        document.body.style.background = 'radial-gradient(circle at top, #1a001a, #000)';
+      }, 1000);
+    });
+  </script>
+
+  <div class="GoBack" onclick="window.location='main.html';"></div>
+<style>.goBack {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: transparent;
+    box-shadow:
+        50px 100px white,
+        150px 200px white,
+        300px 400px white,
+        500px 50px white,
+        700px 300px white,
+        900px 150px white,
+        1100px 500px white;
+    animation: twinkle 3s infinite alternate;
+}
+
+.GoBack {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  width: 55px;
+  height: 55px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #1e1e1e, #2a2a2a);
+  box-shadow: 0 0 10px rgba(27, 27, 27, 0.3),
+              0 0 20px rgba(42, 43, 43, 0.2) inset;
+  border: 2px solid rgba(108, 110, 110, 0.5);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 1000; /* stays above other stuff */
+}
+
+/* Hover effect */
+.GoBack:hover {
+  transform: scale(1.1) rotate(-5deg);
+  box-shadow: 0 0 20px rgba(232, 235, 235, 0.6),
+              0 0 40px rgba(225, 228, 228, 0.4) inset;
+  border-color: rgba(221, 223, 223, 0.8);
+}
+
+/* Optional: add an arrow inside using CSS */
+.GoBack::before {
+  content: "←";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-48%, -50%); /* adjust X a little */
+  font-size: 28px;
+  color: rgb(235, 238, 238);
+  font-family: Arial, sans-serif;
+}</style>
+
+</body>
+</html>

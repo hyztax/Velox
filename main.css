@@ -1492,3 +1492,34 @@ li button:hover:not(:disabled) {
 }
 
 
+.spooky {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  width: 60px;
+  height: 80px;
+  background: white;
+  border-radius: 50% 50% 50% 50%;
+  z-index: 9999;
+  cursor: pointer;
+  pointer-events: auto;
+  box-shadow: 0 0 15px rgba(255,255,255,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: top 0.5s ease, left 0.5s ease; /* smooth movement */
+}
+
+/* Eyes */
+.spooky::before,
+.spooky::after {
+  content: '';
+  position: absolute;
+  top: 25%;
+  width: 10px;
+  height: 10px;
+  background: black;
+  border-radius: 50%;
+}
+.spooky::before { left: 15px; }
+.spooky::after { right: 15px; }
