@@ -35,22 +35,22 @@ let currentUser = null;
 // DOM references
 const messagesContainer = document.getElementById("messagesContainer");
 const sendBtn = document.getElementById("sendButton");
-const messageInput = document.getElementById("messageInput");
+const messageInput2 = document.getElementById("messageInput2");
 
 // Disable inputs if not admin
 onAuthStateChanged(auth, (user) => {
   currentUser = user;
   if (!user || user.uid !== adminUID) {
     if (sendBtn) sendBtn.disabled = true;
-    if (messageInput) messageInput.disabled = true;
+    if (messageInput2) messageInput2.disabled = true;
   } else {
-    if (sendBtn && messageInput) sendBtn.addEventListener("click", sendMessage);
+    if (sendBtn && messageInput2) sendBtn.addEventListener("click", sendMessage);
   }
 });
 
 // Send a new global message
 async function sendMessage() {
-  const text = messageInput.value.trim();
+  const text = messageInput2.value.trim();
   if (!text) return;
 
   await addDoc(collection(db, "globalMessages"), {
@@ -59,7 +59,7 @@ async function sendMessage() {
     timestamp: serverTimestamp()
   });
 
-  messageInput.value = "";
+  messageInput2.value = "";
 }
 
 // Show latest message only if still within visibility window
