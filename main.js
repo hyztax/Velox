@@ -482,88 +482,16 @@ if (editorColor) editorColor.addEventListener('input', async () => {
 // --- show friend profile -----//
 async function showFriendProfile(friend) {
   profileNameDisplay.textContent = friend.displayName || 'Unknown';
-  profileBioDisplay.textContent = friend.bio || 'no bio provided';
+  profileBioDisplay.textContent = friend.bio || 'No bio provided.';
 
-
-// Helper: ordinal suffix
-function getOrdinal(day) {
-  if (day > 3 && day < 21) return day + 'th';
-  switch (day % 10) {
-    case 1: return day + 'st';
-    case 2: return day + 'nd';
-    case 3: return day + 'rd';
-    default: return day + 'th';
-  }
-}
-
-// Format date nicely
-function formatJoinDate(date) {
-  const now = new Date();
-  const oneYearAgo = new Date();
-  oneYearAgo.setFullYear(now.getFullYear() - 1);
-
-  const day = getOrdinal(date.getDate());
-  const month = date.toLocaleString(undefined, { month: 'long' });
-  const year = date.getFullYear();
-
-  return date < oneYearAgo ? `${day} ${month} ${year}` : `${day} ${month}`;
-}
-
-// Get join date of any user from Firestore
-async function getUserJoinDate(uid) {
-  try {
-    const doc = await firebase.firestore().collection('users').doc(uid).get();
-    if (doc.exists && doc.data().joinedAt) {
-      return doc.data().joinedAt.toDate(); // JS Date object
-    }
-
-    // Fallback for currently logged-in user
-    const currentUser = firebase.auth().currentUser;
-    if (currentUser && currentUser.uid === uid) {
-      return new Date(currentUser.metadata.creationTime);
-    }
-
-    return null; // cannot access other users' Auth metadata client-side
-  } catch (err) {
-    console.error("Error fetching join date:", err);
-    return null;
-  }
-}
-
-// Dynamically get UID of the profile being viewed
-function getProfileUidFromURL() {
-  const params = new URLSearchParams(window.location.search);
-  return params.get("uid"); // expects URL like profile.html?uid=USER_UID
-}
-
-// Display join date in the page
-async function showProfileJoinDate(uid, elementId) {
-  const joinDate = await getUserJoinDate(uid);
-  const el = document.getElementById(elementId);
-
-  if (el) {
-    if (joinDate) {
-      el.textContent = `Member since ${formatJoinDate(joinDate)}`;
-    } else {
-      el.textContent = "Member since: unknown";
-    }
-  }
-}
-
-// On page load
-document.addEventListener('DOMContentLoaded', () => {
-  const profileUid = getProfileUidFromURL();
-  if (profileUid) {
-    showProfileJoinDate(profileUid, "profileJoinDate");
+  // Member since / OG user
+  const profileTagEl = document.getElementById('profileTag');
+  if (friend.joinedAt) {
+    const date = friend.joinedAt.toDate ? friend.joinedAt.toDate() : new Date(friend.joinedAt);
+    profileTagEl.textContent = `Member since ${date.toLocaleDateString()}`;
   } else {
-    console.warn("No UID provided in URL; cannot display join date.");
+    profileTagEl.textContent = 'OG user';
   }
-});
-
-
-
-
-
 
   // Avatar
   profileAvatar.innerHTML = '';
