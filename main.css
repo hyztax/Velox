@@ -1523,3 +1523,9 @@ li button:hover:not(:disabled) {
 }
 .spooky::before { left: 15px; }
 .spooky::after { right: 15px; }
+
+
+#profileJoinDate {
+color: rgb(163, 161, 161);
+
+}
