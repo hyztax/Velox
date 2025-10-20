@@ -37,6 +37,22 @@ const messagesContainer = document.getElementById("messagesContainer");
 const sendBtn = document.getElementById("sendButton");
 const messageInput2 = document.getElementById("messageInput2");
 
+// Automatically focus input when page loads
+window.addEventListener("keydown", () => {
+  if (messageInput2) messageInput2.focus();
+});
+
+// Allow Enter key to send message
+if (messageInput2) {
+  messageInput2.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault(); // prevent newline
+      sendMessage();
+    }
+  });
+}
+
+
 // Disable inputs if not admin
 onAuthStateChanged(auth, (user) => {
   currentUser = user;
@@ -118,3 +134,4 @@ if (messagesContainer) {
     }, visibleDuration - age);
   });
 }
+// dedede

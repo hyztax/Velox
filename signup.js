@@ -1,3 +1,4 @@
+
 // Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyBXb9OhOEOo4gXNIv2WcCNmXfnm1x7R2EM",
@@ -13,8 +14,9 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 firebase.analytics();
 const auth = firebase.auth();
+const db = firebase.firestore(); // Firestore initialized properly
 
-// Wait for DOM to load
+// Wait for DOM
 document.addEventListener('DOMContentLoaded', () => {
   const signupForm = document.getElementById('signup-form');
   const usernameInput = signupForm.querySelector('input[name="username"]');
@@ -50,22 +52,32 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     try {
+      // Create Auth user
       const userCredential = await auth.createUserWithEmailAndPassword(email, password);
       const user = userCredential.user;
 
+      // Set display name
       await user.updateProfile({ displayName: username });
-      await user.sendEmailVerification(); // Send verification email
-      await auth.signOut(); // Force logout
 
-      // Friendly alert
-      alert(`✅ Verification email sent to ${email}. Please check your inbox (or spam) to activate your account.`);
+      // Save in Firestore with join date
+      await db.collection('users').doc(user.uid).set({
+        username,
+        email,
+        joinedAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+      // Send verification email
+      await user.sendEmailVerification();
+
+      // Sign out
+      await auth.signOut();
+
+      alert(`✅ Verification email sent to ${email}. Please check your inbox (or spam).`);
       window.location.href = 'signin.html';
 
     } catch (error) {
+      console.error(error);
       alert(`Error: ${error.message}`);
     }
   });
 });
-
-
-//works

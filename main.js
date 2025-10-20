@@ -482,16 +482,58 @@ if (editorColor) editorColor.addEventListener('input', async () => {
 // --- show friend profile -----//
 async function showFriendProfile(friend) {
   profileNameDisplay.textContent = friend.displayName || 'Unknown';
-  profileBioDisplay.textContent = friend.bio || 'No bio provided.';
+  profileBioDisplay.textContent = friend.bio || 'empty bio';
 
-  // Member since / OG user
-  const profileTagEl = document.getElementById('profileTag');
-  if (friend.joinedAt) {
-    const date = friend.joinedAt.toDate ? friend.joinedAt.toDate() : new Date(friend.joinedAt);
-    profileTagEl.textContent = `Member since ${date.toLocaleDateString()}`;
-  } else {
-    profileTagEl.textContent = 'OG user';
+
+  // Helper: get ordinal suffix
+function getOrdinal(day) {
+  if (day > 3 && day < 21) return day + 'th';
+  switch (day % 10) {
+    case 1: return day + 'st';
+    case 2: return day + 'nd';
+    case 3: return day + 'rd';
+    default: return day + 'th';
   }
+}
+
+// Format join date
+function formatJoinDate(date) {
+  const now = new Date();
+  const oneYearAgo = new Date();
+  oneYearAgo.setFullYear(now.getFullYear() - 1);
+
+  const day = getOrdinal(date.getDate());
+  const month = date.toLocaleString(undefined, { month: 'long' });
+  const year = date.getFullYear();
+
+  return date < oneYearAgo ? `${day} ${month} ${year}` : `${day} ${month}`;
+}
+
+// Show member since
+async function showMemberSince(uid) {
+  const profileTagEl = document.getElementById('profileTag');
+
+  try {
+    const doc = await firebase.firestore().collection('users').doc(uid).get();
+
+    if (doc.exists && doc.data().joinedAt) {
+      const joinedAt = doc.data().joinedAt.toDate();
+      profileTagEl.textContent = `Member since ${formatJoinDate(joinedAt)}`;
+    } else {
+      profileTagEl.textContent = 'Member since: unknown';
+    }
+
+  } catch (error) {
+    console.error(error);
+    profileTagEl.textContent = 'Member since: unknown';
+  }
+}
+
+// Usage: pass the UID of the user you want to display
+const currentUser = firebase.auth().currentUser;
+if (currentUser) showMemberSince(currentUser.uid);
+
+
 
   // Avatar
   profileAvatar.innerHTML = '';
