@@ -484,8 +484,7 @@ async function showFriendProfile(friend) {
   profileNameDisplay.textContent = friend.displayName || 'Unknown';
   profileBioDisplay.textContent = friend.bio || 'empty bio';
 
-
-  // Helper: get ordinal suffix
+// Helper: get ordinal suffix
 function getOrdinal(day) {
   if (day > 3 && day < 21) return day + 'th';
   switch (day % 10) {
@@ -496,7 +495,7 @@ function getOrdinal(day) {
   }
 }
 
-// Format join date
+// Format JS Date nicely
 function formatJoinDate(date) {
   const now = new Date();
   const oneYearAgo = new Date();
@@ -509,29 +508,57 @@ function formatJoinDate(date) {
   return date < oneYearAgo ? `${day} ${month} ${year}` : `${day} ${month}`;
 }
 
-// Show member since
-async function showMemberSince(uid) {
-  const profileTagEl = document.getElementById('profileTag');
-
+/**
+ * Get the account creation date of any user.
+ * @param {string} uid - UID of the user.
+ * @returns {Promise<Date|null>} JS Date object or null if unknown.
+ */
+async function getUserJoinDate(uid) {
   try {
+    // 1️⃣ Try Firestore first
     const doc = await firebase.firestore().collection('users').doc(uid).get();
-
     if (doc.exists && doc.data().joinedAt) {
-      const joinedAt = doc.data().joinedAt.toDate();
-      profileTagEl.textContent = `Member since ${formatJoinDate(joinedAt)}`;
-    } else {
-      profileTagEl.textContent = 'Member since: unknown';
+      return doc.data().joinedAt.toDate(); // Firestore timestamp
     }
 
+    // 2️⃣ Fallback for the currently logged-in user
+    const currentUser = firebase.auth().currentUser;
+    if (currentUser && currentUser.uid === uid) {
+      return new Date(currentUser.metadata.creationTime);
+    }
+
+    // 3️⃣ Other users with no Firestore record cannot be accessed client-side
+    console.warn(`No join date found for UID ${uid} on client.`);
+    return null;
   } catch (error) {
-    console.error(error);
-    profileTagEl.textContent = 'Member since: unknown';
+    console.error("Error fetching join date:", error);
+    return null;
   }
 }
 
-// Usage: pass the UID of the user you want to display
-const currentUser = firebase.auth().currentUser;
-if (currentUser) showMemberSince(currentUser.uid);
+// Example usage
+firebase.auth().onAuthStateChanged(async (user) => {
+  if (user) {
+    const joinDate = await getUserJoinDate(user.uid);
+    if (joinDate) {
+      console.log("Member since:", formatJoinDate(joinDate));
+    } else {
+      console.log("Member since: unknown");
+    }
+  }
+});
+
+// Example for another user
+async function showOtherUserJoinDate(otherUid) {
+  const joinDate = await getUserJoinDate(otherUid);
+  if (joinDate) {
+    console.log(`User ${otherUid} joined on:`, formatJoinDate(joinDate));
+  } else {
+    console.log(`User ${otherUid} join date unknown`);
+  }
+}
+
+
 
 
 
