@@ -35,6 +35,8 @@ function showChat() {
   }, 200);
 }
 
+
+
 // -------------------- Event listeners --------------------
 document.addEventListener("click", (e) => {
   const friendItem = e.target.closest("#friendsList li");
@@ -56,3 +58,7 @@ window.addEventListener("DOMContentLoaded", () => {
     resetSections(); // auto-exit any chat
   }, 3000); //3 sek
 });
+
+// works
+
+
