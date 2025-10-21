@@ -388,6 +388,7 @@ main {
   left: 50%;
   transform: translateX(-50%);
   z-index: 1000;
+
   /* Button core */
   background: linear-gradient(135deg, rgba(40, 40, 40, 0.6), rgba(20, 20, 20, 0.3));
   color: #fff;
@@ -396,14 +397,18 @@ main {
   letter-spacing: 0.6px;
   border: 1px solid rgba(194, 193, 193, 0.1);
   border-radius: 12px;
-  padding: 10px 30px;
-  height: 45px;
+  padding: 12px 34px; /* slightly larger padding for comfort */
   cursor: pointer;
   user-select: none;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4), 0 0 10px rgba(26, 24, 24, 0.05);
   backdrop-filter: blur(12px) saturate(180%);
   transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap; /* prevents text from breaking into multiple lines */
 }
+
 
 /* Add a subtle animated glow */
 #inviteBtn::before {
@@ -1176,29 +1181,30 @@ li button:hover:not(:disabled) {
 
 
 
+/* Original */
 .Velox_Shop {
   position: fixed;
-  /* stay fixed on screen */
   top: 20px;
-  /* distance from top */
   right: 20px;
-  /* distance from right */
   display: flex;
-  /* horizontal layout */
   align-items: center;
-  /* vertically center text with image */
   gap: 10px;
-  /* space between image and text */
   padding: 10px;
   background-color: #22222277;
-  /* dark background for visibility */
   border-radius: 8px;
   text-decoration: none;
-  /* remove underline */
   color: rgb(232, 226, 226);
   z-index: 1000;
   transition: background 0.3s ease 0.1s;
 }
+
+/* Move down 5px only on phones */
+@media (max-width: 768px) {
+  .Velox_Shop {
+    top: 40px; /* 20px + 5px = 25px */
+  }
+}
+
 
 .Velox_Connect {
   position: fixed;

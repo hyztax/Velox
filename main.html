@@ -82,12 +82,22 @@
     allowfullscreen>
   </iframe>
   <div id="spotifyBox">
-    <!-- your Spotify embed here -->
   </div>
+
   
   <div class="hideSpotify" onclick="hideSpotify()">Close Spotify</div>
   
 </div>
+
+<style>/* Hide Spotify embed on phones and tablets */
+  @media (max-width: 1024px) {
+    .spotify-container {
+      display: none !important;
+      visibility: hidden;
+      opacity: 0;
+    }
+  }
+  </style>
 
 
 <script>
