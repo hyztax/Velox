@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="velox.image/Velox_logo.png">
+  <title>Velox | Chat</title>
+  <link rel="stylesheet" href="chatMobile.css" />
+  
+  <!-- <link rel="stylesheet" href="global.css" /> -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+  <!-- <script src="notifcations.js"></script> -->
+  
+
+  <style>
+    #starfield { position: fixed; top:0; left:0; width:100%; height:100%; z-index:-1; }
+  </style>
+  
+</head>
+<body>
+  <div id="messagesContainer"></div>
+
+<!-- 
+  <div id="notificationContainer"></div> -->
+
+  <div id="app">
+   <!-- Friends List Section -->
+<section id="friendsSection">
+  <h2 style="color: white;">
+    Friends | <a href="main.html" style="color:white; text-decoration: underline;">Go back</a>
+  </h2>
+
+  <!-- Search + Create Group Button Container -->
+  <div style="display: flex; align-items: stretch; gap: 5px; margin-bottom: 10px;">
+    <input id="searchFriends" placeholder="Search friends..." style="flex: 1; padding: 5px;" />
+    <button id="createGroupBtn" title="Create Group" 
+        style="padding: 0 10px; cursor: pointer; height: 100%; 
+               background: none; border: none; color: white; font-size: 1.1em;">
+        👥
+    </button>
+  </div>
+
+  <div id="friendsList"></div>
+</section>
+
+<!-- Group Chat Modal -->
+<div id="groupModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; 
+     background: rgba(0,0,0,0.7); justify-content:center; align-items:center; z-index:1000;">
+  <div style="background:#222; padding:20px; border-radius:8px; max-width:400px; width:90%;">
+    <h3 style="color:white;">Create Group Chat</h3>
+    <input id="groupNameInput" placeholder="Group name" style="width:100%; margin-bottom:10px; padding:5px;" />
+    <div id="groupFriendsList" style="max-height:200px; overflow-y:auto; margin-bottom:10px;"></div>
+    <button id="createGroupConfirmBtn" style="padding:5px 10px; cursor:pointer;">Create Group</button>
+    <button id="createGroupCancelBtn" style="padding:5px 10px; cursor:pointer; margin-left:5px;">Cancel</button>
+  </div>
+</div>
+
+<div id="contextMenu" style="
+    position: absolute; display: none; background: #222; color: white; 
+    padding: 5px; border-radius: 5px; z-index: 10000; min-width: 120px;
+"></div>
+
+
+
+    <!-- Profile Section -->
+    <section id="profileSection">
+      <div id="profileAvatar" class="profile-avatar"></div>
+      <h3 id="profileName" class="profile-name"></h3>
+      <p id="profileBio" class="profile-bio"></p>
+      <div>
+        <button id="backToFriendsBtn" type="button">Back to Friends</button>
+        <button id="messageUserBtn" type="button">Message User</button>
+      </div>
+    </section>
+
+<!-- Add this somewhere in main.html -->
+<div id="reportModal" class="modal" style="display:none;">
+  <div class="modal-content">
+    <h3 style="margin: 0; padding: 0; line-height: 1;">Report Message</h3>
+    <h4 style="margin: 0; padding: 0; line-height: 1; font-weight: 300;">[any false reports can / will result in a account ban]</h4>
+    <textarea id="reportReason" placeholder="Describe the issue..."></textarea>
+    <button id="submitReport">Submit</button>
+    <button id="cancelReport">Cancel</button>
+  </div>
+</div>
+
+
+<!-- Chat Section -->
+<section id="chatSection">
+    <header id="chatHeader" style="display: flex; align-items: center; justify-content: space-between; padding: 10px 15px; background: #111; color: white; position: relative;">
+    
+      <span id="chatTitle" style="flex: 1; text-align: center; font-weight: 600; font-size: 16px;">Chat</span>
+      <div style="width: 60px;"><!-- Placeholder to balance flex for exit button --></div>
+    </header>
+  
+    <div id="chatMessages" style="padding: 10px;"></div>
+  
+    <form id="chatInputArea" onsubmit="return false" style="display: flex; flex-direction: column; padding: 10px;">
+      <div style="display: flex; align-items: flex-end;">
+        <textarea 
+          id="messageInput" 
+          placeholder="Enter message.." 
+          rows="1" 
+          style="flex: 1; resize: none; overflow-y: hidden; max-height: 90px;">
+        </textarea>
+        <button id="sendBtn" type="submit" disabled style="margin-left: 10px;">↑</button>
+      </div>
+      <div id="charCounter" style="align-self: flex-end; font-size: 0.8em; color: #aaa;">0 / 300</div>
+    </form>
+  </section>
+  
+  </div>
+
+  <button id="exitChatBtn" class="exit-btn" style="display: none;">← Exit</button>
+
+<!-- Add this to your HTML -->
+<div id="loadingScreen" style="
+    position: fixed;
+    inset: 0;
+    background: #111;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5em;
+    z-index: 9999;
+">
+    Loading...
+</div>
+
+
+
+  <script type="module" src="global.js"></script>
+  <canvas id="starfield"></canvas>
+  <script src="stars.js"></script>
+  <script src="chat.js"></script>
+  <script src="chatMobile.js"></script>
+</body>
+</html>

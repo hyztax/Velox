@@ -268,10 +268,27 @@ document.addEventListener("DOMContentLoaded", () => {
 </script>
 
 
-  <a href="chat.html" class="Velox_Shop" rel="noopener noreferrer">
-    <img src="velox.image/icon.png" alt="Shop Image" />
-    <span>Enter Chat</span>
-  </a>
+<a href="chat.html" class="Velox_Shop" id="enterChat" rel="noopener noreferrer">
+  <img src="velox.image/icon.png" alt="Shop Image" />
+  <span>Enter Chat</span>
+</a>
+
+<script>
+  const enterChat = document.getElementById("enterChat");
+
+  function isTouchDevice() {
+    return 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+  }
+
+  if (isTouchDevice()) {
+    enterChat.addEventListener("click", (e) => {
+      e.preventDefault(); // stop default link
+      window.location.href = "chatMobile.html"; // redirect for touch devices
+    });
+  } 
+  // Else: PC automatically follows the link to chat.html
+</script>
+
   
 
 <!-- <a href="#" class="Velox_Connect" onclick="claimAndRedirect(event)">
