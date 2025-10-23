@@ -63,8 +63,49 @@
 "></div>
 
 <div class="FriendActivity">
-  <h3>Friend Activity</h3>
+  <h3>Friend Status</h3>
   <div id="activityList"></div>
+
+  <script>firebase.auth().onAuthStateChanged((currentUser) => {
+    if (!currentUser) return console.log("Not signed in yet.");
+  
+    console.log("Signed in as:", currentUser.uid);
+  
+    const activityList = document.getElementById('activityList');
+    const friendsRef = db.collection('friends').doc(currentUser.uid).collection('list');
+    const profilesRef = db.collection('profiles');
+  
+    friendsRef.onSnapshot(async (snapshot) => {
+      if (!activityList) return;
+  
+      const onlineFriends = [];
+  
+      for (const doc of snapshot.docs) {
+        const uid = doc.id;
+        const online = doc.data().online || false;
+  
+        if (online) {
+          const profileSnap = await profilesRef.doc(uid).get();
+          const profile = profileSnap.exists ? profileSnap.data() : {};
+          onlineFriends.push({ uid, displayName: profile.displayName || "Unknown" });
+        }
+      }
+  
+      activityList.innerHTML = '';
+      if (onlineFriends.length === 0) {
+        activityList.innerHTML = '<p>No friends online.</p>';
+        return;
+      }
+  
+      onlineFriends.forEach(f => {
+        const div = document.createElement('div');
+        div.textContent = f.displayName + ' • Online';
+        activityList.appendChild(div);
+      });
+    });
+  });
+  
+  </script>  
 </div>
 
 
@@ -133,43 +174,5 @@
   <canvas id="starfield"></canvas>
   <script src="stars.js"></script>
   <script src="chat.js"></script>
-
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const activityList = document.getElementById("activityList");
-      if (!activityList) return;
-    
-      const db = firebase.firestore();
-    
-      function renderActivity(friends) {
-        activityList.innerHTML = "";
-        friends.forEach(friend => {
-          const div = document.createElement("div");
-          div.classList.add("activityItem");
-          div.textContent = `${friend.name} • Online`;
-          div.style.color = "#4caf50"; // green dot
-          activityList.appendChild(div);
-        });
-      }
-    
-      firebase.auth().onAuthStateChanged(user => {
-        if (!user) return;
-    
-        const friendsRef = db.collection("users").doc(user.uid).collection("friends");
-    
-        // Listen for online friends
-        friendsRef.where("status", "==", "online")
-          .onSnapshot(snapshot => {
-            const onlineFriends = [];
-            snapshot.forEach(doc => {
-              const data = doc.data();
-              onlineFriends.push({ name: data.name || "Unknown" });
-            });
-            renderActivity(onlineFriends);
-          });
-      });
-    });
-    </script>
-    
 </body>
 </html>
