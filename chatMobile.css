@@ -104,8 +104,7 @@ body {
   font-size: 18px;
   font-weight: 600;
   color: #ddd;
-  margin-left: 45%;
-  margin-right: 45%;
+  margin-left: 185px;
   padding-bottom: 8px;
   margin-top: 5px;
  
@@ -342,7 +341,7 @@ background-color: rgb(92, 11, 11);
       z-index: 10000;
       padding: 8px 12px;
       font-size: 16px;
-      background: #311e00;
+      background: #663e03;
       color: white;
       border: none;
       border-radius: 6px;
@@ -425,134 +424,4 @@ background-color: rgb(92, 11, 11);
     to { opacity: 0; transform: translateY(-50px); }
 }
 
-  /* Add to main.css */
-.modal {
-  position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background: rgba(0,0,0,0.5);
-  display: flex; justify-content: center; align-items: center;
-  z-index: 40000;
-  text-align: center;
-}
-.modal-content {
-  background: #0202027e; color: #fff;
-  padding: 16px;
-  border-radius: 8px;
-  width: 300px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-.modal-content textarea {
-  width: 100%;
-  height: 80px;
-  resize: none;
-  background: #757272;
-  color: #fff;
-  border: none;
-  padding: 6px;
-}
-
-/* Submit and Cancel buttons inside the modal */
-.modal-content button {
-  padding: 8px 12px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: 600;
-  transition: background 0.2s, color 0.2s;
-}
-
-/* Submit button */
-#submitReport {
-  background-color: #224b37; /* green */
-  color: #fff;
-}
-#submitReport:hover {
-  background-color: #12422246;
-}
-
-/* Cancel button */
-#cancelReport {
-  background-color: #50110c; /* red */
-  color: #fff;
-}
-#cancelReport:hover {
-  background-color: #3d04048f;
-}
-
-#reportReason::placeholder {
-  color: rgb(240, 240, 240);
-  opacity: 1; 
-}
-
-.dateDivider {
-  text-align: center;
-  font-size: 12px;
-  color: #aaa;
-  margin: 12px 0;
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.dateDivider::before,
-.dateDivider::after {
-  content: "";
-  flex: 1;
-  height: 1px;
-  background: #555; /* line color */
-  margin: 0 8px;     /* space between line and text */
-}
-
-/* Remove only the default focus ring color in Electron */
-input:focus,
-textarea:focus {
-    outline-color: transparent;   /* keeps focus but removes gold color */
-    outline-style: solid;         /* ensures outline exists for accessibility if needed */
-    outline-width: 1px;           /* or keep default */
-}
-
-/* Optional: keep subtle visual cue */
-input:focus-visible,
-textarea:focus-visible {
-    outline-color: #969799;       /* custom focus color if you want */
-}
-
-
-/* --- Date Separator --- */
-.messageDate {
-    text-align: center;
-    width: 100%;
-    font-size: 0.75em;
-    color: #aaa;
-    margin: 12px 0;
-    position: relative;
-    font-weight: 600;
-}
-
-.messageDate::before,
-.messageDate::after {
-    content: "";
-    position: absolute;
-    top: 50%;
-    width: 40%;
-    height: 1px;
-    background-color: #555;
-}
-
-.messageDate::before {
-    left: 0;
-}
-
-.messageDate::after {
-    right: 0;
-}
-
-.messageDate span {
-    padding: 0 8px;
-    background-color: #272727; /* matches chat background */
-    position: relative;
-}
+  

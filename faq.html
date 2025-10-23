@@ -23,11 +23,7 @@
 <body>
   <div id="messagesContainer"></div>
 
- <button id="backBtn" aria-label="Back to main page" title="Back to main page" type="button">← Back</button>
- <script>document.getElementById("backBtn").addEventListener("click", () => {
-  window.location.href = "main.html";
-});
-</script>
+
 
   <section class="faq-section">
     <h2>Frequently Asked Questions</h2>
@@ -56,6 +52,8 @@
       </div>
     </div>
   </section>
+
+  <div class="GoBack" onclick="window.location='main.html';"></div>
   
 
   <script type="module" src="global.js"></script>

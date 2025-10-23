@@ -64,6 +64,101 @@
 
 
 
+
+<div class="ServersActivity">
+  <h3>Chat Rooms</h3>
+  <div id="serversList" style="display: flex; flex-direction: column; gap: 10px;"></div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  firebase.auth().onAuthStateChanged(async (currentUser) => {
+    if (!currentUser) return console.log("Not signed in.");
+
+    const db = firebase.firestore();
+    const serversList = document.getElementById('serversList');
+    if (!serversList) return;
+
+    const defaultServers = [
+      { id: 'swedish', name: 'Swedish Chat', maxMembers: 50 },
+      { id: 'english', name: 'English Chat', maxMembers: 50 },
+      { id: 'german', name: 'German Chat', maxMembers: 50 },
+      { id: 'french', name: 'French Chat', maxMembers: 50 },
+      { id: 'spanish', name: 'Spanish Chat', maxMembers: 50 },
+      { id: 'italian', name: 'Italian Chat', maxMembers: 50 },
+      { id: 'portuguese', name: 'Portuguese Chat', maxMembers: 50 },
+      { id: 'dutch', name: 'Dutch Chat', maxMembers: 50 },
+      { id: 'norwegian', name: 'Norwegian Chat', maxMembers: 50 },
+      { id: 'danish', name: 'Danish Chat', maxMembers: 50 },
+      { id: 'finnish', name: 'Finnish Chat', maxMembers: 50 },
+      { id: 'russian', name: 'Russian Chat', maxMembers: 50 },
+      { id: 'polish', name: 'Polish Chat', maxMembers: 50 },
+      { id: 'turkish', name: 'Turkish Chat', maxMembers: 50 },
+      { id: 'japanese', name: 'Japanese Chat', maxMembers: 50 },
+      { id: 'chinese', name: 'Chinese Chat', maxMembers: 50 },
+      { id: 'korean', name: 'Korean Chat', maxMembers: 50 },
+      { id: 'arabic', name: 'Arabic Chat', maxMembers: 50 },
+      { id: 'hindi', name: 'Hindi Chat', maxMembers: 50 },
+      { id: 'brazilian', name: 'Brazilian Chat', maxMembers: 50 },
+      { id: 'kirundi', name: 'Kirundi Chat', maxMembers: 50 },
+      { id: 'kenya', name: 'Swahili Chat', maxMembers: 50 },
+    ];
+
+    // Ensure all default servers exist
+    for (const server of defaultServers) {
+      const doc = await db.collection('servers').doc(server.id).get();
+      if (!doc.exists) {
+        await db.collection('servers').doc(server.id).set({
+          name: server.name,
+          maxMembers: server.maxMembers
+        });
+      }
+    }
+
+    // Display servers
+    serversList.innerHTML = '';
+    for (const server of defaultServers) {
+      const serverDoc = await db.collection('servers').doc(server.id).get();
+      const membersSnap = await db.collection('servers').doc(server.id).collection('members').get();
+      const memberCount = membersSnap.size;
+
+      const div = document.createElement('div');
+      div.className = 'activityItem';
+      div.textContent = `${serverDoc.data().name} (${memberCount}/${serverDoc.data().maxMembers})`;
+
+      div.onclick = async () => {
+        const memberRef = db.collection('servers').doc(server.id).collection('members').doc(currentUser.uid);
+        const memberDoc = await memberRef.get();
+
+        if (!memberDoc.exists) {
+          await memberRef.set({
+            displayName: currentUser.displayName || 'Unknown',
+            joinedAt: firebase.firestore.FieldValue.serverTimestamp()
+          });
+
+          // Update UI immediately
+          div.textContent = `${serverDoc.data().name} (${memberCount + 1}/${serverDoc.data().maxMembers})`;
+          alert(`Joined ${serverDoc.data().name}!`);
+        } else {
+          console.log("Already joined this room.");
+        }
+
+        // Redirect to rooms.html
+        window.location.href = 'rooms.html';
+      };
+
+      serversList.appendChild(div);
+    }
+  });
+});
+</script>
+
+
+
+
+
+
+
     <!-- Profile Section -->
     <section id="profileSection">
       <div id="profileAvatar" class="profile-avatar"></div>
@@ -121,6 +216,7 @@
   </form>
 </section>
   </div>
+
 
 
   <script type="module" src="global.js"></script>

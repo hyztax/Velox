@@ -4,6 +4,21 @@ const chatInputArea = document.getElementById("chatInputArea");
 const exitBtn = document.getElementById("exitChatBtn");
 const loadingScreen = document.getElementById("loadingScreen");
 
+
+// -------------------- Detect Device --------------------
+function isTouchDevice() {
+  return (
+    "ontouchstart" in window ||
+    navigator.maxTouchPoints > 0 ||
+    navigator.msMaxTouchPoints > 0
+  );
+}
+
+// If user is on PC, redirect to main.html
+if (!isTouchDevice()) {
+  window.location.href = "main.html";
+}
+
 // -------------------- Helpers --------------------
 function resetSections() {
   friendsSection.style.display = "flex";
