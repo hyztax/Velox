@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Velox | Rooms</title>
+  <link rel="icon" href="velox.image/Velox_logo.png">
+  <link rel="stylesheet" href="rooms.css" />
+
+  <!-- Firebase (Compat Version for Older Syntax) -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+</head>
+
+<body>
+  <h2 class="roomsTitle">Chat Rooms</h2>
+
+  <!-- Rooms list -->
+  <div id="roomsContainer" class="roomsList">
+    <p class="notice">Loading rooms...</p>
+  </div>
+
+  <!-- Chat view -->
+  <div id="chatContainer" style="display: none; flex-direction: column;">
+    <div class="chatHeader">
+      <button id="backBtn">⬅ Back</button>
+      <h2 id="roomTitle">Room Name</h2>
+    </div>
+    <div id="chatMessages" class="chatMessages"></div>
+    <div class="chatInputArea">
+      <input id="chatInput" placeholder="Type a message..." />
+      <button id="sendBtn">Send</button>
+    </div>
+  </div>
+
+  <div class="GoBack" onclick="window.location='chat.html';"></div>
+
+
+  <!-- Your JavaScript -->
+  <script src="rooms.js"></script>
+  <script src="stars.js"></script>
+  <canvas id="starfield"></canvas>
+</body>
+</html>

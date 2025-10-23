@@ -1048,17 +1048,17 @@ textarea:focus-visible {
     to { opacity: 0; transform: translateY(-50px); }
 }
 
-/* new stuff *//* Right column for friend activity — wall style */
-.FriendActivity {
+/* --- Right column for friend/server activity — wall style --- */
+.FriendActivity, .ServersActivity {
   position: fixed;       /* stick to viewport */
-  top: 0;                /* start at top */
-  right: 0;              /* align to right edge */
+  top: 0;
+  right: 0;
   width: 300px;          /* fixed width */
   height: 100vh;         /* full viewport height */
-  background-color: #1d1d1d9c; /* solid background like a wall */
-  padding: 10px;         /* optional padding inside */
+  background-color: #1d1d1dcc; /* semi-transparent wall-like background */
+  padding: 10px;
   box-sizing: border-box;
-  overflow-y: auto;      /* scrollable if content exceeds height */
+  overflow-y: auto;      /* scroll if content overflows */
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -1067,8 +1067,9 @@ textarea:focus-visible {
   z-index: 1000;         /* stays on top */
 }
 
-/* Header */
-.FriendActivity h3 {
+/* --- Header --- */
+.FriendActivity h3,
+.ServersActivity h3 {
   font-size: 18px;
   font-weight: 600;
   text-align: center;
@@ -1076,78 +1077,64 @@ textarea:focus-visible {
   padding-bottom: 5px;
 }
 
-/* Activity item — modern, clean, interactive */
+/* --- Activity/Server item — modern, clean, interactive --- */
 .activityItem {
-  padding: 10px;              /* balanced spacing */
-  background-color: #dfdddd10;     /* semi-transparent dark */
-  border-radius: 10px;             /* smoother rounded corners */
+  padding: 10px;
+  background-color: #dfdddd10;      /* semi-transparent dark */
+  border-radius: 10px;
   font-size: 14px;
   font-weight: 500;
   height: 60px;
-  width: 270px;                    /* fixed width */
+  width: 270px;
   color: #eee;
   cursor: default;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3); /* subtle depth */
-  transition: 
-    background 0.3s ease,
-    transform 0.3s ease,
-    box-shadow 0.3s ease;           /* smooth animations */
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  transition: background 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
   display: flex;
-  justify-content: center;   /* center horizontally inside box */
-  align-items: center;       /* center vertically inside box */
-  text-align: center;        /* center multi-line text */
-  gap: 10px;                 /* spacing if adding icons later */
-  margin:10px;            /* centers the whole item horizontally */
-  
-}
-/* Hide scrollbar for WebKit browsers (Chrome, Safari) */
-.FriendActivity::-webkit-scrollbar {
-  display: none;
+  justify-content: space-between; /* name left, count right */
+  align-items: center;
+  padding-left: 15px;
+  padding-right: 15px;
+  margin: 0px auto;      /* centers horizontally with margin */
 }
 
-/* Hide scrollbar for Firefox */
-.FriendActivity {
-  scrollbar-width: none;  /* Firefox */
-  -ms-overflow-style: none; /* IE 10+ */
-}
-
-/* Optional: still allow scrolling */
-.FriendActivity {
-  overflow-y: auto;
-}
-
-
-
-/* Hover effect — highlight, grow, shadow */
+/* --- Hover effect — highlight, grow, shadow --- */
 .activityItem:hover {
-  background-color: #7c7b7eaa;     /* stronger hover color */
-  transform: scale(1.025);          /* subtle growth */
-  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4); /* lift effect */
+  background-color: #7c7b7eaa;
+  transform: scale(1.025);
+  box-shadow: 0 6px 15px rgba(0,0,0,0.4);
   cursor: pointer;
 }
 
-/* Optional: selected state */
+/* --- Optional: selected state --- */
 .activityItem.selected {
-  background-color: #562a7480;     /* purple highlight */
+  background-color: #562a7480; 
   font-weight: 600;
   color: #fff;
-  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.45);
-  transform: scale(1.05);          /* slightly lifted like hover */
+  box-shadow: 0 6px 15px rgba(0,0,0,0.45);
+  transform: scale(1.05);
 }
 
-
-
-
-/* Scrollbar styling */
-.FriendActivity::-webkit-scrollbar {
+/* --- Scrollbar styling --- */
+.FriendActivity::-webkit-scrollbar,
+.ServersActivity::-webkit-scrollbar {
   width: 6px;
 }
 
-.FriendActivity::-webkit-scrollbar-thumb {
+.FriendActivity::-webkit-scrollbar-thumb,
+.ServersActivity::-webkit-scrollbar-thumb {
   background-color: #555;
   border-radius: 3px;
 }
 
-.FriendActivity::-webkit-scrollbar-track {
+.FriendActivity::-webkit-scrollbar-track,
+.ServersActivity::-webkit-scrollbar-track {
   background-color: transparent;
+}
+
+/* --- Hide scrollbar for Firefox --- */
+.FriendActivity,
+.ServersActivity {
+  scrollbar-width: thin;    /* Firefox */
+  scrollbar-color: #414040e1 transparent;
 }
