@@ -62,6 +62,11 @@
     padding: 5px; border-radius: 5px; z-index: 10000; min-width: 120px;
 "></div>
 
+<div class="FriendActivity">
+  <h3>Friend Activity</h3>
+  <div id="activityList"></div>
+</div>
+
 
 
     <!-- Profile Section -->
@@ -123,9 +128,48 @@
   </div>
 
 
+
   <script type="module" src="global.js"></script>
   <canvas id="starfield"></canvas>
   <script src="stars.js"></script>
   <script src="chat.js"></script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const activityList = document.getElementById("activityList");
+      if (!activityList) return;
+    
+      const db = firebase.firestore();
+    
+      function renderActivity(friends) {
+        activityList.innerHTML = "";
+        friends.forEach(friend => {
+          const div = document.createElement("div");
+          div.classList.add("activityItem");
+          div.textContent = `${friend.name} • Online`;
+          div.style.color = "#4caf50"; // green dot
+          activityList.appendChild(div);
+        });
+      }
+    
+      firebase.auth().onAuthStateChanged(user => {
+        if (!user) return;
+    
+        const friendsRef = db.collection("users").doc(user.uid).collection("friends");
+    
+        // Listen for online friends
+        friendsRef.where("status", "==", "online")
+          .onSnapshot(snapshot => {
+            const onlineFriends = [];
+            snapshot.forEach(doc => {
+              const data = doc.data();
+              onlineFriends.push({ name: data.name || "Unknown" });
+            });
+            renderActivity(onlineFriends);
+          });
+      });
+    });
+    </script>
+    
 </body>
 </html>

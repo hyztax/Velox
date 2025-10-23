@@ -108,8 +108,8 @@ const firebaseConfig = {
     leaveBtn.textContent = 'Leave Group';
     leaveBtn.style.display = 'none';
     leaveBtn.style.position = 'fixed';
-    leaveBtn.style.top = '14px';
-    leaveBtn.style.right = '20px';
+    leaveBtn.style.top = '70px';
+    leaveBtn.style.right = '430px';
     leaveBtn.style.background = '#red';
     leaveBtn.style.color = '#fff';
     leaveBtn.style.border = 'none';
@@ -133,8 +133,8 @@ const firebaseConfig = {
 
     //positioning
     toggleMembersBtn.style.position = 'fixed';
-    toggleMembersBtn.style.top = '13px';
-    toggleMembersBtn.style.right = '120px'; 
+    toggleMembersBtn.style.top = '69px';
+    toggleMembersBtn.style.right = '540px'; 
     toggleMembersBtn.style.background = 'transparent';
     toggleMembersBtn.style.color = '#fff';
     toggleMembersBtn.style.border = 'none';
