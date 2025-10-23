@@ -1,12 +1,13 @@
 /* ===== Base Styles ===== */
 body {
     font-family: 'Inter', sans-serif;
-    background: linear-gradient(135deg, #0d0d0d, #1a1a1a);
+    background-color: #141414;
     color: #eee;
     margin: 0;
     padding: 20px;
+    
+    
 }
-
 /* ===== Rooms Title ===== */
 .roomsTitle {
     text-align: center;
@@ -14,24 +15,28 @@ body {
     font-weight: 600;
     margin-bottom: 25px;
     color: #fff;
-    text-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.15), 0 0 25px rgba(255, 255, 255, 0.05);
+    letter-spacing: 1px;
 }
+
 /* ===== Rooms Grid ===== */
 .roomsList {
     display: grid;
-    grid-template-columns: repeat(6, 140px); /* bigger columns */
-    grid-auto-rows: 100px; /* bigger rows to match */
+    grid-template-columns: repeat(6, 140px);
+    grid-auto-rows: 100px;
     gap: 20px;
     justify-content: center;
-    max-width: calc(6*140px + 5*20px); /* 6 columns + gaps */
+    max-width: calc(6 * 140px + 5 * 20px);
     margin: auto;
 }
 
+/* ===== Room Item ===== */
 .roomItem {
+    gap: 10px;
     width: 140px;
     height: 100px;
-    background: #111;
-    border: 1px solid #333;
+    background: linear-gradient(145deg, #101010, #1a1a1a);
+    border: 1px solid rgba(255, 255, 255, 0.06);
     border-radius: 12px;
     display: flex;
     justify-content: center;
@@ -39,18 +44,63 @@ body {
     text-align: center;
     cursor: pointer;
     transition: all 0.3s ease;
-    font-size: 16px; /* bigger font too */
+    font-size: 16px;
     font-weight: 500;
     color: #fff;
-    box-shadow: 0 3px 8px rgba(0,0,0,0.35);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.35),
+                inset 0 0 8px rgba(255, 255, 255, 0.02);
+    position: relative;
+    overflow: hidden;
 }
 
+/* Subtle light streak overlay */
+.roomItem::before {
+    content: "";
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(
+        120deg,
+        rgba(255, 255, 255, 0.06) 0%,
+        rgba(255, 255, 255, 0) 60%
+    );
+    transform: rotate(25deg);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
 
+.roomItem:hover::before {
+    opacity: 1;
+}
+
+/* Hover effects */
 .roomItem:hover {
-    background: #1e1e1e;
-    transform: scale(1.1);
-    box-shadow: 0 6px 16px rgba(0,0,0,0.5);
+    background: linear-gradient(145deg, #181818, #252525);
+    transform: scale(1.08);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.55),
+                0 0 10px rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.15);
 }
+
+/* Optional glowing border pulse */
+.roomItem:hover::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.1),
+                0 0 20px rgba(255, 255, 255, 0.05);
+    animation: pulseGlow 1.2s ease-in-out infinite alternate;
+}
+
+@keyframes pulseGlow {
+    from { opacity: 0.4; }
+    to { opacity: 1; }
+}
+
 
 
 
@@ -75,7 +125,6 @@ body {
     justify-content: space-between;
     background: #25252580;
     padding: 12px 20px;
-    border-bottom: 1px solid #000;
 }
 
 .chatHeader h2 {
@@ -86,12 +135,11 @@ body {
 }
 
 /* ===== Chat Messages ===== */
-/* ===== Chat Messages ===== */
 .chatMessages {
     flex: 1 1 auto;       /* grow and shrink properly */
     min-height: 600px;    /* always at least this tall */
     padding: 15px;
-    background: #1b1b1b77;
+    background: #1d1d1d5d;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
@@ -114,13 +162,22 @@ body {
 }
 
 .messageItem {
-    max-width: 75%;
-    padding: 10px 14px;
-    border-radius: 16px;
-    font-size: 14px;
-    line-height: 1.4;
-    word-wrap: break-word;
+    display: inline-block;      /* shrink-wrap to text width */
+    border-radius: 24px;
+    font-size: 15px;
+    color: #fff;
+    position: relative;
+    transition: transform 0.15s, box-shadow 0.2s;
 }
+
+
+
+
+.messageText {
+    margin-right: 8px; /* small gap before delete button */
+}
+
+
 
 /* Sender vs Receiver style */
 .messageItem.sent {

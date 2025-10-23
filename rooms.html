@@ -6,6 +6,7 @@
   <title>Velox | Rooms</title>
   <link rel="icon" href="velox.image/Velox_logo.png">
   <link rel="stylesheet" href="rooms.css" />
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
   <!-- Firebase (Compat Version for Older Syntax) -->
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
@@ -24,7 +25,7 @@
   <!-- Chat view -->
   <div id="chatContainer" style="display: none; flex-direction: column;">
     <div class="chatHeader">
-      <button id="backBtn">⬅ Back</button>
+      <button id="backBtn">Back</button>
       <h2 id="roomTitle">Room Name</h2>
     </div>
     <div id="chatMessages" class="chatMessages"></div>

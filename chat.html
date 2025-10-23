@@ -101,7 +101,7 @@ document.addEventListener('DOMContentLoaded', () => {
       { id: 'hindi', name: 'Hindi Chat', maxMembers: 50 },
       { id: 'brazilian', name: 'Brazilian Chat', maxMembers: 50 },
       { id: 'kirundi', name: 'Kirundi Chat', maxMembers: 50 },
-      { id: 'kenya', name: 'Swahili Chat', maxMembers: 50 },
+      { id: 'kenya', name: 'Swahili Chat', maxMembers: 50 }
     ];
 
     // Ensure all default servers exist
@@ -118,16 +118,21 @@ document.addEventListener('DOMContentLoaded', () => {
     // Display servers
     serversList.innerHTML = '';
     for (const server of defaultServers) {
-      const serverDoc = await db.collection('servers').doc(server.id).get();
-      const membersSnap = await db.collection('servers').doc(server.id).collection('members').get();
-      const memberCount = membersSnap.size;
-
       const div = document.createElement('div');
       div.className = 'activityItem';
-      div.textContent = `${serverDoc.data().name} (${memberCount}/${serverDoc.data().maxMembers})`;
+      div.textContent = `${server.name} (0/${server.maxMembers})`;
+      serversList.appendChild(div);
+
+      const serverRef = db.collection('servers').doc(server.id);
+
+      // Listen for real-time member count updates
+      serverRef.collection('members').onSnapshot((membersSnap) => {
+        const memberCount = membersSnap.size;
+        div.textContent = `${server.name} (${memberCount}/${server.maxMembers})`;
+      });
 
       div.onclick = async () => {
-        const memberRef = db.collection('servers').doc(server.id).collection('members').doc(currentUser.uid);
+        const memberRef = serverRef.collection('members').doc(currentUser.uid);
         const memberDoc = await memberRef.get();
 
         if (!memberDoc.exists) {
@@ -135,10 +140,7 @@ document.addEventListener('DOMContentLoaded', () => {
             displayName: currentUser.displayName || 'Unknown',
             joinedAt: firebase.firestore.FieldValue.serverTimestamp()
           });
-
-          // Update UI immediately
-          div.textContent = `${serverDoc.data().name} (${memberCount + 1}/${serverDoc.data().maxMembers})`;
-          alert(`Joined ${serverDoc.data().name}!`);
+          alert(`Joined ${server.name}!`);
         } else {
           console.log("Already joined this room.");
         }
@@ -146,12 +148,11 @@ document.addEventListener('DOMContentLoaded', () => {
         // Redirect to rooms.html
         window.location.href = 'rooms.html';
       };
-
-      serversList.appendChild(div);
     }
   });
 });
 </script>
+
 
 
 
