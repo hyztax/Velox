@@ -66,46 +66,49 @@
   <h3>Friend Status</h3>
   <div id="activityList"></div>
 
-  <script>firebase.auth().onAuthStateChanged((currentUser) => {
-    if (!currentUser) return console.log("Not signed in yet.");
-  
-    console.log("Signed in as:", currentUser.uid);
-  
-    const activityList = document.getElementById('activityList');
-    const friendsRef = db.collection('friends').doc(currentUser.uid).collection('list');
-    const profilesRef = db.collection('profiles');
-  
-    friendsRef.onSnapshot(async (snapshot) => {
-      if (!activityList) return;
-  
-      const onlineFriends = [];
-  
-      for (const doc of snapshot.docs) {
-        const uid = doc.id;
-        const online = doc.data().online || false;
-  
-        if (online) {
-          const profileSnap = await profilesRef.doc(uid).get();
-          const profile = profileSnap.exists ? profileSnap.data() : {};
-          onlineFriends.push({ uid, displayName: profile.displayName || "Unknown" });
-        }
-      }
-  
-      activityList.innerHTML = '';
-      if (onlineFriends.length === 0) {
-        activityList.innerHTML = '<p>No friends online.</p>';
+  <script>
+    firebase.auth().onAuthStateChanged((currentUser) => {
+      if (!currentUser) {
+        console.log("Not signed in yet.");
         return;
       }
-  
-      onlineFriends.forEach(f => {
-        const div = document.createElement('div');
-        div.textContent = f.displayName + ' • Online';
-        activityList.appendChild(div);
+    
+      console.log("Signed in as:", currentUser.uid);
+    
+      const activityList = document.getElementById('activityList');
+      const friendsRef = db.collection('friends').doc(currentUser.uid).collection('list');
+      const profilesRef = db.collection('profiles');
+    
+      friendsRef.onSnapshot(async (snapshot) => {
+        if (!activityList) return;
+    
+        const onlineFriends = [];
+    
+        for (const doc of snapshot.docs) {
+          const uid = doc.id;
+          const online = doc.data().online || false;
+    
+          if (online) {
+            const profileSnap = await profilesRef.doc(uid).get();
+            const profile = profileSnap.exists ? profileSnap.data() : {};
+            onlineFriends.push({ uid, displayName: profile.displayName || "Unknown" });
+          }
+        }
+    
+        activityList.innerHTML = '';
+        if (onlineFriends.length === 0) {
+          activityList.innerHTML = '<p>No friends online.</p>';
+          return;
+        }
+    
+        onlineFriends.forEach(f => {
+          const div = document.createElement('div');
+          div.textContent = f.displayName + ' • Online';
+          activityList.appendChild(div);
+        });
       });
     });
-  });
-  
-  </script>  
+    </script>    
 </div>
 
 
