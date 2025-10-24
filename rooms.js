@@ -26,7 +26,7 @@ const backBtn = document.getElementById("backBtn");
 const roomTitle = document.getElementById("roomTitle");
 const chatSettings = {
     deleteButton: {
-        text: "×",
+        text: "x",
         color: "#fff",
         background: "#ff4d4f",
         hoverBackground: "#ff7875",
@@ -41,6 +41,49 @@ const chatSettings = {
         transition: "all 0.2s ease"
     }
 };
+
+const MAX_CHARS = 300;
+
+// Character counter update
+const charCount = document.getElementById("charCount");
+chatInput.addEventListener("input", () => {
+    const len = chatInput.value.length;
+    charCount.textContent = `${len}/${MAX_CHARS}`;
+
+    // Glow effect if near limit
+    if (len > 300) {
+        charCount.style.color = "red";
+    } else {
+        charCount.style.color = "#aaa";
+    }
+
+    // Disable send button if empty or over limit
+    sendBtn.disabled = len === 0 || len > MAX_CHARS;
+});
+
+// Send button click
+sendBtn.onclick = async () => {
+    const text = chatInput.value.trim();
+
+    // Prevent sending if empty or over MAX_CHARS
+    if (!text || text.length > MAX_CHARS || !currentRoomId) return;
+
+    const user = auth.currentUser;
+    if (!user) return;
+
+    await db.collection("servers").doc(currentRoomId).collection("messages").add({
+        senderId: user.uid,
+        senderName: user.displayName || "Anonymous",
+        text,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    chatInput.value = "";
+    charCount.textContent = `0/${MAX_CHARS}`;
+    sendBtn.disabled = true;
+    chatInput.focus();
+};
+
 
 let currentRoomId = null;
 let unsubscribeMessages = null;
@@ -270,6 +313,7 @@ sendBtn.onclick = async () => {
 
     chatInput.value = "";
     chatInput.focus();
+    
 };
 
 // =============================
@@ -301,8 +345,9 @@ backBtn.onclick = async () => {
 
     currentRoomId = null;
     chatContainer.style.display = "none";
-    roomsContainer.style.display = "grid";
+    roomsContainer.style.display = "flex"; // keep flex for wrapping
 };
+
 
 // =============================
 // Focus input if any key

@@ -6,54 +6,81 @@ body {
     margin: 0;
     padding: 20px;
     
-    
 }
+
 /* ===== Rooms Title ===== */
 .roomsTitle {
     text-align: center;
     font-size: 28px;
     font-weight: 600;
     margin-bottom: 25px;
-    color: #fff;
+    color: #dadf94;
     text-shadow: 0 0 10px rgba(255, 255, 255, 0.15), 0 0 25px rgba(255, 255, 255, 0.05);
     letter-spacing: 1px;
+    margin-top: 5%;
 }
 
-/* ===== Rooms Grid ===== */
+/* ===== Rooms Container ===== */
 .roomsList {
-    display: grid;
-    grid-template-columns: repeat(6, 140px);
-    grid-auto-rows: 100px;
-    gap: 20px;
+    display: flex;
+    flex-wrap: wrap;
     justify-content: center;
-    max-width: calc(6 * 140px + 5 * 20px);
-    margin: auto;
+    gap: 12px; /* smaller gap between boxes */
+    padding: 20px; /* reduced padding */
+    background: rgba(54, 54, 54, 0.041); /* slightly lighter glass effect */
+    border-radius: 16px; /* smaller radius for compact look */
+    backdrop-filter: blur(10px); /* subtle blur */
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35); /* lighter shadow */
+    min-height: 60px; /* reduced height for compactness */
+    max-width: 600px; /* optional: limit container width */
+    margin: 0 auto; /* center on page */
 }
 
-/* ===== Room Item ===== */
+
+/* Notice message styling */
+.roomsList .notice {
+    width: 100%;
+    text-align: center;
+    color: #ccc;
+    font-weight: 500;
+    font-size: 18px;
+}
+
+/* ===== Individual Room Boxes ===== */
 .roomItem {
-    gap: 10px;
     width: 140px;
     height: 100px;
-    background: linear-gradient(145deg, #101010, #1a1a1a);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    border-radius: 12px;
+    background: rgba(29, 29, 29, 0.705); /* frosted glass base */
+    border-radius: 16px;
     display: flex;
-    justify-content: center;
+    gap: 5px;
     align-items: center;
+    font-weight: 600;
+    font-size: 16px;
+    color: #fff;
     text-align: center;
     cursor: pointer;
-    transition: all 0.3s ease;
-    font-size: 16px;
-    font-weight: 500;
-    color: #fff;
-    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.35),
-                inset 0 0 8px rgba(255, 255, 255, 0.02);
     position: relative;
     overflow: hidden;
+    transition: all 0.35s ease;
+    box-shadow: 
+    0 6px 15px rgba(0, 0, 0, 0.35), 
+    inset 0 0 8px rgba(255, 255, 255, 0.05);
+    justify-content: center;  
+    font-weight: 600;
+    flex-direction: column;
 }
 
-/* Subtle light streak overlay */
+/* 3D Lift + Hover Glow */
+.roomItem:hover {
+    transform: translateY(-6px) scale(1.07);
+    background: rgba(24, 24, 24, 0.12);
+    box-shadow: 
+        0 14px 25px rgba(0, 0, 0, 0.5),
+        0 0 15px rgba(255, 255, 255, 0.1) inset;
+}
+
+/* Light streak animation */
 .roomItem::before {
     content: "";
     position: absolute;
@@ -61,43 +88,36 @@ body {
     left: -50%;
     width: 200%;
     height: 200%;
-    background: linear-gradient(
-        120deg,
-        rgba(255, 255, 255, 0.06) 0%,
-        rgba(255, 255, 255, 0) 60%
-    );
+    background: linear-gradient(120deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0) 70%);
     transform: rotate(25deg);
     opacity: 0;
-    transition: opacity 0.4s ease;
+    transition: opacity 0.4s ease-in-out;
 }
 
 .roomItem:hover::before {
     opacity: 1;
 }
 
-/* Hover effects */
-.roomItem:hover {
-    background: linear-gradient(145deg, #181818, #252525);
-    transform: scale(1.08);
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.55),
-                0 0 10px rgba(255, 255, 255, 0.08);
-    border-color: rgba(255, 255, 255, 0.15);
-}
-
-/* Optional glowing border pulse */
-.roomItem:hover::after {
+/* Glowing border pulse */
+.roomItem::after {
     content: "";
     position: absolute;
     inset: 0;
-    border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.1),
-                0 0 20px rgba(255, 255, 255, 0.05);
-    animation: pulseGlow 1.2s ease-in-out infinite alternate;
+    border-radius: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.08);
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+}
+
+.roomItem:hover::after {
+    opacity: 1;
+    box-shadow: 0 0 20px rgba(255,255,255,0.12),
+                0 0 35px rgba(255,255,255,0.05);
+    animation: pulseGlow 1.5s ease-in-out infinite alternate;
 }
 
 @keyframes pulseGlow {
-    from { opacity: 0.4; }
+    from { opacity: 0.3; }
     to { opacity: 1; }
 }
 
@@ -106,17 +126,19 @@ body {
 
 
 /* ===== Chat Container ===== */
-.chatContainer {
+#chatContainer {
     display: flex;
     flex-direction: column;
     max-width: 600px;
     margin: 30px auto;
     height: 80vh;
     border-radius: 12px;
-    background: #1e1e1e;
+    background: #1e1e1e3b;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
     overflow: hidden;
 }
+
+
 
 /* ===== Chat Header ===== */
 .chatHeader {
@@ -137,7 +159,7 @@ body {
 /* ===== Chat Messages ===== */
 .chatMessages {
     flex: 1 1 auto;       /* grow and shrink properly */
-    min-height: 600px;    /* always at least this tall */
+    min-height: 600px;   
     padding: 15px;
     background: #1d1d1d5d;
     overflow-y: auto;
@@ -162,13 +184,20 @@ body {
 }
 
 .messageItem {
+  
     display: inline-block;      /* shrink-wrap to text width */
+    max-width: 80%;             /* bubble won’t exceed 80% of chat width */
+    word-wrap: break-word;      /* break long words */
+    white-space: pre-wrap;      /* preserve line breaks if user adds them */
     border-radius: 24px;
     font-size: 15px;
     color: #fff;
     position: relative;
     transition: transform 0.15s, box-shadow 0.2s;
+    padding: 8px 12px;          /* give some padding inside bubble */
 }
+
+
 
 
 
@@ -204,37 +233,62 @@ body {
     gap: 10px;
     padding: 12px 15px;
     background: #21212257;
+    align-items: flex-start; /* align items at top */
+    position: relative; /* so the counter can be positioned easily */
 
 }
+
+#charCount {
+     font-size: 12px;
+    color: #aaa;
+    position: absolute;
+    top: 100%;      /* just below the button */
+    left: 50%;      /* center horizontally */
+    transform: translateX(-50%);
+    margin-top: 4px; /* space below button */
+    white-space: nowrap;
+}
+
+
 
 #chatInput {
     flex: 1;
     padding: 12px 15px;
-    border-radius: 20px;
-    border: none;
+    border-radius: 10px;
+    border: 1px solid rgba(3, 3, 3, 0.116);
     background: #0d0d0eb0;
-    color: #fff;
+    color: #dbd8d8;
     font-size: 14px;
-    
 }
+
+#chatInput:focus {
+    outline: none;
+    border: 1px solid rgba(211, 211, 211, 0.329);
+    box-shadow: 0 0 8px rgba(211, 211, 211, 0.5);
+    color: rgb(211, 210, 210);
+    transition: box-shadow 0.2s ease, border 0.2s ease;
+}
+
+
 
 #chatInput::placeholder {
     color: #868788;
 }
 
 #sendBtn, #backBtn {
-    background: #565b8f;
+ background: #686897;
     border: none;
     color: #fff;
-    padding: 10px 18px;
-    border-radius: 20px;
+    padding: 8px 14px; /* made smaller */
+    border-radius: 10px;
     cursor: pointer;
     font-weight: 500;
     transition: all 0.2s ease;
+    position: relative; /* Important: for absolute child */
 }
 
 #sendBtn:hover, #backBtn:hover {
-    background: #353b8b;
+    background: #2c2c3d;
 }
 
 /* ===== Responsive ===== */

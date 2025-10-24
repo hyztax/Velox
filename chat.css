@@ -1080,7 +1080,7 @@ textarea:focus-visible {
 /* --- Activity/Server item — modern, clean, interactive --- */
 .activityItem {
   padding: 10px;
-  background-color: #dfdddd10;      /* semi-transparent dark */
+  background-color: #3b349210;      /* semi-transparent dark */
   border-radius: 10px;
   font-size: 14px;
   font-weight: 500;
@@ -1100,7 +1100,7 @@ textarea:focus-visible {
 
 /* --- Hover effect — highlight, grow, shadow --- */
 .activityItem:hover {
-  background-color: #7c7b7eaa;
+  background-color: #372a52aa;
   transform: scale(1.025);
   box-shadow: 0 6px 15px rgba(0,0,0,0.4);
   cursor: pointer;

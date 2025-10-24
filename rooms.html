@@ -15,25 +15,28 @@
 </head>
 
 <body>
-  <h2 class="roomsTitle">Chat Rooms</h2>
+  <h2 class="roomsTitle"></h2>
 
   <!-- Rooms list -->
   <div id="roomsContainer" class="roomsList">
     <p class="notice">Loading rooms...</p>
   </div>
 
-  <!-- Chat view -->
-  <div id="chatContainer" style="display: none; flex-direction: column;">
-    <div class="chatHeader">
-      <button id="backBtn">Back</button>
-      <h2 id="roomTitle">Room Name</h2>
-    </div>
-    <div id="chatMessages" class="chatMessages"></div>
-    <div class="chatInputArea">
-      <input id="chatInput" placeholder="Type a message..." />
-      <button id="sendBtn">Send</button>
-    </div>
+<div id="chatContainer" style="display: none; flex-direction: column;">
+  <div class="chatHeader">
+    <button id="backBtn">Back</button>
+    <h2 id="roomTitle">Room Name</h2>
   </div>
+  <div id="chatMessages" class="chatMessages"></div>
+  <div class="chatInputArea">
+    <input id="chatInput" placeholder="Type a message..." />
+    <button id="sendBtn">
+      Send
+      <span id="charCount">0/300</span>
+    </button>
+  </div>
+</div>
+
 
   <div class="GoBack" onclick="window.location='chat.html';"></div>
 
