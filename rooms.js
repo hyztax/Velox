@@ -45,10 +45,16 @@ const chatSettings = {
 let currentRoomId = null;
 let unsubscribeMessages = null;
 let userUid = null;
-
 // =============================
 // Auth & Initial Load
 // =============================
+function getQueryParam(param) {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get(param);
+}
+
+
+
 auth.onAuthStateChanged(async (user) => {
     if (!user) {
         try {
@@ -62,13 +68,36 @@ auth.onAuthStateChanged(async (user) => {
     }
     userUid = auth.currentUser.uid;
     console.log("Current UID:", userUid);
+
+    // Load all rooms first
     loadRooms();
-    // presence code temporarily disabled for debugging
-    // setupPresence();
+
+    // Check if a roomId is in the URL, and open it automatically
+    const initialRoomId = getQueryParam('roomId');
+    if (initialRoomId) {
+        const roomDoc = await db.collection("servers").doc(initialRoomId).get();
+        if (roomDoc.exists) {
+            const data = roomDoc.data();
+            openRoom(initialRoomId, data.name, data.maxMembers || 0);
+        } else {
+            console.warn("Room not found:", initialRoomId);
+        }
+
+        // Remove ?roomId from URL after 2 seconds
+        setTimeout(() => {
+            if (window.history.replaceState) {
+                const cleanUrl = window.location.origin + window.location.pathname;
+                window.history.replaceState({}, document.title, cleanUrl);
+                console.log("?roomId removed from URL");
+            }
+        }, );
+    }
 });
 
+
+
 // =============================
-// Load Rooms with Debug
+// Load Rooms
 // =============================
 async function loadRooms() {
     roomsContainer.innerHTML = `<p class="notice">Loading rooms...</p>`;
@@ -111,6 +140,7 @@ async function loadRooms() {
                     }
                 });
 
+            // On click: join room & remove ?roomId from URL
             div.onclick = () => openRoom(serverDoc.id, data.name, data.maxMembers || 0);
         });
     } catch (error) {
@@ -118,6 +148,7 @@ async function loadRooms() {
         roomsContainer.innerHTML = `<p class="notice">Failed to load rooms.</p>`;
     }
 }
+
 
 // =============================
 // Add user to room
@@ -298,3 +329,4 @@ window.addEventListener("beforeunload", async (e) => {
         console.error("Failed to remove user on page unload:", err);
     }
 });
+// ddd

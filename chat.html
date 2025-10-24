@@ -66,8 +66,10 @@
 
 
 <div class="ServersActivity">
-  <h3>Chat Rooms</h3>
-  <div id="serversList" style="display: flex; flex-direction: column; gap: 10px;"></div>
+  <h3 onclick="window.location.href='rooms.html'" style="cursor: pointer;" >
+    Chat Rooms
+  </h3>
+    <div id="serversList" style="display: flex; flex-direction: column; gap: 10px;"></div>
 </div>
 
 <script>
@@ -135,22 +137,23 @@ document.addEventListener('DOMContentLoaded', () => {
       });
 
       div.onclick = async () => {
-        const memberRef = serverRef.collection('members').doc(currentUser.uid);
-        const memberDoc = await memberRef.get();
+    const memberRef = serverRef.collection('members').doc(currentUser.uid);
+    const memberDoc = await memberRef.get();
 
-        if (!memberDoc.exists) {
-          await memberRef.set({
+    if (!memberDoc.exists) {
+        await memberRef.set({
             displayName: currentUser.displayName || 'Unknown',
             joinedAt: firebase.firestore.FieldValue.serverTimestamp()
-          });
-          alert(`Joined ${server.name}!`);
-        } else {
-          console.log("Already joined this room.");
-        }
+        });
+        alert(`Joined ${server.name}!`);
+    } else {
+        console.log("Already joined this room.");
+    }
 
-        // Redirect to rooms.html
-        window.location.href = 'rooms.html';
-      };
+    // Redirect with server ID in URL
+    window.location.href = `rooms.html?roomId=${server.id}`;
+};
+
     }
   });
 });
