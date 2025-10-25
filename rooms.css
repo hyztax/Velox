@@ -373,3 +373,69 @@ body {
   color: rgb(235, 238, 238);
   font-family: Arial, sans-serif;
 }
+
+
+#messagesContainer {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 320px;
+    background: transparent; /* container itself is transparent */
+    z-index: 9999;
+    pointer-events: none;    /* clicks pass through */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.messageBox {
+    position: relative;       /* allow animation inside container */
+    display: flex;
+    align-items: center;
+    background: rgba(0,0,0,0.9);
+    color: #fff;
+    border-radius: 16px;
+    padding: 10px 14px;
+    opacity: 0;
+    transform: translateY(-50px);
+    animation: slideIn 0.5s forwards;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+    margin: 0;               /* REMOVE margin to prevent pushing */
+}
+
+.messageBox .icon {
+    background: rgb(92, 17, 17);
+    color: #fff;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    flex-shrink: 0;
+    margin-right: 10px;
+}
+
+.messageBox .text {
+    flex: 1;
+    text-align: center;
+}
+
+
+
+@keyframes slideIn {
+    from { opacity: 0; transform: translateY(-50px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.fadeOut {
+    animation: fadeOut 0.5s forwards;
+}
+
+@keyframes fadeOut {
+    to { opacity: 0; transform: translateY(-50px); }
+}
