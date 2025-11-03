@@ -1427,7 +1427,7 @@ li button:hover:not(:disabled) {
     overflow: hidden;
     padding: 12px 24px;
   
-    background: linear-gradient(135deg, #3b0a21, #18162e);
+    background: linear-gradient(135deg, #421a5c, #161616);
     box-shadow: 0 0 20px rgba(35, 36, 35, 0.3);
     color: white;
     font-weight: 600;
@@ -1498,34 +1498,48 @@ li button:hover:not(:disabled) {
 }
 
 
-.spooky {
-  position: fixed;
+.Contact_me {
+  position: fixed; /* stays in place */
   top: 20px;
   left: 20px;
-  width: 60px;
-  height: 80px;
-  background: white;
-  border-radius: 50% 50% 50% 50%;
-  z-index: 9999;
-  cursor: pointer;
-  pointer-events: auto;
-  box-shadow: 0 0 15px rgba(255,255,255,0.6);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: top 0.5s ease, left 0.5s ease; /* smooth movement */
+  background-color: #3535356e;
+  padding: 20px 25px;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+  width: 220px;
+  text-align: left;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-/* Eyes */
-.spooky::before,
-.spooky::after {
-  content: '';
-  position: absolute;
-  top: 25%;
-  width: 10px;
-  height: 10px;
-  background: black;
-  border-radius: 50%;
+.Contact_me:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.25);
 }
-.spooky::before { left: 15px; }
-.spooky::after { right: 15px; }
+
+.Contact_me h2 {
+  font-size: 18px;
+  margin-bottom: 10px;
+  color: #d8d4d4;
+}
+
+.Contact_me p {
+  font-size: 14px;
+  margin-bottom: 8px;
+  color: #868686;
+}
+
+.Contact_me a {
+  display: inline-block;
+  margin-top: 10px;
+  text-decoration: none;
+  background-color: #6c6d6d;
+  color: #cfcaca;
+  padding: 7px 12px;
+  border-radius: 5px;
+  font-size: 14px;
+  transition: background-color 0.3s ease;
+}
+
+.Contact_me a:hover {
+  background-color: #333435;
+}

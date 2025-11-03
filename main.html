@@ -472,35 +472,12 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 </script>
 
-<div class="spooky"; style="color: rgba(7, 0, 0, 0.459); font-weight: 700;">⚫</div>
-<script>
-const ghost = document.querySelector('.spooky');
-let clickCount = 0; // counter for clicks
 
-ghost.addEventListener('click', () => {
-  clickCount++;
-
-  // Get viewport dimensions
-  const maxX = window.innerWidth - ghost.offsetWidth;
-  const maxY = window.innerHeight - ghost.offsetHeight;
-
-  // Generate random position
-  const randomX = Math.floor(Math.random() * maxX);
-  const randomY = Math.floor(Math.random() * maxY);
-
-  // Move ghost
-  ghost.style.left = randomX + 'px';
-  ghost.style.top = randomY + 'px';
-
-  // Redirect on 10th click
-  if (clickCount === 5) {
-    window.location.href = "haloween.html"; 
-  }
-});
-
-</script>
-
-
+<div class="Contact_me">
+  <h2>Reach me here</h2>
+  <p>Email: hyztaxx@gmail.com</p>
+  <a href="mailto:hyztaxx@gmail.com">Send a Message</a>
+</div>
 
 
 <script type="module" src="global.js"></script>

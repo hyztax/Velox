@@ -49,7 +49,7 @@ if (signinForm) {
         // Send verification first, then sign out
         await user.sendEmailVerification();
         await auth.signOut();
-        alert("⚠️ Please verify your email before logging in. Verification email sent again.");
+        alert("⚠️ Verify your email before logging in. Verification email sent again.");
         return;
       }
 

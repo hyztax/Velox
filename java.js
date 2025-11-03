@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!user.emailVerified) {
           await user.sendEmailVerification();
           await auth.signOut();
-          alert("⚠️ Please verify your email before logging in. Verification email sent again.");
+          alert("⚠️ Verify your email before logging in. Verification email sent again.");
           return;
         }
 
@@ -57,3 +57,4 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 });
+// dd
