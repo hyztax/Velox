@@ -1499,47 +1499,65 @@ li button:hover:not(:disabled) {
 
 
 .Contact_me {
-  position: fixed; /* stays in place */
+  position: fixed;
   top: 20px;
   left: 20px;
-  background-color: #3535356e;
-  padding: 20px 25px;
-  border-radius: 10px;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-  width: 220px;
+  background: linear-gradient(145deg, #2a2a2a10, #3b3b3b2a);
+  padding: 22px 26px;
+  border-radius: 15px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+  width: 240px;
   text-align: left;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
 }
 
 .Contact_me:hover {
   transform: translateY(-5px);
-  box-shadow: 0 10px 20px rgba(0,0,0,0.25);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
+  background: linear-gradient(145deg, #32323231, #45454531);
 }
 
 .Contact_me h2 {
-  font-size: 18px;
+  font-size: 19px;
   margin-bottom: 10px;
-  color: #d8d4d4;
+  color: #f0f0f0;
+  letter-spacing: 0.5px;
+  text-shadow: 0 0 6px rgba(255, 255, 255, 0.1);
 }
 
 .Contact_me p {
   font-size: 14px;
   margin-bottom: 8px;
-  color: #868686;
+  color: #a1a1a1;
 }
 
 .Contact_me a {
   display: inline-block;
-  margin-top: 10px;
+  margin-top: 12px;
   text-decoration: none;
-  background-color: #6c6d6d;
-  color: #cfcaca;
-  padding: 7px 12px;
-  border-radius: 5px;
+  background: linear-gradient(90deg, #161616, #0e0d0d);
+  color: #e0e0e0;
+  padding: 8px 14px;
+  border-radius: 6px;
   font-size: 14px;
-  transition: background-color 0.3s ease;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+  transition: all 0.3s ease;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
 }
 
 .Contact_me a:hover {
-  background-color: #333435;
+  background: linear-gradient(90deg, #252525, #1f1d1d);
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 14px rgba(0, 0, 0, 0.3);
+}
+
+/* Hide on mobile (phones) */
+@media (max-width: 480px) {
+  .Contact_me {
+    display: none;
+  }
 }
