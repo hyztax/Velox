@@ -5,6 +5,7 @@ const exitBtn = document.getElementById("exitChatBtn");
 const loadingScreen = document.getElementById("loadingScreen");
 
 
+
 // -------------------- Detect Device --------------------
 function isTouchDevice() {
   return (
@@ -75,5 +76,3 @@ window.addEventListener("DOMContentLoaded", () => {
 });
 
 // works
-
-

@@ -160,6 +160,18 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 
 
+<script>
+  // Simple mobile detection using user agent
+  function isMobile() {
+    return /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  }
+
+  if (isMobile()) {
+    // Redirect to mobile chat page
+    window.location.href = "chatMobile.html";
+  }
+</script>
+
 
 
 
