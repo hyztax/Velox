@@ -532,16 +532,28 @@ async function showFriendProfile(friend) {
   } else {
     const areFriends = await areUsersFriends(currentUser.uid, friend.uid);
 
-  if (areFriends) {
-  // Message button - redirects to chat.html
+// -------------------- Profile Action Buttons --------------------
+if (areFriends) {
+  // Message button - opens chat directly if possible
   const msgBtn = document.createElement('button');
   msgBtn.textContent = 'Message';
   msgBtn.className = 'messageBtn';
+
   msgBtn.onclick = () => {
     const encodedName = encodeURIComponent(friend.displayName || 'Unknown');
-    window.location.href = `chat.html?uid=${friend.uid}&name=${encodedName}`;
+    
+    // If chat.js is loaded and startChat exists, open in-page
+    if (typeof startChat === 'function' && currentUser) {
+      startChat(friend.uid);
+    } else {
+      // Fallback: redirect to chat.html with UID
+      window.location.href = `chat.html?uid=${friend.uid}&name=${encodedName}`;
+    }
   };
+
   actionsContainer.appendChild(msgBtn);
+}
+    if (areFriends) {
 
 
       // Remove button
@@ -608,6 +620,6 @@ sendBtn.onclick = async () => {
   await db.collection('messages').doc(currentUser.uid).collection(friendUid).add(msgData);
   await db.collection('messages').doc(friendUid).collection(currentUser.uid).add(msgData);
 };
-
+//ddd
 
 

@@ -49,6 +49,38 @@ const firebaseConfig = {
     charCounter.style.color = '#aaa';
     if (messageInput && messageInput.parentNode) messageInput.parentNode.appendChild(charCounter);
   }
+
+  firebase.auth().onAuthStateChanged(user => {
+    if (!user) return; // Not logged in
+    currentUser = user;
+  
+    const urlParams = new URLSearchParams(window.location.search);
+    const friendUid = urlParams.get('uid');
+    const friendName = urlParams.get('name') || 'Unknown';
+  
+    if (!friendUid) return;
+  
+    // Wait until startChat function and DOM elements exist
+    const tryStartChat = () => {
+      if (typeof startChat === 'function' && chatHeader && chatMessages) {
+        chatHeader.textContent = friendName;
+        startChat(friendUid); // Opens the chat properly
+  
+        // Optional: hide search input
+        if (searchFriends) searchFriends.style.display = 'none';
+  
+        // Remove ?uid=... from URL without reloading
+        setTimeout(() => {
+          const cleanUrl = window.location.origin + window.location.pathname;
+          window.history.replaceState({}, '', cleanUrl);
+        }); 
+      } else {
+        setTimeout(tryStartChat, 400); // Retry until ready
+      }
+    };
+    tryStartChat();
+  });
+  
   
   // -------------------- State --------------------
   const MAX_LENGTH = 300;
@@ -1471,4 +1503,3 @@ function linkify(text) {
 
 
    // -------------------- End of script --------------------
-
