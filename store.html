@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="velox.image/Velox_logo.png">
+  <title>Velox | Store</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="store.css">
+  <script src="https://www.paypal.com/sdk/js?client-id=AajurWWRLQ5M1CLVLf4Nz5J5N7GzOM4_6RHeMxG1QkqFLkuTw90LeLU1r9XjVp2kvixCGdybt4bqpqGC&currency=USD"></script>
+</head>
+<body>
+
+<header>
+  <div class="header-title">Velox Store</div>
+  <nav class="header-nav">
+    <a href="#" onclick="showSection('home')">Home</a> | 
+    <a href="#" onclick="showSection('popular')">Popular</a> | 
+    <a href="#" onclick="showSection('new')">New</a>
+  </nav>
+  <div class="cart-icon" onclick="toggleSidebar()">
+    🛒 <span id="cart-count">0</span>
+  </div>
+</header>
+
+<main>
+  <section id="home">
+    <h2 style="text-align: center;">Home</h2>
+    <div class="store-container" id="home-container"></div>
+  </section>
+
+  <section id="popular">
+    <h2 style="text-align: center;">Popular</h2>
+    <div class="store-container" id="popular-container"></div>
+  </section>
+
+  <section id="new">
+    <h2 style="text-align: center;">New</h2>
+    <div class="store-container" id="new-container"></div>
+  </section>
+</main>
+
+<!-- Sidebar for Cart and Favorites -->
+<div id="sidebar">
+  <div class="tabs">
+    <button onclick="showSidebarTab('cart')">Cart</button>
+    <button onclick="showSidebarTab('favorites')">Saved</button>
+  </div>
+  <div id="sidebar-content"></div>
+</div>
+
+<!-- Purchase Modal -->
+<!-- Purchase Modal -->
+<div id="purchase-modal" style="display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.6); justify-content: center; align-items: center; z-index: 2000;">
+  <div class="modal-content" style="background:#1a1c29; padding:20px; border-radius:12px; width: 320px; max-width: 90%; color:#fff; display:flex; flex-direction:column; gap:10px;">
+    <h3 style="text-align:center;">Your Order</h3>
+    <div id="purchase-items" style="max-height:200px; overflow-y:auto;"></div>
+    <div class="purchase-total" style="text-align:right; font-weight:600;">Total: <span id="total-price">0</span> $</div>
+    <!-- PayPal button container -->
+    <div id="paypal-button-container" style="margin-top:10px;"></div>
+  <button id="close-modal-btn" 
+        style="margin: 10px auto 0 auto; display: block; padding:8px 12px; background:#ff4c4c; color:#fff; border:none; border-radius:10px; cursor:pointer;">
+  Cancel
+</button>
+
+  </div>
+</div>
+
+<!-- Fullscreen redirect overlay -->
+<div id="redirect-overlay" style="
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #111111dd;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Inter', sans-serif;
+    font-size: 2rem;
+    z-index: 999999;
+    text-align: center;
+">
+  <div>Store coming soon! <span id="countdown">5</span> seconds...</div>
+  <div style="font-size:1rem; margin-top:20px;">Redirecting</div>
+</div>
+
+<script>
+(function() {
+  const overlay = document.getElementById('redirect-overlay');
+  const countdownEl = document.getElementById('countdown');
+  const redirectURL = "main.html"; // Change this
+  const countdownSeconds = 5; // Total countdown in seconds
+
+  // Disable scrolling
+  document.body.style.overflow = 'hidden';
+
+  // Prevent clicks
+  overlay.addEventListener('click', e => {
+    e.stopPropagation();
+    e.preventDefault();
+  });
+
+  // Get or set the redirect end timestamp
+  let endTime = localStorage.getItem('redirectEndTime');
+  if (!endTime) {
+    endTime = Date.now() + countdownSeconds * 1000;
+    localStorage.setItem('redirectEndTime', endTime);
+  } else {
+    endTime = parseInt(endTime, 10);
+  }
+
+  // Countdown function
+  const interval = setInterval(() => {
+    const remaining = Math.ceil((endTime - Date.now()) / 1000);
+    countdownEl.textContent = remaining > 0 ? remaining : 0;
+
+    if (remaining <= 0) {
+      clearInterval(interval);
+      localStorage.removeItem('redirectEndTime'); // cleanup
+      window.location.href = redirectURL;
+    }
+  }, 1000);
+
+  // Anti-tamper: detect overlay removal
+  const observer = new MutationObserver(() => {
+    if (!document.body.contains(overlay)) {
+      window.location.href = redirectURL;
+    }
+  });
+  observer.observe(document.body, { childList: true, subtree: true });
+
+  // Anti-tamper: constantly re-add overlay if removed
+  const protectOverlay = setInterval(() => {
+    if (!document.body.contains(overlay)) {
+      document.body.appendChild(overlay);
+    }
+  }, 100);
+
+})();
+</script>
+
+
+
+
+<footer>
+  &copy; 2025 Velox. All rights reserved.
+</footer>
+
+
+<script src="store.js"></script>
+
+</body>
+</html>
