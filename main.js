@@ -556,18 +556,24 @@ if (areFriends) {
     if (areFriends) {
 
 
-      // Remove button
-      const removeBtn = document.createElement('button');
-      removeBtn.textContent = 'Remove';
-      removeBtn.className = 'removeFriendBtn';
-      removeBtn.onclick = async () => {
-        await db.collection('friends').doc(currentUser.uid).collection('list').doc(friend.uid).delete();
-        await db.collection('friends').doc(friend.uid).collection('list').doc(currentUser.uid).delete();
-        alert('Friend removed.');
-        showFriendProfile(friend); // Refresh buttons
-        listenToFriends();
-      };
-      actionsContainer.appendChild(removeBtn);
+// Remove button
+const removeBtn = document.createElement('button');
+removeBtn.textContent = 'Remove';
+removeBtn.className = 'removeFriendBtn';
+removeBtn.onclick = async () => {
+  const confirmed = confirm(`Are you sure you want to remove ${friend.displayName || 'this friend'}?`);
+  if (!confirmed) return; // User clicked Cancel
+
+  // Proceed with removing friend
+  await db.collection('friends').doc(currentUser.uid).collection('list').doc(friend.uid).delete();
+  await db.collection('friends').doc(friend.uid).collection('list').doc(currentUser.uid).delete();
+
+  alert('Friend removed.');
+  showFriendProfile(friend); // Refresh buttons
+  listenToFriends();
+};
+actionsContainer.appendChild(removeBtn);
+
 
     } else {
       // Add Friend button
