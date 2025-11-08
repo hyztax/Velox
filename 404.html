@@ -17,7 +17,7 @@
       z-index: -1;
     }
 
- html, body {
+ html  {
   margin: 0;
   padding: 0;
   height: 100%;
@@ -33,9 +33,27 @@
   padding: 20px;
 }
 
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden; /* removes scrollbars */
+  font-family: 'Inter', sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #d4101000;
+  color: #fdfdfd;
+  text-align: center;
+  flex-direction: column;
+  padding: 20px;
+}
+
 
     .content {
       max-width: 400px;
+      background: rgba(153, 59, 59, 0);
+      background-color: #b6232300;
     }
 
     .error-icon {
