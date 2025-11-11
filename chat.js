@@ -1400,14 +1400,13 @@ async function renderGroupMembers(group) {
         groupMembersList.appendChild(li);
     }
 
-    db.collection('chats').doc(chatId).onSnapshot(doc => {
+    db.collection('chats').doc(group.chatId).onSnapshot(doc => {
       const data = doc.data();
       if (!data) return;
-
-      // If the current user is no longer in the members list
+  
       if (!data.members.includes(currentUser.uid)) {
         alert('You have been removed from the group.');
-        location.reload(); // or redirect them to home/chat list
+        location.reload(); 
       }
     });
 }
