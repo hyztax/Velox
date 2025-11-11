@@ -18,12 +18,12 @@
 
 // Fake products for each section
 const homeProducts = [
-  { name: "Prod 1", description: "Description 1", price: 10, image: "velox.image/velox_logo.png" },
-  { name: "Prod 2", description: "Description 2", price: 12, image: "velox.image/velox_logo.png" },
-  { name: "Prod 3", description: "Description 3", price: 15, image: "velox.image/velox_logo.png" },
-  { name: "Prod 4", description: "Description 4", price: 18, image: "velox.image/velox_logo.png" },
-  { name: "Prod 5", description: "Description 5", price: 20, image: "velox.image/velox_logo.png" },
-  { name: "Prod 6", description: "Description 6", price: 20, image: "velox.image/velox_logo.png" },
+  { name: "Prod 1", description: "Description 1", price: 10, image: "images/logo.png"    },
+  { name: "Prod 2", description: "Description 2", price: 12, image: "images/logo.png"    },
+  { name: "Prod 3", description: "Description 3", price: 15, image: "images/logo.png"    },
+  { name: "Prod 4", description: "Description 4", price: 18, image: "images/logo.png"    },
+  { name: "Prod 5", description: "Description 5", price: 20, image: "images/logo.png"    },
+  { name: "Prod 6", description: "Description 6", price: 20, image: "images/logo.png"    },
 ];
 
 const popularProducts = [

@@ -1164,6 +1164,7 @@ async function kickMember(uidToKick) {
         if (groupChatsState[selectedUser.chatId]) {
             groupChatsState[selectedUser.chatId].members = selectedUser.members;
         }
+        location.reload(); // Refresh to ensure UI consistency
 
         renderGroupMembers(selectedUser);
         if (uidToKick !== currentUser.uid) alert('Member kicked successfully!');
@@ -1171,7 +1172,7 @@ async function kickMember(uidToKick) {
         console.error('Kick failed', err);
         alert('Failed to kick member.');
     }
-}// works
+}// Doesn't work
 
 // -------------------- Real-time member listener --------------------
 function listenToGroupMembers(chatId) {
