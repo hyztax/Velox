@@ -1373,57 +1373,44 @@ document.addEventListener('DOMContentLoaded', () => {
     if (groupSidebar) groupSidebar.style.display = 'none';
   }
 
-  let currentGroupUnsub = null;
+  
 
+  // render members (deduped)
 async function renderGroupMembers(group) {
-  if (!group || !Array.isArray(group.members) || !groupMembersList) return;
-  groupMembersList.innerHTML = '';
+    if (!group || !Array.isArray(group.members) || !groupMembersList) return;
+    groupMembersList.innerHTML = '';
 
-  const members = [...new Set(group.members)];
-  const chatId = group.chatId; // ✅ make sure this exists
+    const members = [...new Set(group.members)];
 
-  // ✅ Remove previous listener if switching groups
-  if (currentGroupUnsub) currentGroupUnsub();
-
-  // ✅ Set up Firestore listener ONCE per group
-  currentGroupUnsub = db.collection('chats').doc(chatId).onSnapshot(doc => {
-    const data = doc.data();
-    if (!data) return;
-
-    // if the current user has been removed
-    if (!data.members.includes(currentUser.uid)) {
-      alert('You have been removed from the group.');
-      location.reload(); // or redirect
-    }
-  });
-
-  for (const uid of members) {
-    let displayName = uid, avatarUrl = null;
-
-    if (friendsState[uid]) {
-      const f = friendsState[uid].data;
-      displayName = f.displayName || uid;
-      avatarUrl = f.avatarUrl || null;
-    } else {
-      try {
-        const p = await db.collection('profiles').doc(uid).get();
-        if (p.exists) {
-          displayName = p.data().displayName || uid;
-          avatarUrl = p.data().avatarUrl || null;
+    for (const uid of members) {
+        let displayName = uid, avatarUrl = null;
+        if (friendsState[uid]) {
+            const f = friendsState[uid].data;
+            displayName = f.displayName || uid;
+            avatarUrl = f.avatarUrl || null;
+        } else {
+            try {
+                const p = await db.collection('profiles').doc(uid).get();
+                if (p.exists) { displayName = p.data().displayName || uid; avatarUrl = p.data().avatarUrl || null; }
+            } catch(e) { console.error('Failed profile fetch', uid, e); }
         }
-      } catch (e) {
-        console.error('Failed profile fetch', uid, e);
-      }
+
+        const canKick = group.createdBy === currentUser.uid && uid !== currentUser.uid;
+        const li = makeMemberListItem(uid, displayName, avatarUrl, canKick, kickMember, group.members);
+        groupMembersList.appendChild(li);
     }
 
-    const canKick = group.createdBy === currentUser.uid && uid !== currentUser.uid;
-    const li = makeMemberListItem(uid, displayName, avatarUrl, canKick, kickMember, group.members);
-    groupMembersList.appendChild(li);
-  }
+    db.collection('chats').doc(chatId).onSnapshot(doc => {
+      const data = doc.data();
+      if (!data) return;
+
+      // If the current user is no longer in the members list
+      if (!data.members.includes(currentUser.uid)) {
+        alert('You have been removed from the group.');
+        location.reload(); // or redirect them to home/chat list
+      }
+    });
 }
-
-
-
 
   function makeMemberListItem(uid, displayName, avatarUrl, canKick = false, onKick = null, groupMembers) {
     const li = document.createElement('li');
