@@ -1142,7 +1142,7 @@ function listenToGroupMembersSafe(chatId) {
 
 
 // -------------------- Kick member --------------------
-async function kickMember(uidToKick) {
+async function kickMember(groupMembers, uidToKick) {
     if (!selectedUser || !selectedUser.isGroup) return;
 
     const chatRef = db.collection('chats').doc(selectedUser.chatId);
@@ -1164,7 +1164,6 @@ async function kickMember(uidToKick) {
         if (groupChatsState[selectedUser.chatId]) {
             groupChatsState[selectedUser.chatId].members = selectedUser.members;
         }
-        location.reload(); // Refresh to ensure UI consistency
 
         renderGroupMembers(selectedUser);
         if (uidToKick !== currentUser.uid) alert('Member kicked successfully!');
@@ -1396,12 +1395,23 @@ async function renderGroupMembers(group) {
         }
 
         const canKick = group.createdBy === currentUser.uid && uid !== currentUser.uid;
-        const li = makeMemberListItem(uid, displayName, avatarUrl, canKick, kickMember);
+        const li = makeMemberListItem(uid, displayName, avatarUrl, canKick, kickMember, group.members);
         groupMembersList.appendChild(li);
     }
+
+    db.collection('chats').doc(chatId).onSnapshot(doc => {
+      const data = doc.data();
+      if (!data) return;
+
+      // If the current user is no longer in the members list
+      if (!data.members.includes(currentUser.uid)) {
+        alert('You have been removed from the group.');
+        location.reload(); // or redirect them to home/chat list
+      }
+    });
 }
 
-  function makeMemberListItem(uid, displayName, avatarUrl, canKick = false, onKick = null) {
+  function makeMemberListItem(uid, displayName, avatarUrl, canKick = false, onKick = null, groupMembers) {
     const li = document.createElement('li');
     li.className = 'member-item';
     li.style.display = 'flex';
@@ -1430,7 +1440,7 @@ async function renderGroupMembers(group) {
         btn.style.borderRadius = '4px';
         btn.style.padding = '4px 8px';
         btn.style.cursor = 'pointer';
-        btn.onclick = () => onKick(uid);
+        btn.onclick = () => onKick(groupMembers, uid);
         li.appendChild(btn);
     }
 
