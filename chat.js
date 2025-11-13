@@ -437,6 +437,7 @@ function showContextMenu(msgId, msg, container) {
             messageText: msg.text || '',
             reason,
             timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            
           });
           alert('Thank you, your report has been submitted.');
         } catch (err) {
@@ -460,73 +461,93 @@ function showContextMenu(msgId, msg, container) {
 
   
   // -------------------- Friends & Groups listeners --------------------
-  function listenToFriendsRealtime() {
-    if (!currentUser) return;
-  
-    // friends (1-on-1 metadata)
-    db.collection('friends').doc(currentUser.uid).collection('list')
-      .onSnapshot(async snapshot => {
-        for (const change of snapshot.docChanges()) {
-          const friendUid = change.doc.id;
-          const data = change.doc.data() || {};
-          try {
-            const prof = await db.collection('profiles').doc(friendUid).get();
-            const profileData = prof.data() || {};
-            friendsState[friendUid] = {
-              uid: friendUid,
-              data: profileData,
-              latestMsg: data.lastMessage || '',
-              lastChatTimestamp: data.lastChatTimestamp ? data.lastChatTimestamp.toMillis() : 0
-            };
-          } catch (e) {
-            console.error('Profile fetch error', e);
-          }
+function listenToFriendsRealtime() {
+  if (!currentUser) return;
+
+  // friends (1-on-1 metadata)
+  db.collection('friends').doc(currentUser.uid).collection('list')
+    .onSnapshot(async snapshot => {
+      for (const change of snapshot.docChanges()) {
+        const friendUid = change.doc.id;
+        const data = change.doc.data() || {};
+        try {
+          const prof = await db.collection('profiles').doc(friendUid).get();
+          const profileData = prof.data() || {};
+          friendsState[friendUid] = {
+            uid: friendUid,
+            data: profileData,
+            latestMsg: data.lastMessage || '',
+            lastChatTimestamp: data.lastChatTimestamp ? data.lastChatTimestamp.toMillis() : 0
+          };
+        } catch (e) {
+          console.error('Profile fetch error', e);
         }
-        renderCombinedList();
-      });
-  
-    // groups (chats where current user is member)
-    db.collection('chats').where('members', 'array-contains', currentUser.uid)
-      .onSnapshot(snapshot => {
-        for (const change of snapshot.docChanges()) {
-          const id = change.doc.id;
-          const data = change.doc.data() || {};
+      }
+      renderCombinedList();
+    });
+
+  // groups (chats where current user is member)
+  db.collection('chats').where('members', 'array-contains', currentUser.uid)
+    .onSnapshot(snapshot => {
+      for (const change of snapshot.docChanges()) {
+        const id = change.doc.id;
+        const data = change.doc.data() || {};
+
+        if (change.type === 'removed') {
+          // handle group deletion
+          delete groupChatsState[id];
+
+          // if user is viewing this chat, clear UI
+          if (selectedUser && selectedUser.chatId === id) {
+            selectedUser = null;
+            chatId = null;
+            chatMessages.innerHTML = '';
+            chatHeader.textContent = '';
+            hideGroupSidebar();
+          }
+        } else {
+          // added or modified
           groupChatsState[id] = {
             chatId: id,
             name: data.name || 'Group',
             members: uniqueArray(data.members || []),
-            lastChatTimestamp: data.lastChatTimestamp ? data.lastChatTimestamp.toMillis() : (data.createdAt ? data.createdAt.toMillis() : Date.now()),
+            lastChatTimestamp: data.lastChatTimestamp
+              ? data.lastChatTimestamp.toMillis()
+              : data.createdAt
+              ? data.createdAt.toMillis()
+              : Date.now(),
             createdBy: data.createdBy || null,
             lastMessagePreview: data.lastMessagePreview || ''
           };
         }
-        renderCombinedList();
-        
-      });
-  }
-  
-  // -------------------- Render combined (friends + groups) --------------------
-  function renderCombinedList() {
-    if (!friendsListEl) return;
-    const combined = [
-      ...Object.values(friendsState),
-      ...Object.values(groupChatsState).filter(g => g.members && g.members.includes(currentUser.uid))
-    ].sort((a, b) => {
-      const tA = a.lastChatTimestamp || 0;
-      const tB = b.lastChatTimestamp || 0;
-      if (tA === tB) {
-        if (a.chatId && !b.chatId) return 1;
-        if (!a.chatId && b.chatId) return -1;
       }
-      return tB - tA;
+      renderCombinedList();
     });
-  
-    friendsListEl.innerHTML = '';
-    for (const item of combined) {
-      if (item.chatId) renderOrUpdateGroup(item);
-      else renderOrUpdateFriend(item.uid);
+}
+
+// -------------------- Render combined (friends + groups) --------------------
+function renderCombinedList() {
+  if (!friendsListEl) return;
+  const combined = [
+    ...Object.values(friendsState),
+    ...Object.values(groupChatsState).filter(g => g.members && g.members.includes(currentUser.uid))
+  ].sort((a, b) => {
+    const tA = a.lastChatTimestamp || 0;
+    const tB = b.lastChatTimestamp || 0;
+    if (tA === tB) {
+      if (a.chatId && !b.chatId) return 1;
+      if (!a.chatId && b.chatId) return -1;
     }
+    return tB - tA;
+  });
+
+  friendsListEl.innerHTML = '';
+  for (const item of combined) {
+    if (item.chatId) renderOrUpdateGroup(item);
+    else renderOrUpdateFriend(item.uid);
   }
+}
+
   
   // friend list item
   function renderOrUpdateFriend(friendUid) {
@@ -641,6 +662,7 @@ function showContextMenu(msgId, msg, container) {
    const rendered = new Set();
 
 if (chatUnsubscribe) chatUnsubscribe();
+
 
 chatUnsubscribe = db.collection('chats')
   .doc(chatId)
@@ -1009,8 +1031,7 @@ auth.onAuthStateChanged(async (user) => {
     // subscribe to messages in this group
     if (chatUnsubscribe) chatUnsubscribe();
     const rendered = new Set();
-    chatUnsubscribe = db.collection('chats').doc(chatId).collection('messages').orderBy('timestamp')
-  .onSnapshot(snap => {
+    chatUnsubscribe = db.collection('chats').doc(chatId).collection('messages').orderBy('timestamp').onSnapshot(snap => {
     snap.docChanges().forEach(change => {
       const msg = change.doc.data();
       const id = change.doc.id;
