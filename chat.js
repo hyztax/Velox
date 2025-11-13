@@ -893,6 +893,8 @@ auth.onAuthStateChanged(async (user) => {
     const friends = Object.values(friendsState).filter(f => f.uid !== currentUser.uid);
     if (friends.length === 0) return alert('No friends to add!');
     friends.forEach(f => {
+      console.log("Created new chat for user!");
+      alert("Created new chat for user!");
       const label = document.createElement('label');
       label.style.display = 'block';
       label.style.color = '#fff';
