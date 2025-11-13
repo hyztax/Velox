@@ -517,7 +517,7 @@ async function showFriendProfile(friend) {
       if (currentUserFriendIds.has(id)) mutualCount++;
     });
 
-    mutualEl.textContent = `Mutual friends: ${mutualCount}`;
+    mutualEl.textContent = `Mutual friends: ${mutualCount-1 >= 0 ? mutualCount-1 : 0}`;
   } catch (err) {
     console.warn('Error calculating mutual friends:', err);
     mutualEl.textContent = `Mutual friends: 0`;

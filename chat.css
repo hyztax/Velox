@@ -10,6 +10,7 @@ body {
   height: 100vh;
   width: 100vw;
   overflow: hidden; /* keep full screen body with no scroll */
+  user-select: none !important; /* prevent text selection */
 }
 
 /* --- Sidebar / Friends --- */
@@ -786,6 +787,13 @@ textarea:focus-visible {
   background-position: center;
   box-shadow: 0 0 8px rgba(0,0,0,0.4);
 }
+#ActiveMembersList .friend-item .avatar-activeList {
+  border-radius: 50%;
+  flex-shrink: 0;
+  background-size: cover;
+  background-position: center;
+  box-shadow: 0 0 10px 2px #27ac79ab; /* green glow for active members */
+}
 
 
 
@@ -1049,7 +1057,7 @@ textarea:focus-visible {
 }
 
 /* --- Right column for friend/server activity — wall style --- */
-.FriendActivity, .ServersActivity {
+.FriendActivity, .ActiveMembersSidebar {
   position: fixed;       /* stick to viewport */
   top: 0;
   right: 0;
@@ -1069,7 +1077,7 @@ textarea:focus-visible {
 
 /* --- Header --- */
 .FriendActivity h3,
-.ServersActivity h3 {
+.ActiveMembersSidebar h3 {
   font-size: 18px;
   font-weight: 600;
   text-align: center;
@@ -1117,24 +1125,24 @@ textarea:focus-visible {
 
 /* --- Scrollbar styling --- */
 .FriendActivity::-webkit-scrollbar,
-.ServersActivity::-webkit-scrollbar {
+.ActiveMembersSidebar::-webkit-scrollbar {
   width: 6px;
 }
 
 .FriendActivity::-webkit-scrollbar-thumb,
-.ServersActivity::-webkit-scrollbar-thumb {
+.ActiveMembersSidebar::-webkit-scrollbar-thumb {
   background-color: #555;
   border-radius: 3px;
 }
 
 .FriendActivity::-webkit-scrollbar-track,
-.ServersActivity::-webkit-scrollbar-track {
+.ActiveMembersSidebar::-webkit-scrollbar-track {
   background-color: transparent;
 }
 
 /* --- Hide scrollbar for Firefox --- */
 .FriendActivity,
-.ServersActivity {
+.ActiveMembersSidebar {
   scrollbar-width: thin;    /* Firefox */
   scrollbar-color: #414040e1 transparent;
 }

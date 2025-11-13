@@ -41,6 +41,9 @@ const groupMembersList = document.getElementById('groupMembersList');
 const addMemberSearch = document.getElementById('addMemberSearch');
 const addMemberBtn = document.getElementById('addMemberBtn');
 
+const activeMembersList = document.getElementById('ActiveMembersList');
+const activeMembersHeader = document.querySelector('.ActiveMembersSidebar h3 ');
+
 let charCounter = document.getElementById('charCounter');
 if (!charCounter) {
   charCounter = document.createElement('div');
@@ -89,6 +92,7 @@ let selectedUser = null; // { uid } for 1-on-1 OR { isGroup:true, chatId, displa
 let chatId = null;
 let chatUnsubscribe = null;
 let lastRenderedDate = null;
+let groupMembers = 0;
 
 const friendsState = {};    // uid -> { uid, data:profileData, latestMsg, lastChatTimestamp }
 const friendElements = {};  // uid or chatId -> li
@@ -155,6 +159,7 @@ function createLeaveButtonIfMissing() {
 // toggle members button
 function createToggleMembersButtonIfMissing() {
   if (toggleMembersBtn) return;
+  const title = document.getElementById('memberListDisplay');
   const app = document.getElementById('app') || document.body;
   toggleMembersBtn = document.createElement('button');
   toggleMembersBtn.id = 'toggleMembersBtn';
@@ -178,6 +183,7 @@ function createToggleMembersButtonIfMissing() {
 
   toggleMembersBtn.addEventListener('click', () => {
       if (!groupSidebar) return;
+      title.textContent = `Member List [${groupMembers}/20]`;
       if (groupSidebar.style.display === 'flex') hideGroupSidebar();
       else showGroupSidebar(selectedUser);
   });
@@ -574,6 +580,38 @@ function renderOrUpdateFriend(friendUid) {
   friendsListEl.appendChild(li);
 }
 
+function DisplayActiveMembers(group) {
+  activeMembersList.innerHTML = '';
+  activeMembersHeader.textContent = `Active members [${group.members.length}/20]`;
+  group.members.forEach(member => {
+    const li = document.createElement('li');
+    li.className = 'friend-item';
+    li.style.display = 'flex';
+    li.style.alignItems = 'center';
+    li.style.gap = '8px';
+    li.style.cursor = 'pointer';
+    const avatar = document.createElement('div'); 
+    avatar.className = 'avatar-activeList'; 
+    setAvatar(avatar, null, 'rgba(0, 255, 42, 0.67)');
+    avatar.style.width = '20px'; 
+    avatar.style.height = '20px'; 
+    avatar.style.borderRadius = '50%'; 
+    avatar.style.boxShadow = '0 0 10px 2px #27ac79ab';
+    const nameDiv = document.createElement('div'); 
+    nameDiv.className = 'friendName';
+    nameDiv.style.color = '#fff'; 
+    nameDiv.style.fontWeight = '600';
+    db.collection('profiles').doc(member).get().then(doc => {
+      const data = doc.data() || {};
+      nameDiv.textContent = data.displayName || 'Unknown';
+      li.addEventListener('click', (e) => { e.preventDefault(); openProfile(member);});
+    });
+    li.appendChild(avatar);
+    li.appendChild(nameDiv);
+    activeMembersList.appendChild(li);
+  });
+}
+
 function renderOrUpdateGroup(group) {
 let li = friendElements[group.chatId];
 if (!li) {
@@ -586,7 +624,12 @@ if (!li) {
   li.style.whiteSpace = "normal";
   li.style.maxHeight = "60px";
   li.style.cursor = 'pointer';
-  li.addEventListener('click', (e) => { e.preventDefault(); startGroupChat(group.chatId); });
+  li.addEventListener('click', (e) => { 
+    e.preventDefault(); 
+    groupSidebar.style.display = 'none';
+    DisplayActiveMembers(group);
+    startGroupChat(group.chatId); 
+  });
   friendElements[group.chatId] = li;
 }
 
@@ -1108,6 +1151,7 @@ async function addMemberHandler() {
     selectedUser.members.push(toAdd);
     renderGroupMembers(selectedUser);
     addMemberSearch.value = '';
+    document.getElementById('memberListDisplay').textContent = `Member List [${groupMembers}/20]`;
   } catch (err) {
     console.error('add member failed', err);
     alert('Failed to add member');
@@ -1169,7 +1213,6 @@ async function kickMember(groupMembers, uidToKick) {
   const data = chatDoc.data() || {};
   if (data.createdBy !== currentUser.uid) return alert('Only the creator can kick.');
   if (!confirm('Kick this member?')) return;
-
   try {
       // Remove member from Firestore
       await chatRef.update({
@@ -1395,6 +1438,7 @@ function hideGroupSidebar() {
 // render members (deduped)
 async function renderGroupMembers(group) {
   if (!group || !Array.isArray(group.members) || !groupMembersList) return;
+  groupMembers = group.members.length
   groupMembersList.innerHTML = '';
 
   const members = [...new Set(group.members)];
@@ -1427,6 +1471,7 @@ async function renderGroupMembers(group) {
       location.reload(); // or redirect them to home/chat list
     }
   });
+  document.getElementById('memberListDisplay').textContent = `Member List [${groupMembers}/20]`;
 }
 
 function makeMemberListItem(uid, displayName, avatarUrl, canKick = false, onKick = null, groupMembers) {
