@@ -437,6 +437,7 @@ function showContextMenu(msgId, msg, container) {
             messageText: msg.text || '',
             reason,
             timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            
           });
           alert('Thank you, your report has been submitted.');
         } catch (err) {
