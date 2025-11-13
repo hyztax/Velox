@@ -127,14 +127,14 @@ mask-size: 100% 100%;
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 10px 14px;
+  padding: 10px;
   border-radius: 12px;
-  background: #1a1a1a;
+  background: #07070765;
   margin-bottom: 10px;
   cursor: pointer;
   transition: background 0.2s;
 }
-.friend-item:hover { background: #222; }
+.friend-item:hover { background: #050505; }
 .friend-avatar { width: 40px; height: 40px; border-radius: 50%; background-size: cover; background-position: center; }
 .friend-name { color: #eee; font-weight: 600; }
 
@@ -311,7 +311,7 @@ mask-size: 100% 100%;
 
 .friend-item,
 .group-item {
-  padding: 10px;          /* space inside each item */
+  padding: 15px;          /* space inside each item */
   margin-bottom: 8px;     /* space between items */
   border-radius: 6px;     /* optional: softer look */
 }
@@ -1063,7 +1063,7 @@ textarea:focus-visible {
   right: 0;
   width: 300px;          /* fixed width */
   height: 100vh;         /* full viewport height */
-  background-color: #1d1d1dcc; /* semi-transparent wall-like background */
+  background-color: #181818cc; /* semi-transparent wall-like background */
   padding: 10px;
   box-sizing: border-box;
   overflow-y: auto;      /* scroll if content overflows */
