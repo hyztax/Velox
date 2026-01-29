@@ -155,14 +155,14 @@ async function renderUsers(users) {
 
     // Map of special UIDs and their colors
     const SPECIAL_USERS = {
-      "AS1sGNXa2HMfrOzsSxo1bj5zQaL2": "#dac44dff",  // hyztax
+      "AS1sGNXa2HMfrOzsSxo1bj5zQaL2": "#dac44dff",  // Kroiqz
       "40YE0iJtwKR0p5pk3GuoylBqPGh2": "#d64be2ff",  // adam
       "OqnJbpZUuOhEfWZL6T5DuiN13lD2": "#ee92e2ff",  // A
     };
 
     // Map of UIDs to emojis
     const SPECIAL_EMOJIS = {
-      "AS1sGNXa2HMfrOzsSxo1bj5zQaL2": "👑",  // Hyztax
+      "AS1sGNXa2HMfrOzsSxo1bj5zQaL2": "👑",  // Kroiqz
       "40YE0iJtwKR0p5pk3GuoylBqPGh2": "😎", // Adam
       "enter all user ID's for verified people here": "✅",  // Verified users
       "OqnJbpZUuOhEfWZL6T5DuiN13lD2": "🩷", // A
@@ -447,7 +447,7 @@ logoutBtn.addEventListener('click', () => auth.signOut().then(() => location.hre
 
 // --- INVITE ---
 inviteBtn.addEventListener('click', () => {
-  const linkToCopy = 'https://hyztax.github.io/Velox';
+  const linkToCopy = 'https://Kroiqz.github.io/Velox';
   const tempInput = document.createElement('input');
   tempInput.value = linkToCopy;
   document.body.appendChild(tempInput);
