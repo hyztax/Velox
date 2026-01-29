@@ -1,22 +1,22 @@
-// import { initializeApp } from "https://www.gstatic.com/firebasejs/10.2.0/firebase-app.js";
-// import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.2.0/firebase-auth.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.2.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.2.0/firebase-auth.js";
 
-// const firebaseConfig = {
-//   apiKey: "AIzaSyBXb9OhOEOo4gXNIv2WcCNmXfnm1x7R2EM",
-//   authDomain: "velox-c39ad.firebaseapp.com",
-//   projectId: "velox-c39ad",
-//   storageBucket: "velox-c39ad.appspot.com",
-//   messagingSenderId: "404832661601",
-//   appId: "1:404832661601:web:9ad221c8bfb459410bba20",
-//   measurementId: "G-X8W755KRF6"
-// };
+const firebaseConfig = {
+  apiKey: "AIzaSyBXb9OhOEOo4gXNIv2WcCNmXfnm1x7R2EM",
+  authDomain: "velox-c39ad.firebaseapp.com",
+  projectId: "velox-c39ad",
+  storageBucket: "velox-c39ad.appspot.com",
+  messagingSenderId: "404832661601",
+  appId: "1:404832661601:web:9ad221c8bfb459410bba20",
+  measurementId: "G-X8W755KRF6"
+};
 
-// const app = initializeApp(firebaseConfig);
-// const auth = getAuth();
-// onAuthStateChanged(auth, user => console.log("Firebase user:", user));
+const app = initializeApp(firebaseConfig); // 
+const auth = getAuth(app);
 
 
-// Fake products for each section
+
+
 const homeProducts = [
   { name: "Prod 1", description: "Description 1", price: 10, image: "images/logo.png"    },
   { name: "Prod 2", description: "Description 2", price: 12, image: "images/logo.png"    },
@@ -95,6 +95,7 @@ function renderProducts(containerId, products) {
     });
   });
 }
+
 
 // Initialize all sections
 renderProducts("home-container", homeProducts);
@@ -354,3 +355,9 @@ document.addEventListener('click', e => {
     openPurchaseModal();
   }
 });
+
+
+// ==== PUT THIS LAST ====
+window.showSection = showSection;
+window.toggleSidebar = toggleSidebar;
+window.showSidebarTab = showSidebarTab;
