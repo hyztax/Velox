@@ -22,6 +22,10 @@ header {
 .header-title {
   font-size: 1.8rem;
   font-weight: 700;
+  text-decoration: none; /* removes underline */
+  cursor: pointer;
+  color: white;
+  margin-left: 7px;
 }
 
 /* Center nav */

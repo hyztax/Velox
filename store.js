@@ -27,21 +27,21 @@ const homeProducts = [
 ];
 
 const popularProducts = [
-  { name: "Prod 7", description: "Description 7", price: 22, image: "https://via.placeholder.com/150x80" },
-  { name: "Prod 8", description: "Description 8", price: 25, image: "https://via.placeholder.com/150x80" },
-  { name: "Prod 9", description: "Description 9", price: 28, image: "https://via.placeholder.com/150x80" },
-  { name: "Prod 10", description: "Description 10", price: 30, image: "https://via.placeholder.com/150x80" },
-  { name: "Prod 11", description: "Description 11", price: 32, image: "https://via.placeholder.com/150x80" },
-  { name: "Prod 12", description: "Description 12", price: 20, image: "https://via.placeholder.com/150x80" }
+  { name: "Prod 7", description: "Description 7", price: 22, image: "images/logo.png" },
+  { name: "Prod 8", description: "Description 8", price: 25, image: "images/logo.png" },
+  { name: "Prod 9", description: "Description 9", price: 28, image: "images/logo.png" },
+  { name: "Prod 10", description: "Description 10", price: 30, image: "images/logo.png" },
+  { name: "Prod 11", description: "Description 11", price: 32, image: "images/logo.png" },
+  { name: "Prod 12", description: "Description 12", price: 20, image: "images/logo.png" }
 ];
 
 const newProducts = [
-  { name: "Prod 13", description: "Description 13", price: 12, image: "https://via.placeholder.com/150x80" },
-  { name: "Prod 14", description: "Description 14", price: 14, image: "https://via.placeholder.com/150x80" },
-  { name: "Prod 15", description: "Description 15", price: 16, image: "https://via.placeholder.com/150x80" },
-  { name: "Prod 16", description: "Description 16", price: 18, image: "https://via.placeholder.com/150x80" },
-  { name: "Prod 17", description: "Description 17", price: 20, image: "https://via.placeholder.com/150x80" },
-  { name: "Prod 18", description: "Description 18", price: 20, image: "https://via.placeholder.com/150x80" }
+  { name: "Prod 13", description: "Description 13", price: 12, image: "images/logo.png" },
+  { name: "Prod 14", description: "Description 14", price: 14, image: "images/logo.png" },
+  { name: "Prod 15", description: "Description 15", price: 16, image: "images/logo.png" },
+  { name: "Prod 16", description: "Description 16", price: 18, image: "images/logo.png" },
+  { name: "Prod 17", description: "Description 17", price: 20, image: "images/logo.png" },
+  { name: "Prod 18", description: "Description 18", price: 20, image: "images/logo.png" }
 ];// Cart & favorites
 
 
