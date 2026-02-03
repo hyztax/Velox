@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <title>Velox | Admin</title>
@@ -13,10 +14,10 @@
       width: 55px;
       height: 55px;
       border-radius: 50%;
-      background: linear-gradient(135deg, #1e1e1e, #2a2a2a);
-      box-shadow: 0 0 10px rgba(27, 27, 27, 0.3),
-                  0 0 20px rgba(42, 43, 43, 0.2) inset;
-      border: 2px solid rgba(108, 110, 110, 0.5);
+      background: linear-gradient(135deg, #0000002d, #00000071);
+      box-shadow: 0 0 10px rgb(0, 0, 0),
+        0 0 20px rgba(42, 43, 43, 0.2) inset;
+      border: 1px solid rgba(175, 173, 173, 0.788);
       cursor: pointer;
       transition: all 0.3s ease;
       z-index: 1000;
@@ -25,7 +26,7 @@
     .GoBack:hover {
       transform: scale(1.1) rotate(-5deg);
       box-shadow: 0 0 20px rgba(232, 235, 235, 0.6),
-                  0 0 40px rgba(225, 228, 228, 0.4) inset;
+        0 0 40px rgba(225, 228, 228, 0.4) inset;
       border-color: rgba(221, 223, 223, 0.8);
     }
 
@@ -69,14 +70,14 @@
 
 
     const firebaseConfig = {
-  apiKey: "AIzaSyBXb9OhOEOo4gXNIv2WcCNmXfnm1x7R2EM",
-  authDomain: "velox-c39ad.firebaseapp.com",
-  projectId: "velox-c39ad",
-  storageBucket: "velox-c39ad.appspot.com",
-  messagingSenderId: "404832661601",
-  appId: "1:404832661601:web:9ad221c8bfb459410bba20",
-  measurementId: "G-X8W755KRF6"
-};
+      apiKey: "AIzaSyBXb9OhOEOo4gXNIv2WcCNmXfnm1x7R2EM",
+      authDomain: "velox-c39ad.firebaseapp.com",
+      projectId: "velox-c39ad",
+      storageBucket: "velox-c39ad.appspot.com",
+      messagingSenderId: "404832661601",
+      appId: "1:404832661601:web:9ad221c8bfb459410bba20",
+      measurementId: "G-X8W755KRF6"
+    };
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
@@ -93,4 +94,5 @@
   <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
 
 </body>
+
 </html>

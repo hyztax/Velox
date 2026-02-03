@@ -201,10 +201,10 @@ body::-webkit-scrollbar {
   width: 55px;
   height: 55px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #1e1e1e, #2a2a2a);
-  box-shadow: 0 0 10px rgba(27, 27, 27, 0.3),
+  background: linear-gradient(135deg, #0000002d, #00000071);
+  box-shadow: 0 0 10px rgb(0, 0, 0),
               0 0 20px rgba(42, 43, 43, 0.2) inset;
-  border: 2px solid rgba(108, 110, 110, 0.5);
+  border: 1px solid rgba(175, 173, 173, 0.788);
   cursor: pointer;
   transition: all 0.3s ease;
   z-index: 1000; /* stays above other stuff */
