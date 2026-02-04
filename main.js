@@ -123,7 +123,7 @@ async function renderUsers(users) {
     usersUl.innerHTML = ''; // clear immediately
 
     if (!users || users.length === 0) {
-      usersUl.innerHTML = '<li>No users online</li>';
+      usersUl.innerHTML = '<li>Cant find matching user / ID</li>';
       return;
     }
 

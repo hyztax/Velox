@@ -1,0 +1,154 @@
+
+body {
+    overflow: hidden;
+  }
+  
+.deluxe-wrapper {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Inter', sans-serif;
+    padding: 20px;
+  }
+  
+  .deluxe-card {
+    position: relative;
+    width: 100%;
+    max-width: 420px;
+    padding: 40px;
+    border-radius: 20px;
+    text-align: center;
+    color: #f0edf0;
+
+    background-color: #1a1a1a00;
+    background-image:
+      /* luxury monogram style pattern */
+      repeating-linear-gradient(45deg, rgba(76, 14, 88, 0.301) 0 2px, transparent 2px 20px),
+      repeating-linear-gradient(-45deg, rgba(76, 14, 88, 0.281) 0 2px, transparent 2px 20px);
+    background-size: 40px 40px;
+    background-position: 0 0, 0 0;
+
+    border: 2px solid rgba(231, 82, 231, 0.15);
+   
+    box-shadow:
+      0 0 15px rgba(61, 13, 57, 0.3),
+      0 0 30px rgba(0, 0, 0, 0.6),
+      0 0 50px rgba(88, 16, 95, 0.4);
+}
+
+  .deluxe-icon {
+    width: 70px;
+    margin-bottom: 15px;
+  }
+  
+  .subtitle {
+    opacity: 0.7;
+    margin-bottom: 20px;
+  }
+  
+  .benefits {
+    list-style: none;
+    padding: 0;
+    text-align: left;
+    margin: 25px 0;
+  }
+  
+  .benefits li {
+    margin-bottom: 12px;
+    font-size: 15px;
+  }
+  
+  .buy-btn {
+    display: inline-block;
+    margin-top: 20px;
+    padding: 14px 28px;
+    border-radius: 12px;
+    text-decoration: none;
+    font-weight: bold;
+    color: #fff;
+    background: rgba(0, 0, 0, 0.247); /* semi-transparent purple */
+   
+    border: 2px solid rgba(52, 24, 68, 0.589);
+  
+    /* subtle glow */
+    box-shadow:
+      0 0 10px rgba(92, 21, 92, 0.5),
+      0 0 20px rgba(83, 17, 92, 0.3);
+  
+    transition: all 0.3s ease;
+  }
+  
+  .buy-btn:hover {
+    transform: scale(1.05);
+    background: rgba(71, 16, 69, 0.219); /* slightly stronger on hover */
+    box-shadow:
+      0 0 15px rgba(58, 16, 47, 0.8),
+      0 0 30px rgba(141, 29, 206, 0);
+  }
+  
+  
+  .buy-btn:hover {
+    transform: scale(1.08);
+    box-shadow:
+      0 0 18px rgb(94, 22, 109),
+      0 0 35px rgba(84, 14, 124, 0);
+  }
+  
+  l1 {
+    color: red;
+  }
+
+  .deluxe-card h1 {
+    color: #9d4ec2; /* purple title */
+  }
+  
+  .deluxe-card .subtitle {
+    color: #a833a8; /* soft light color */
+  }
+  
+  .deluxe-card .benefits li {
+    color: #ffffff; /* white text for benefits */
+  }
+  
+  .deluxe-card .buy-btn {
+    color: #c23bce; /* already set, button text */
+  }
+  
+  
+.GoBack {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    width: 55px;
+    height: 55px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #6e16632d, #00000071);
+    box-shadow: 0 0 10px rgb(0, 0, 0),
+                0 0 20px rgba(42, 43, 43, 0.2) inset;
+    border: 1px solid rgb(76, 9, 85);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 1000; /* stays above other stuff */
+    }
+    
+    /* Hover effect */
+    .GoBack:hover {
+    transform: scale(1.1) rotate(-5deg);
+    box-shadow: 0 0 20px rgba(71, 9, 66, 0),
+                0 0 40px rgba(92, 8, 95, 0.096) inset;
+    border-color: rgba(53, 23, 44, 0.61);
+    }
+    
+    /* Optional: add an arrow inside using CSS */
+    .GoBack::before {
+    content: "←";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-48%, -50%); /* adjust X a little */
+    font-size: 28px;
+    color: rgb(235, 238, 238);
+    font-family: Arial, sans-serif;
+    }
+    
