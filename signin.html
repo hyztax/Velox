@@ -19,7 +19,7 @@
     }
 </style>
 
-  <!-- Firebase Compat SDKs (classic, no ES module) -->
+  
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-analytics-compat.js"></script>
@@ -41,7 +41,7 @@
   <button type="submit" class="create-btn">Sign In</button>
 </form>
 
-<!-- Password Reset Form -->
+
 <form id="reset-form" class="auth-form reset-form">
   <label for="reset-email">Forgot password?</label>
   <input id="reset-email" name="reset-email" type="email" placeholder="Enter your email" required />
@@ -54,7 +54,7 @@
   </main>
 
 <script>
-  // Your Firebase config
+  
   const firebaseConfig = {
     apiKey: "AIzaSyBXb9OhOEOo4gXNIv2WcCNmXfnm1x7R2EM",
     authDomain: "velox-c39ad.firebaseapp.com",
@@ -68,7 +68,7 @@
   if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
   const auth = firebase.auth();
 
-  // ===== Sign In Form =====
+  
   const signinForm = document.getElementById('signin-form');
   if (signinForm) {
     signinForm.addEventListener('submit', async (e) => {
@@ -85,17 +85,17 @@
         const userCredential = await auth.signInWithEmailAndPassword(email, password);
         const user = userCredential.user;
 
-        await user.reload(); // Ensure emailVerified is up-to-date
+        await user.reload(); 
 
         if (!user.emailVerified) {
-          await user.sendEmailVerification(); // Resend verification email
+          await user.sendEmailVerification(); 
           await auth.signOut();
           alert("⚠️ Please verify your email before logging in. Verification email sent again.");
           return;
         }
 
-        // ✅ Verified → redirect reliably
-        window.location.replace('main.html'); // Use replace instead of href
+       
+        window.location.replace('main.html'); 
         console.log("✅ User signed in and verified:", user.email);
 
       } catch (error) {
@@ -108,7 +108,7 @@
 
 
 
-<script>  // ===== Password Reset Form =====
+<script>  
   const resetForm = document.getElementById('reset-form');
   if (resetForm) {
     resetForm.addEventListener('submit', async (e) => {
@@ -124,7 +124,7 @@
       try {
         await auth.sendPasswordResetEmail(email);
         alert("✅ Password reset email sent! Check your inbox (or spam).");
-        resetForm.reset(); // clears the field
+        resetForm.reset(); 
       } catch (error) {
         alert(`Error: ${error.message}`);
         console.error(error);

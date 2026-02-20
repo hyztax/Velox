@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const signinForm = document.getElementById('signin-form');
   const resetForm = document.getElementById('reset-form');
 
-  // ===== Sign In Form =====
+ 
 if (signinForm) {
   signinForm.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -42,18 +42,18 @@ if (signinForm) {
       const userCredential = await auth.signInWithEmailAndPassword(email, password);
       const user = userCredential.user;
 
-      // Refresh user to get latest emailVerified status
+   
       await user.reload();
 
       if (!user.emailVerified) {
-        // Send verification first, then sign out
+       
         await user.sendEmailVerification();
         await auth.signOut();
         alert("⚠️ Verify your email before logging in. Verification email sent again.");
         return;
       }
 
-      // Verified → allow login
+     
       alert("✅ Welcome back! Redirecting...");
       window.location.href = 'main.html';
 
@@ -65,7 +65,6 @@ if (signinForm) {
 }
 
 
-  // ===== Reset Password Form =====
   if (resetForm) {
     resetForm.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -88,4 +87,4 @@ if (signinForm) {
   }
 });
 
-//worked
+// works
